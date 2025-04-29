@@ -1,5 +1,5 @@
 <template>
-  <HelloWorld />
+  <explorePage />
 </template>
 
 <script setup>

@@ -1,6 +1,6 @@
 <template>
   <AppMenu />
-  <v-main>
+  <v-main class="bg-grey-lighten-4">
     <router-view />
   </v-main>
 

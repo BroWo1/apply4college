@@ -31,7 +31,8 @@ export default defineConfig({
     Fonts({
       google: {
         families: [{
-          name: 'Roboto',
+          name: 'roboto',
+          //name: 'Noto Serif',
           styles: 'wght@100;300;400;500;700;900',
         }],
       },
@@ -75,7 +76,7 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3000,
+    port: 9090,
   },
   css: {
     preprocessorOptions: {

@@ -1,5 +1,5 @@
 <template>
-  <explore />
+  <home />
 </template>
 
 <script setup>
