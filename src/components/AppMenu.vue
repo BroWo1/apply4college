@@ -172,6 +172,7 @@
     // Logic for logging out
     console.log('Logging out...')
   }
+  import { md3 } from 'vuetify/blueprints'
 </script>
 
 <style scoped>

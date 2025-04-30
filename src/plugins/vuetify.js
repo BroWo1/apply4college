@@ -7,6 +7,7 @@
 // Styles
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
+import { md3 } from 'vuetify/blueprints'
 
 // Composables
 import { createVuetify } from 'vuetify'
@@ -16,4 +17,5 @@ export default createVuetify({
   theme: {
     defaultTheme: 'light',
   },
+  blueprint: md3
 })
