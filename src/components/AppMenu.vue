@@ -5,10 +5,10 @@
     elevation="2"
   >
     <!-- Logo Section (Left) -->
-    <div class="d-flex align-center">
+    <div class="d-flex align-center px-1">
       <v-img
-        src="@/assets/gpe.png"
-        :width="logoSize * 3"
+        src="@/assets/a4c.svg"
+        :width="logoSize"
         :height="logoSize"
         alt="Logo"
         class="ml-2"

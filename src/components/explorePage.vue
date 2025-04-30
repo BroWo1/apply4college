@@ -5,10 +5,10 @@
       <h1 class="text-h2 font-weight-bold mb-6">Apply 4 College .ai</h1>
       <v-text-field
         label="Search Colleges"
-        variant="outlined"
+        variant="solo-filled"
         prepend-inner-icon="mdi-magnify"
         clearable
-        class="mx-auto"
+        class="mx-auto py-2"
         style="max-width: 600px"
       ></v-text-field>
     </v-container>
@@ -18,23 +18,23 @@
       <!-- Left Category Panel -->
       <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down">
         <v-card class="pa-4" rounded="lg">
-          <v-card-title class="text-h6">Filter By</v-card-title>
+          <v-card-title class="text-h6">Personal Profile</v-card-title>
           <v-divider class="my-2"></v-divider>
 
           <v-expansion-panels variant="accordion">
-            <v-expansion-panel title="Location">
+            <v-expansion-panel title="Standardized Test">
               <v-expansion-panel-text>
                 <v-checkbox v-for="(region, i) in regions" :key="i" :label="region"></v-checkbox>
               </v-expansion-panel-text>
             </v-expansion-panel>
 
-            <v-expansion-panel title="Program Type">
+            <v-expansion-panel title="AP and Honors">
               <v-expansion-panel-text>
                 <v-checkbox v-for="(program, i) in programs" :key="i" :label="program"></v-checkbox>
               </v-expansion-panel-text>
             </v-expansion-panel>
 
-            <v-expansion-panel title="Acceptance Rate">
+            <v-expansion-panel title="Extracurricular">
               <v-expansion-panel-text>
                 <v-range-slider
                   v-model="acceptanceRange"
@@ -154,7 +154,7 @@
       <!-- Right Category/Details Panel -->
       <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down">
         <v-card class="pa-4" rounded="lg">
-          <v-card-title class="text-h6">Saved Colleges</v-card-title>
+          <v-card-title class="text-h6">Early Decision</v-card-title>
           <v-divider class="my-2"></v-divider>
 
           <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
@@ -175,15 +175,12 @@
                   <v-img :src="college.image" cover></v-img>
                 </v-avatar>
               </template>
-              <template v-slot:append>
-                <v-icon icon="mdi-bookmark" color="primary"></v-icon>
-              </template>
             </v-list-item>
           </v-list>
 
           <v-divider class="my-4"></v-divider>
 
-          <v-card-title class="text-h6">Recently Viewed</v-card-title>
+          <v-card-title class="text-h6">Regular Decision</v-card-title>
           <v-list lines="two" density="compact">
             <v-list-item
               v-for="(college, i) in recentlyViewed"

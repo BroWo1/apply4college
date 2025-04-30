@@ -22,15 +22,13 @@
       class="text-caption text-disabled"
       style="position: absolute; right: 16px;"
     >
-      &copy; 2016-{{ (new Date()).getFullYear() }} <span class="d-none d-sm-inline-block">Vuetify, LLC</span>
-      —
       <a
         class="text-decoration-none on-surface"
-        href="https://vuetifyjs.com/about/licensing/"
+        href="https://gpeclub.com"
         rel="noopener noreferrer"
         target="_blank"
       >
-        MIT License
+        &copy; 2025 GPE Club
       </a>
     </div>
   </v-footer>
@@ -40,7 +38,7 @@
   const items = [
     {
       title: 'Vuetify Documentation',
-      icon: `$vuetify`,
+      icon: `@/assets/gpeOnly.jpg`,
       href: 'https://vuetifyjs.com/',
     },
     {
