@@ -1,168 +1,174 @@
 <template>
-  <v-card
-    class="mb-4 pa-4"
-    rounded="lg"
-    :elevation="4"
-    v-if="collegeChance"
-  >
-    <v-card-title class="text-h6 font-weight-bold mb-2">
-      Admission Chance Calculator
-    </v-card-title>
+  <v-dialog v-model="dialog" max-width="750px">
+    <v-card
+      class="pa-4"
+      rounded="lg"
+      :elevation="4"
+      v-if="collegeChance"
+    >
+      <v-card-title class="d-flex justify-space-between">
+        <span class="text-h6 font-weight-bold">Admission Chance Calculator</span>
+        <v-btn icon="mdi-close" variant="text" @click="closeDialog"></v-btn>
+      </v-card-title>
 
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" sm="6">
-          <div class="d-flex flex-column align-center justify-center">
-            <v-progress-circular
-              :model-value="collegeChance.probabilityPercentage"
-              :color="chanceColor"
-              :size="120"
-              :width="12"
-              class="mb-2"
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <div class="d-flex flex-column align-center justify-center">
+              <v-progress-circular
+                :model-value="collegeChance.probabilityPercentage"
+                :color="chanceColor"
+                :size="120"
+                :width="12"
+                class="mb-2"
+              >
+                {{ collegeChance.probabilityPercentage }}%
+              </v-progress-circular>
+              <div class="text-h6 font-weight-bold">{{ chanceDescription }}</div>
+              <div class="text-body-2 text-center">
+                {{ timesAverage }} times the average applicant
+              </div>
+            </div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-list density="compact">
+              <v-list-subheader>Your Profile Strengths</v-list-subheader>
+
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon :color="getZScoreColor(collegeChance.zScores.gpa)" class="mr-2">
+                    mdi-school
+                  </v-icon>
+                </template>
+                <v-list-item-title>GPA</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip :color="getZScoreColor(collegeChance.zScores.gpa)" size="small">
+                    {{ formatZScore(collegeChance.zScores.gpa) }}σ
+                  </v-chip>
+                </template>
+              </v-list-item>
+
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon :color="getZScoreColor(collegeChance.zScores.sat)" class="mr-2">
+                    mdi-book-open-variant
+                  </v-icon>
+                </template>
+                <v-list-item-title>SAT</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip :color="getZScoreColor(collegeChance.zScores.sat)" size="small">
+                    {{ formatZScore(collegeChance.zScores.sat) }}σ
+                  </v-chip>
+                </template>
+              </v-list-item>
+
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon :color="getZScoreColor(collegeChance.zScores.ap)" class="mr-2">
+                    mdi-certificate
+                  </v-icon>
+                </template>
+                <v-list-item-title>AP Courses</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip :color="getZScoreColor(collegeChance.zScores.ap)" size="small">
+                    {{ formatZScore(collegeChance.zScores.ap) }}σ
+                  </v-chip>
+                </template>
+              </v-list-item>
+
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon :color="getZScoreColor(collegeChance.zScores.ec)" class="mr-2">
+                    mdi-account-group
+                  </v-icon>
+                </template>
+                <v-list-item-title>Extracurriculars</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip :color="getZScoreColor(collegeChance.zScores.ec)" size="small">
+                    {{ formatZScore(collegeChance.zScores.ec) }}σ
+                  </v-chip>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-3"></v-divider>
+
+        <div class="text-body-2 mb-3" v-if="recommendation">
+          <strong>Recommendation:</strong> {{ recommendation }}
+        </div>
+
+        <v-row class="mt-1">
+          <v-col cols="12" sm="6">
+            <v-btn
+              color="primary"
+              variant="outlined"
+              block
+              @click="showDetails = !showDetails"
             >
-              {{ collegeChance.probabilityPercentage }}%
-            </v-progress-circular>
-            <div class="text-h6 font-weight-bold">{{ chanceDescription }}</div>
-            <div class="text-body-2 text-center">
-              {{ timesAverage }} times the average applicant
+              {{ showDetails ? 'Hide Details' : 'Show Details' }}
+            </v-btn>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-btn
+              :color="saveButtonColor"
+              variant="tonal"
+              block
+              @click="emitSaveDecision"
+            >
+              {{ saveButtonText }}
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-expand-transition>
+          <div v-if="showDetails">
+            <v-divider class="my-3"></v-divider>
+
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-card variant="outlined" class="pa-3 mb-3">
+                  <div class="text-subtitle-2 mb-2">Academic Strength</div>
+                  <v-progress-linear
+                    :model-value="normalizeBlock(collegeChance.strengthBlock)"
+                    color="primary"
+                    height="10"
+                    class="mb-1"
+                  ></v-progress-linear>
+                  <div class="text-caption text-high-emphasis">
+                    Your academic strength score: {{ formatNumber(collegeChance.strengthBlock) }}
+                  </div>
+                </v-card>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-card variant="outlined" class="pa-3 mb-3">
+                  <div class="text-subtitle-2 mb-2">Mission Alignment</div>
+                  <v-progress-linear
+                    :model-value="normalizeBlock(collegeChance.alignmentBlock)"
+                    color="secondary"
+                    height="10"
+                    class="mb-1"
+                  ></v-progress-linear>
+                  <div class="text-caption text-high-emphasis">
+                    Your mission alignment score: {{ formatNumber(collegeChance.alignmentBlock) }}
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+
+            <div class="text-caption mt-2">
+              <strong>Note:</strong> This calculator uses standardized scores (Z-scores) to compare your profile
+              to the average applicant pool. A score of +1σ means you're one standard deviation above the average.
             </div>
           </div>
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-list density="compact">
-            <v-list-subheader>Your Profile Strengths</v-list-subheader>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-icon :color="getZScoreColor(collegeChance.zScores.gpa)" class="mr-2">
-                  mdi-school
-                </v-icon>
-              </template>
-              <v-list-item-title>GPA</v-list-item-title>
-              <template v-slot:append>
-                <v-chip :color="getZScoreColor(collegeChance.zScores.gpa)" size="small">
-                  {{ formatZScore(collegeChance.zScores.gpa) }}σ
-                </v-chip>
-              </template>
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-icon :color="getZScoreColor(collegeChance.zScores.sat)" class="mr-2">
-                  mdi-book-open-variant
-                </v-icon>
-              </template>
-              <v-list-item-title>SAT</v-list-item-title>
-              <template v-slot:append>
-                <v-chip :color="getZScoreColor(collegeChance.zScores.sat)" size="small">
-                  {{ formatZScore(collegeChance.zScores.sat) }}σ
-                </v-chip>
-              </template>
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-icon :color="getZScoreColor(collegeChance.zScores.ap)" class="mr-2">
-                  mdi-certificate
-                </v-icon>
-              </template>
-              <v-list-item-title>AP Courses</v-list-item-title>
-              <template v-slot:append>
-                <v-chip :color="getZScoreColor(collegeChance.zScores.ap)" size="small">
-                  {{ formatZScore(collegeChance.zScores.ap) }}σ
-                </v-chip>
-              </template>
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-icon :color="getZScoreColor(collegeChance.zScores.ec)" class="mr-2">
-                  mdi-account-group
-                </v-icon>
-              </template>
-              <v-list-item-title>Extracurriculars</v-list-item-title>
-              <template v-slot:append>
-                <v-chip :color="getZScoreColor(collegeChance.zScores.ec)" size="small">
-                  {{ formatZScore(collegeChance.zScores.ec) }}σ
-                </v-chip>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-col>
-      </v-row>
-
-      <v-divider class="my-3"></v-divider>
-
-      <div class="text-body-2 mb-3" v-if="recommendation">
-        <strong>Recommendation:</strong> {{ recommendation }}
-      </div>
-
-      <v-row class="mt-1">
-        <v-col cols="12" sm="6">
-          <v-btn
-            color="primary"
-            variant="outlined"
-            block
-            @click="showDetails = !showDetails"
-          >
-            {{ showDetails ? 'Hide Details' : 'Show Details' }}
-          </v-btn>
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-btn
-            :color="saveButtonColor"
-            variant="tonal"
-            block
-            @click="emitSaveDecision"
-          >
-            {{ saveButtonText }}
-          </v-btn>
-        </v-col>
-      </v-row>
-
-      <v-expand-transition>
-        <div v-if="showDetails">
-          <v-divider class="my-3"></v-divider>
-
-          <v-row>
-            <v-col cols="12" sm="6">
-              <v-card variant="outlined" class="pa-3 mb-3">
-                <div class="text-subtitle-2 mb-2">Academic Strength</div>
-                <v-progress-linear
-                  :model-value="normalizeBlock(collegeChance.strengthBlock)"
-                  color="primary"
-                  height="10"
-                  class="mb-1"
-                ></v-progress-linear>
-                <div class="text-caption text-high-emphasis">
-                  Your academic strength score: {{ formatNumber(collegeChance.strengthBlock) }}
-                </div>
-              </v-card>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-card variant="outlined" class="pa-3 mb-3">
-                <div class="text-subtitle-2 mb-2">Mission Alignment</div>
-                <v-progress-linear
-                  :model-value="normalizeBlock(collegeChance.alignmentBlock)"
-                  color="secondary"
-                  height="10"
-                  class="mb-1"
-                ></v-progress-linear>
-                <div class="text-caption text-high-emphasis">
-                  Your mission alignment score: {{ formatNumber(collegeChance.alignmentBlock) }}
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <div class="text-caption mt-2">
-            <strong>Note:</strong> This calculator uses standardized scores (Z-scores) to compare your profile
-            to the average applicant pool. A score of +1σ means you're one standard deviation above the average.
-          </div>
-        </div>
-      </v-expand-transition>
-    </v-card-text>
-  </v-card>
+        </v-expand-transition>
+      </v-card-text>
+      <v-card-actions class="d-flex justify-end">
+        <v-btn color="grey-darken-1" variant="text" @click="closeDialog">Close</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -190,13 +196,21 @@ const props = defineProps({
   recentlyViewed: {
     type: Array,
     default: () => []
+  },
+  modelValue: {
+    type: Boolean,
+    default: false
   }
 });
 
-const emit = defineEmits(['saveToEarly', 'saveToRegular']);
+const emit = defineEmits(['saveToEarly', 'saveToRegular', 'update:modelValue', 'close']);
 
 const collegeChance = ref(null);
 const showDetails = ref(false);
+const dialog = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+});
 
 // Define calculateChance function FIRST
 const calculateChance = () => {
@@ -217,6 +231,12 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+// Close dialog handler
+const closeDialog = () => {
+  dialog.value = false;
+  emit('close');
+};
 
 // Computed properties for UI display
 const chanceColor = computed(() => {

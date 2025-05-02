@@ -31,7 +31,7 @@ export default defineConfig({
     Fonts({
       google: {
         families: [{
-          name: 'roboto',
+          name: 'Source Serif 4',
           //name: 'Noto Serif',
           styles: 'wght@100;300;400;500;700;900',
         }],

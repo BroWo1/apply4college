@@ -318,15 +318,17 @@
           </v-card-title>
         </v-card>
 
-        <!-- Selected College Admission Chance Component -->
+        <!-- Admission Chance Modal Component -->
         <AdmitChanceComponent
           v-if="selectedCollege"
           :college="selectedCollege"
           :studentProfile="studentProfile"
           :savedColleges="savedColleges"
           :recentlyViewed="recentlyViewed"
+          v-model="admitChanceModalOpen"
           @saveToEarly="handleSaveToEarly"
           @saveToRegular="handleSaveToRegular"
+          @close="closeAdmitChanceModal"
         />
 
         <!-- College Cards List -->
@@ -337,7 +339,6 @@
           rounded="lg"
           :elevation="4"
           @click="selectCollege(college)"
-          :class="{'selected-college': selectedCollege && selectedCollege.name === college.name}"
         >
           <v-row class="ma-0">
             <v-col cols="4" class="pa-0">
@@ -525,6 +526,7 @@ const sortBy = ref('acceptanceRate');
 const page = ref(1);
 const itemsPerPage = 5;
 const selectedCollege = ref(null);
+const admitChanceModalOpen = ref(false);
 
 // Filter options
 const filterOptions = [
@@ -926,13 +928,15 @@ const collegeActionItems = [
   { title: 'Save to Early Decision', action: 'saveEarly', icon: 'mdi-bookmark' },
 ];
 
-// Handle college selection for admission chance calculation
+// Handle college selection to open admission chance modal
 const selectCollege = (college) => {
-  if (selectedCollege.value && selectedCollege.value.name === college.name) {
-    selectedCollege.value = null;
-  } else {
-    selectedCollege.value = college;
-  }
+  selectedCollege.value = college;
+  admitChanceModalOpen.value = true;
+};
+
+// Close the admission chance modal
+const closeAdmitChanceModal = () => {
+  admitChanceModalOpen.value = false;
 };
 
 // Handle college action selections
@@ -1002,12 +1006,6 @@ const removeRecentlyViewedCollege = (index) => {
 
 /* Apply hover effect only to cards that are not expansion panels, dialog cards, sticky panel cards, or marked with .no-hover */
 .v-card:not(.v-expansion-panel):not(.v-dialog .v-card):not(.sticky-panel .v-card):not(.no-hover):hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
-}
-
-.selected-college {
-  border: 2px solid var(--bs-primary);
   transform: translateY(-4px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
 }
