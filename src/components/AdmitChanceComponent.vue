@@ -95,8 +95,68 @@
 
         <v-divider class="my-3"></v-divider>
 
-        <div class="text-body-2 mb-3" v-if="recommendation">
-          <strong>Recommendation:</strong> {{ recommendation }}
+        <!-- Recommendation Section - Modified to include AI toggle -->
+        <div class="text-body-2 mb-3">
+          <div class="d-flex align-center justify-space-between mb-2">
+            <strong>Recommendation:</strong>
+            <v-btn
+              v-if="!loadingAiRec"
+              :color="useAiRecommendation ? 'primary' : 'grey'"
+              :variant="useAiRecommendation ? 'tonal' : 'text'"
+              size="small"
+              @click="toggleAiRecommendation"
+            >
+              <v-icon size="small" class="mr-1">mdi-robot</v-icon>
+              {{ useAiRecommendation ? 'Using AI' : 'Get AI Recommendation' }}
+            </v-btn>
+            <v-progress-circular
+              v-else
+              indeterminate
+              size="20"
+              width="2"
+              color="primary"
+            ></v-progress-circular>
+          </div>
+
+          <!-- No API key message -->
+          <v-alert
+            v-if="showNoApiKeyMessage"
+            type="info"
+            density="compact"
+            variant="tonal"
+            class="mt-2 mb-3"
+          >
+            <div class="d-flex align-center">
+              <span>Please configure your OpenAI API key in Settings to use AI recommendations.</span>
+              <v-btn
+                color="primary"
+                variant="text"
+                size="small"
+                class="ml-2"
+                to="/settings"
+              >
+                Go to Settings
+              </v-btn>
+            </div>
+          </v-alert>
+
+          <!-- AI Recommendation Error -->
+          <v-alert
+            v-if="aiError"
+            type="error"
+            density="compact"
+            variant="tonal"
+            class="mt-2 mb-3"
+          >
+            {{ aiError }}
+          </v-alert>
+
+          <div v-if="useAiRecommendation && aiRecommendation">
+            <div v-html="formatRecommendation(aiRecommendation)"></div>
+          </div>
+          <div v-else>
+            {{ basicRecommendation }}
+          </div>
         </div>
 
         <v-row class="mt-1">
@@ -179,6 +239,10 @@ import {
   calculateAdmissionChance,
   prepareStudentData
 } from '../utils/admitChanceCalculator';
+import {
+  getCollegeMatchAnalysis,
+  isApiKeyConfigured
+} from '../utils/profileRecommendationService';
 
 const props = defineProps({
   college: {
@@ -254,7 +318,8 @@ const timesAverage = computed(() => {
   return collegeChance.value.timesAverageApplicant;
 });
 
-const recommendation = computed(() => {
+// Basic recommendation (original logic)
+const basicRecommendation = computed(() => {
   if (!collegeChance.value) return '';
 
   const prob = collegeChance.value.probability;
@@ -270,6 +335,105 @@ const recommendation = computed(() => {
     return `You're a strong candidate for this ${collegeType} school. Consider it as a target school with good chances.`;
   } else {
     return `This would be a safety school for you with your strong ${collegeType === 'STEM-heavy' ? 'STEM' : 'Liberal Arts'} profile.`;
+  }
+});
+
+// AI Recommendation Integration
+const useAiRecommendation = ref(false);
+const showNoApiKeyMessage = ref(false);
+const aiRecommendation = ref('');
+const loadingAiRec = ref(false);
+const aiError = ref('');
+// Track which college the recommendation is for
+const currentRecommendationCollegeId = ref(null);
+
+// Watch for college changes to reset recommendation if needed
+watch(() => props.college?.id, (newCollegeId, oldCollegeId) => {
+  if (newCollegeId !== oldCollegeId) {
+    // If the college changes, reset the AI recommendation
+    if (useAiRecommendation.value) {
+      // Only fetch new recommendation if we're actively using AI recs
+      getAiRecommendation();
+    } else {
+      // Otherwise just clear the stored recommendation
+      aiRecommendation.value = '';
+      currentRecommendationCollegeId.value = null;
+    }
+  }
+}, { immediate: true });
+
+// Toggle AI recommendation
+const toggleAiRecommendation = () => {
+  // If already using AI recommendation, toggle back to basic
+  if (useAiRecommendation.value) {
+    useAiRecommendation.value = false;
+    return;
+  }
+
+  // Check if API key is configured
+  if (!isApiKeyConfigured()) {
+    showNoApiKeyMessage.value = true;
+    return;
+  }
+
+  // Hide no API key message if it was shown
+  showNoApiKeyMessage.value = false;
+
+  // Toggle to AI recommendation
+  useAiRecommendation.value = true;
+
+  // Check if we need a new recommendation for the current college
+  if (!aiRecommendation.value || currentRecommendationCollegeId.value !== props.college.id) {
+    getAiRecommendation();
+  }
+};
+
+// Format AI recommendation text (convert newlines and formatting)
+const formatRecommendation = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+};
+
+// Get AI recommendation from OpenAI
+const getAiRecommendation = async () => {
+  if (!props.college || !props.studentProfile) return;
+
+  loadingAiRec.value = true;
+  aiError.value = '';
+
+  try {
+    const result = await getCollegeMatchAnalysis(props.studentProfile, props.college);
+
+    if (result.success) {
+      aiRecommendation.value = result.analysis;
+      currentRecommendationCollegeId.value = props.college.id;
+    } else {
+      aiError.value = result.error || 'Failed to get AI recommendation';
+      useAiRecommendation.value = false;
+    }
+  } catch (error) {
+    aiError.value = error.message || 'An unexpected error occurred';
+    useAiRecommendation.value = false;
+  } finally {
+    loadingAiRec.value = false;
+  }
+};
+
+// Reset recommendation when dialog opens
+watch(() => dialog.value, (isOpen) => {
+  if (isOpen) {
+    // Reset to default recommendation view when opening dialog
+    useAiRecommendation.value = false;
+
+    // Clear any previous recommendation if it's for a different college
+    if (currentRecommendationCollegeId.value !== props.college.id) {
+      aiRecommendation.value = '';
+      currentRecommendationCollegeId.value = null;
+    }
   }
 });
 

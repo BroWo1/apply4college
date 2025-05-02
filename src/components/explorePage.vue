@@ -2,8 +2,7 @@
   <v-container fluid class="pa-0" style="max-width: 2000px">
     <!-- Header and Search Bar -->
     <v-container class="text-center py-6">
-      <h1 class="text-h2 font-weight-bold mb-6 pt-5">Apply 4 College .org</h1>
-      <v-text-field
+        <h1 class="text-h2 font-weight-bold mb-6 pt-5">Apply 4 College <span class="text-body-1 font-weight-bold bg-primary white--text px-2 py-1 rounded">.org</span></h1>      <v-text-field
         v-model="searchQuery"
         label="Search Colleges"
         variant="solo"

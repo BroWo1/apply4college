@@ -8,8 +8,8 @@ export const safetyColleges = [
     description: 'A top public university known for computer science, engineering, and medicine.',
     acceptanceRate: 52,
     tuition: 12076,
-    rating: 4.3,
-    reviewCount: 763,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.72, stdDev: 0.18 },
@@ -40,8 +40,8 @@ export const safetyColleges = [
     description: 'A private Jesuit research university with a strong liberal arts tradition.',
     acceptanceRate: 27,
     tuition: 60950,
-    rating: 4.4,
-    reviewCount: 684,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'Liberal-arts',
     stats: {
       gpa: { mean: 3.7, stdDev: 0.2 },
@@ -67,13 +67,13 @@ export const safetyColleges = [
   }),
 
   createCollegeData({
-    name: 'University of Wisconsin-Madison',
-    location: 'Madison, WI',
-    description: 'A large public research university with a beautiful campus and strong school spirit.',
-    acceptanceRate: 57,
-    tuition: 10720,
-    rating: 4.2,
-    reviewCount: 725,
+    name: 'UNC Chapel Hill',
+    location: 'Chapel Hill, NC',
+    description: 'A public research university known for its strong programs in business, law, and public health.',
+    acceptanceRate: 23,
+    tuition: 9196,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'Liberal-arts',
     stats: {
       gpa: { mean: 3.6, stdDev: 0.25 },
@@ -99,13 +99,13 @@ export const safetyColleges = [
   }),
 
   createCollegeData({
-    name: 'Purdue University',
-    location: 'West Lafayette, IN',
-    description: 'A public research university known for engineering, science, and technology programs.',
+    name: 'UIUC',
+    location: 'Champaign, IL',
+    description: 'A leading public research university with a strong emphasis on engineering and computer science.',
     acceptanceRate: 60,
-    tuition: 9992,
-    rating: 4.2,
-    reviewCount: 695,
+    tuition: 15000,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.62, stdDev: 0.22 },

@@ -22,8 +22,8 @@ export const createCollegeData = ({
     acceptanceRate,
     tuition,
     image,
-    rating: rating || 4.5,
-    reviewCount: reviewCount || 500,
+    rating: rating || 0,
+    reviewCount: reviewCount || 0,
     collegeType,
     stats: {
       gpa: stats.gpa || { mean: 3.8, stdDev: 0.15 },

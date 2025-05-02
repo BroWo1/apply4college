@@ -33,14 +33,13 @@
         <v-list-item-title>Major: {{ intendedMajor || 'Not specified' }}</v-list-item-title>
       </v-list-item>
 
-      <!-- AP Classes Summary -->
       <v-list-item>
         <template v-slot:prepend>
           <v-icon icon="mdi-book-multiple" class="mr-2"></v-icon>
         </template>
         <v-list-item-title>AP Classes: {{ apClasses.length }}</v-list-item-title>
         <v-list-item-subtitle v-if="apClasses.length > 0">
-          {{ getTopScore() }} score: {{ getHighestScore() }}
+          Average score: {{ getAverageScore() }}
         </v-list-item-subtitle>
       </v-list-item>
 
@@ -51,7 +50,7 @@
         </template>
         <v-list-item-title>Activities: {{ extracurriculars.length }}</v-list-item-title>
         <v-list-item-subtitle v-if="extracurriculars.length > 0">
-          Top involvement: Level {{ getHighestActivityLevel() }}
+          Average level: {{ getAverageActivity() }}
         </v-list-item-subtitle>
       </v-list-item>
     </v-list>
@@ -70,37 +69,19 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import { defineProps } from 'vue';
 
 const props = defineProps({
-  satReading: {
-    type: Number,
-    default: 500
-  },
-  satMath: {
-    type: Number,
-    default: 500
-  },
-  gpa: {
-    type: Number,
-    default: 3.0
-  },
-  intendedMajor: {
-    type: String,
-    default: ''
-  },
-  apClasses: {
-    type: Array,
-    default: () => []
-  },
-  extracurriculars: {
-    type: Array,
-    default: () => []
-  }
+  satReading: { type: Number, default: 500 },
+  satMath: { type: Number, default: 500 },
+  gpa: { type: Number, default: 3.0 },
+  intendedMajor: { type: String, default: '' },
+  apClasses: { type: Array, default: () => [] },
+  extracurriculars: { type: Array, default: () => [] }
 });
 
-// Helper functions for summary information
-const getHighestScore = () => {
+// Helper function for average AP score
+const getAverageScore = () => {
   if (props.apClasses.length === 0) return 'N/A';
 
   const scores = props.apClasses
@@ -108,24 +89,18 @@ const getHighestScore = () => {
     .filter(score => score !== 'N/A' && typeof score === 'number');
 
   if (scores.length === 0) return 'N/A';
-  return Math.max(...scores);
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  return avg.toFixed(2);
 };
 
-const getTopScore = () => {
-  if (props.apClasses.length === 0) return 'Highest';
-
-  const scores = props.apClasses
-    .map(ap => ap.score)
-    .filter(score => score !== 'N/A' && typeof score === 'number');
-
-  if (scores.length === 0) return 'In progress';
-  return 'Highest';
-};
-
-const getHighestActivityLevel = () => {
+const getAverageActivity = () => {
   if (props.extracurriculars.length === 0) return 'N/A';
 
-  const levels = props.extracurriculars.map(activity => activity.level);
-  return Math.max(...levels);
+  const levels = props.extracurriculars
+    .map(activity => activity.level)
+
+  const avgLevel = levels.reduce((a, b) => a + b, 0) / levels.length;
+  return avgLevel.toFixed(2);
+
 };
 </script>

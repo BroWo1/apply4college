@@ -9,8 +9,8 @@ export const targetColleges = [
     acceptanceRate: 10,
     tuition: 14000,
     imageUrl: 'https://placehold.co/600x400/f4e9fe/9C27B0?text=UCB',
-    rating: 4.7,
-    reviewCount: 1089,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.89, stdDev: 0.12 },
@@ -42,8 +42,8 @@ export const targetColleges = [
     acceptanceRate: 12,
     tuition: 14000,
     imageUrl: 'https://placehold.co/600x400/e9fef3/4CAF50?text=UCLA',
-    rating: 4.5,
-    reviewCount: 876,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'Liberal-arts',
     stats: {
       gpa: { mean: 3.85, stdDev: 0.15 },
@@ -75,8 +75,8 @@ export const targetColleges = [
     acceptanceRate: 18,
     tuition: 17786,
     imageUrl: 'https://placehold.co/600x400/fff8e1/FFB300?text=UMich',
-    rating: 4.7,
-    reviewCount: 920,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'Liberal-arts',
     stats: {
       gpa: { mean: 3.82, stdDev: 0.15 },
@@ -107,8 +107,8 @@ export const targetColleges = [
     description: 'A private research university with renowned programs in computer science and engineering.',
     acceptanceRate: 15,
     tuition: 58924,
-    rating: 4.6,
-    reviewCount: 842,
+    rating: 0,
+    reviewCount: 0,
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.85, stdDev: 0.14 },
