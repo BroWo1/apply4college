@@ -12,11 +12,11 @@ declare module 'vue' {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppMenu: typeof import('./src/components/AppMenu.vue')['default']
     CollegeComparison: typeof import('./src/components/CollegeComparison.vue')['default']
-    Explore: typeof import('@/components/explorePage.vue')['default']
     ExplorePage: typeof import('./src/components/explorePage.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Home: typeof import('./src/components/home.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Schools: typeof import('./src/components/Schools.vue')['default']
   }
 }
