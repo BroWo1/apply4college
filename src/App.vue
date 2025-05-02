@@ -1,6 +1,7 @@
 <template>
   <v-app>
       <div>★ Hello from App.vue ★</div>
+    <Schools />
     <router-view />
   </v-app>
 </template>
