@@ -19,7 +19,6 @@
 </template>
 
 <script setup>
-console.log('🔍 Schools component setup() is running')
 import { ref, onMounted } from 'vue'
 import api from '@/api'
 

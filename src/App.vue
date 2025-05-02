@@ -1,6 +1,6 @@
 <template>
   <v-app>
-      <div>★ Hello from App.vue ★</div>
+    <Login/>
     <Schools />
     <router-view />
   </v-app>
@@ -9,6 +9,7 @@
 <script setup>
   //
   import Schools from '@/components/Schools.vue';
+  import Login from '@/components/Login.vue'
   import { inject, onMounted } from 'vue'
   const api = inject('api')    // <-- now injected
 
