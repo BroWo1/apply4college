@@ -41,6 +41,17 @@
     <!-- Spacer -->
     <v-spacer></v-spacer>
 
+    <!-- Dev Button (Visible only in development) -->
+    <v-btn
+      v-if="isDevelopment"
+      icon
+      @click="showSchoolsDialog = true"
+      title="Show Schools (Dev)"
+      class="mr-2"
+    >
+      <v-icon>mdi-school</v-icon>
+    </v-btn>
+
     <!-- User Profile Section (Right) -->
     <div class="d-flex align-center">
       <v-menu
@@ -102,22 +113,54 @@
         :value="item.value"
       ></v-list-item>
 
+      <!-- Dev Button in Mobile Drawer -->
+      <v-list-item
+        v-if="isDevelopment"
+        prepend-icon="mdi-school"
+        title="Show Schools (Dev)"
+        @click="showSchoolsDialog = true"
+      ></v-list-item>
+
       <v-divider></v-divider>
 
       <v-list-item prepend-icon="mdi-logout" title="Logout" @click="logout"></v-list-item>
     </v-list>
   </v-navigation-drawer>
+
+  <!-- Schools Dialog (Visible only in development) -->
+  <v-dialog v-model="showSchoolsDialog" max-width="800px" v-if="isDevelopment">
+    <v-card>
+      <v-card-title>
+        <span class="headline">Schools Component (Dev View)</span>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="showSchoolsDialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
+      <v-card-text>
+        <Schools />
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+
 </template>
 
 <script setup>
   import {ref, computed} from 'vue'
   import {useDisplay} from 'vuetify'
+  // Assuming Schools component is located at '@/components/Schools.vue'
+  // Adjust the path if necessary
+  import Schools from '@/components/Schools.vue' // Import the Schools component
 
   const username = ref('Andy Wang')
   const activeTab = ref('explore')
   const userMenu = ref(false)
   const mobileDrawer = ref(false)
+  const showSchoolsDialog = ref(false) // State for the dialog visibility
   const {name: breakpoint} = useDisplay()
+
+  // Check if in development mode (Vite specific)
+  const isDevelopment = computed(() => import.meta.env.DEV);
 
   // Responsive sizes based on screen size
   const appBarHeight = computed(() => {
@@ -172,7 +215,8 @@
     // Logic for logging out
     console.log('Logging out...')
   }
-  import { md3 } from 'vuetify/blueprints'
+  // Removed duplicate import
+  // import { md3 } from 'vuetify/blueprints'
 </script>
 
 <style scoped>

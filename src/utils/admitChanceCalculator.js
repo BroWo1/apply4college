@@ -14,6 +14,17 @@ export const calculateZScore = (value, mean, stdDev) => {
 };
 
 /**
+ * Generate a random 'bitter by coffee' factor if enabled
+ * @param {boolean} enableBitterByCoffee - Whether the random factor is enabled
+ * @returns {number} - Random factor between 0.75 and 1.25, or 1.0 if disabled
+ */
+export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
+  if (!enableBitterByCoffee) return 1.0; // Return 1.0 (neutral) if not enabled
+  // Generate random number between 0.75 and 1.25
+  return 0.75 + (Math.random() * 0.5);
+};
+
+/**
  * Calculate the admission chance for a college based on student profile
  * @param {Object} student - Student profile data
  * @param {Object} college - College data with stats and weights
@@ -63,8 +74,14 @@ export const calculateAdmissionChance = (student, college) => {
     const exponent = strengthBlock + alignmentBlock;
     const probability = p0 * Math.exp(exponent);
 
+    // Generate bitter by coffee factor (randomness)
+    const bitterByCoffeeFactor = generateBitterByCoffeeFactor(student.enableBitterByCoffee);
+
+    // Apply the bitter by coffee factor to the probability
+    const adjustedProbability = probability * bitterByCoffeeFactor;
+
     // Ensure probability is between 0 and 1
-    const cappedProbability = Math.min(Math.max(probability, 0), 1);
+    const cappedProbability = Math.min(Math.max(adjustedProbability, 0), 1);
 
     // Calculate how the student compares to the average applicant
     const comparisonToAverage = Math.exp(exponent);
@@ -74,6 +91,7 @@ export const calculateAdmissionChance = (student, college) => {
       probability: cappedProbability,
       probabilityPercentage: Math.round(cappedProbability * 100),
       timesAverageApplicant: comparisonToAverage.toFixed(2),
+      bitterByCoffeeFactor: bitterByCoffeeFactor.toFixed(2),
       zScores,
       fitScores,
       strengthBlock,
@@ -171,7 +189,8 @@ export const prepareStudentData = (profileData) => {
     recScore: profileData.recScore || 0,
     isLegacy: profileData.isLegacy || false,
     demoScore: profileData.demoScore || 0,
-    intendedMajor: profileData.intendedMajor
+    intendedMajor: profileData.intendedMajor,
+    enableBitterByCoffee: profileData.enableBitterByCoffee || false
   };
 };
 
