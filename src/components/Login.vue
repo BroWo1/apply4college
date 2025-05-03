@@ -1,64 +1,108 @@
 <template>
-  <v-container class="d-flex justify-center">
-    <v-card max-width="400">
-      <v-card-title>Login</v-card-title>
-      <v-card-text>
-        <v-form @submit.prevent="onSubmit" ref="form">
-          <v-text-field
-            v-model="username"
-            label="Username"
-            required
-          />
-          <v-text-field
-            v-model="password"
-            label="Password"
-            type="password"
-            required
-          />
-          <v-btn
-            type="submit"
-            :loading="loading"
-            color="primary"
-            class="mt-4"
-            block
-          >
-            Login
-          </v-btn>
-        </v-form>
-      </v-card-text>
-    </v-card>
-  </v-container>
+  <v-card-text>
+    <div class="text-h5 mb-4">Login to Your Account</div>
+    <v-alert
+      v-if="error"
+      type="error"
+      density="compact"
+      variant="tonal"
+      class="mb-3"
+    >
+      {{ error }}
+    </v-alert>
+
+    <v-form @submit.prevent="onSubmit" ref="form">
+      <v-text-field
+        v-model="username"
+        label="Username"
+        required
+        prepend-inner-icon="mdi-account"
+        variant="outlined"
+        class="mb-3"
+      />
+      <v-text-field
+        v-model="password"
+        label="Password"
+        type="password"
+        required
+        prepend-inner-icon="mdi-lock"
+        variant="outlined"
+        class="mb-4"
+      />
+      <v-btn
+        type="submit"
+        :loading="loading"
+        color="primary"
+        block
+        size="large"
+      >
+        Login
+      </v-btn>
+    </v-form>
+  </v-card-text>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api'
 
 const router = useRouter()
+const emit = defineEmits(['login-success'])
 const username = ref('')
 const password = ref('')
-const loading  = ref(false)
+const loading = ref(false)
+const error = ref('')
 
 async function onSubmit() {
-  console.log("Submiting login")
+  error.value = '' // Clear any previous errors
   loading.value = true
+
   try {
-    const { data } = await api.post('token/', {
+    const response = await api.post('token/', {
       username: username.value,
       password: password.value
     })
-    // store tokens
-    localStorage.setItem('access_token', data.access)
-    localStorage.setItem('refresh_token', data.refresh)
-    // set default header for future requests
-    api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
-    // redirect to home (or wherever)
-    router.push({ path:'/' })
-    console.log("Login success")
+
+    const { access, refresh } = response.data
+
+    // Store tokens
+    localStorage.setItem('access_token', access)
+    localStorage.setItem('refresh_token', refresh)
+
+    // Set default header for future requests
+    api.defaults.headers.common['Authorization'] = `Bearer ${access}`
+
+    // Create basic user data from login information
+    const userData = {
+      username: username.value
+    }
+
+    // Store basic user data
+    localStorage.setItem('user_data', JSON.stringify(userData))
+
+    // Emit login success event with basic user data
+    emit('login-success', userData)
+
+    // Clear form after successful login
+    username.value = ''
+    password.value = ''
+
   } catch (err) {
     console.error('Login failed:', err)
-    // you could show a snackbar or form error here
+
+    // Provide user-friendly error message
+    if (err.response) {
+      if (err.response.status === 401) {
+        error.value = 'Invalid username or password'
+      } else if (err.response.data?.detail) {
+        error.value = err.response.data.detail
+      } else {
+        error.value = 'Login failed. Please try again.'
+      }
+    } else {
+      error.value = 'Network error. Please check your connection.'
+    }
   } finally {
     loading.value = false
   }
@@ -66,6 +110,5 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-.v-card { margin-top: 100px; }
+/* No styles needed as the card is managed by the parent component */
 </style>
-

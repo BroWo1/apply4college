@@ -1,9 +1,7 @@
 <template>
   <v-app>
-      <div>★ Hello from App.vue ★</div>
+      <div>★ Hello from GPE Club ★</div>
     <router-view />
-    <Login/>
-    <Register/>
   </v-app>
 </template>
 

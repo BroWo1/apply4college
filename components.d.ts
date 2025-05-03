@@ -11,6 +11,7 @@ declare module 'vue' {
     AdmitChanceComponent: typeof import('./src/components/AdmitChanceComponent.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppMenu: typeof import('./src/components/AppMenu.vue')['default']
+    AuthModal: typeof import('./src/components/AuthModal.vue')['default']
     CollegeComparison: typeof import('./src/components/CollegeComparison.vue')['default']
     ExplorePage: typeof import('./src/components/explorePage.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
@@ -23,5 +24,6 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Schools: typeof import('./src/components/Schools.vue')['default']
+    SettingsPage: typeof import('./src/components/settingsPage.vue')['default']
   }
 }

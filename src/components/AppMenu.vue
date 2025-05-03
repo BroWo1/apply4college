@@ -54,16 +54,29 @@
 
     <!-- User Profile Section (Right) -->
     <div class="d-flex align-center">
+      <!-- Not authenticated state -->
+      <div v-if="!userStore.isAuthenticated">
+        <v-btn color="primary" variant="text" @click="openAuthModal('login')">
+          Login
+        </v-btn>
+        <v-btn color="primary" variant="outlined" class="ml-2" @click="openAuthModal('register')">
+          Register
+        </v-btn>
+      </div>
+
+      <!-- Authenticated state -->
       <v-menu
+        v-else
         v-model="userMenu"
         :close-on-content-click="false"
         location="bottom"
       >
         <template v-slot:activator="{ props }">
           <div class="d-flex align-center" v-bind="props">
-            <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ username }}</span>
+            <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.username }}</span>
             <v-avatar size="40" class="mr-2">
-              <img alt="User" src="@/assets/logo.png"/>
+              <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
+              <v-icon v-else icon="mdi-account" />
             </v-avatar>
           </div>
         </template>
@@ -93,11 +106,12 @@
   >
     <v-list>
       <v-list-item
-        :title="username"
+        :title="userStore.isAuthenticated ? userStore.username : 'Guest'"
       >
         <template v-slot:prepend>
           <v-avatar size="40">
-            <img alt="User" src="@/assets/logo.png"/>
+            <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
+            <v-icon v-else icon="mdi-account" />
           </v-avatar>
         </template>
       </v-list-item>
@@ -123,9 +137,21 @@
 
       <v-divider></v-divider>
 
-      <v-list-item prepend-icon="mdi-logout" title="Logout" @click="logout"></v-list-item>
+      <!-- Authentication buttons for mobile -->
+      <template v-if="!userStore.isAuthenticated">
+        <v-list-item prepend-icon="mdi-login" title="Login" @click="openAuthModal('login')"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-plus" title="Register" @click="openAuthModal('register')"></v-list-item>
+      </template>
+      <v-list-item v-else prepend-icon="mdi-logout" title="Logout" @click="logout"></v-list-item>
     </v-list>
   </v-navigation-drawer>
+
+  <!-- Auth Modal -->
+  <AuthModal
+    v-model="showAuthModal"
+    :initial-tab="authModalTab"
+    @login-success="handleLoginSuccess"
+  />
 
   <!-- Schools Dialog (Visible only in development) -->
   <v-dialog v-model="showSchoolsDialog" max-width="800px" v-if="isDevelopment">
@@ -146,18 +172,25 @@
 </template>
 
 <script setup>
-  import {ref, computed} from 'vue'
-  import {useDisplay} from 'vuetify'
-  // Assuming Schools component is located at '@/components/Schools.vue'
-  // Adjust the path if necessary
-  import Schools from '@/components/Schools.vue' // Import the Schools component
+  import { ref, computed, onMounted } from 'vue'
+  import { useDisplay } from 'vuetify'
+  import { useUserStore } from '@/stores/user'
+  import Schools from '@/components/Schools.vue'
+  import AuthModal from '@/components/AuthModal.vue'
 
-  const username = ref('Andy Wang')
+  const userStore = useUserStore()
   const activeTab = ref('explore')
   const userMenu = ref(false)
   const mobileDrawer = ref(false)
-  const showSchoolsDialog = ref(false) // State for the dialog visibility
+  const showSchoolsDialog = ref(false)
+  const showAuthModal = ref(false)
+  const authModalTab = ref('login')
   const {name: breakpoint} = useDisplay()
+
+  // Initialize user store
+  onMounted(() => {
+    userStore.initialize()
+  })
 
   // Check if in development mode (Vite specific)
   const isDevelopment = computed(() => import.meta.env.DEV);
@@ -211,12 +244,23 @@
     },
   ]
 
-  const logout = () => {
-    // Logic for logging out
-    console.log('Logging out...')
+  // Open auth modal with specific tab
+  const openAuthModal = (tab) => {
+    authModalTab.value = tab
+    showAuthModal.value = true
   }
-  // Removed duplicate import
-  // import { md3 } from 'vuetify/blueprints'
+
+  // Handle successful login
+  const handleLoginSuccess = (userData) => {
+    showAuthModal.value = false
+    // No need to manually set user data as it's handled by the store
+  }
+
+  // Logout function
+  const logout = () => {
+    userStore.logout()
+    userMenu.value = false
+  }
 </script>
 
 <style scoped>
