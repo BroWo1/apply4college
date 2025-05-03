@@ -2,6 +2,7 @@
   <v-app>
       <div>★ Hello from App.vue ★</div>
     <router-view />
+    <Login/>
   </v-app>
 </template>
 

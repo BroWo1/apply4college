@@ -41,6 +41,7 @@ const password = ref('')
 const loading  = ref(false)
 
 async function onSubmit() {
+  console.log("Submiting login")
   loading.value = true
   try {
     const { data } = await api.post('token/', {
@@ -53,7 +54,8 @@ async function onSubmit() {
     // set default header for future requests
     api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
     // redirect to home (or wherever)
-    router.push({ name: 'Home' })
+    router.push({ path:'/' })
+    console.log("Login success")
   } catch (err) {
     console.error('Login failed:', err)
     // you could show a snackbar or form error here
