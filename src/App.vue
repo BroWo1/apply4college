@@ -3,6 +3,7 @@
       <div>★ Hello from App.vue ★</div>
     <router-view />
     <Login/>
+    <Register/>
   </v-app>
 </template>
 
@@ -10,6 +11,7 @@
   //
   import Schools from '@/components/Schools.vue';
   import { inject, onMounted } from 'vue'
+  import Register from "@/components/Register.vue";
   const api = inject('api')    // <-- now injected
 
   onMounted(() => {

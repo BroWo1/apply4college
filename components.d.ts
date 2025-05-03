@@ -19,6 +19,7 @@ declare module 'vue' {
     ProfilePage: typeof import('./src/components/profilePage.vue')['default']
     ProfileSummaryComponent: typeof import('./src/components/ProfileSummaryComponent.vue')['default']
     RecommendationComponent: typeof import('./src/components/RecommendationComponent.vue')['default']
+    Register: typeof import('./src/components/Register.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Schools: typeof import('./src/components/Schools.vue')['default']
