@@ -84,7 +84,10 @@ async function onSubmit() {
     // Emit login success event with basic user data
     emit('login-success', userData)
 
-    // Clear form after successful login
+    // Reload the page after successful login
+    window.location.reload()
+
+    // Clear form after successful login (this might not be reached due to reload)
     username.value = ''
     password.value = ''
 

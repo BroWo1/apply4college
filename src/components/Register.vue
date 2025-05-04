@@ -47,14 +47,6 @@
         variant="outlined"
         class="mb-3"
       />
-      <v-textarea
-        v-model="biography"
-        label="Biography"
-        rows="3"
-        prepend-inner-icon="mdi-card-account-details"
-        variant="outlined"
-        class="mb-3"
-      />
       <v-file-input
         v-model="profilePicture"
         label="Profile Picture"
@@ -84,7 +76,6 @@ const emit = defineEmits(['register-success'])
 const username = ref('')
 const email = ref('')
 const password = ref('')
-const biography = ref('')
 const profilePicture = ref(null)
 const loading = ref(false)
 const error = ref('')
@@ -106,7 +97,6 @@ async function onSubmit() {
     formData.append('username', username.value)
     formData.append('email', email.value)
     formData.append('password', password.value)
-    formData.append('biography', biography.value)
 
     if (profilePicture.value) {
       formData.append('profile_picture', profilePicture.value)
@@ -126,7 +116,6 @@ async function onSubmit() {
     username.value = ''
     email.value = ''
     password.value = ''
-    biography.value = ''
     profilePicture.value = null
 
     // Emit success event and wait a moment for the user to see the success message

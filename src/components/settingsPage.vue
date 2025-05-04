@@ -83,15 +83,6 @@
                 class="mb-3"
               ></v-text-field>
 
-              <!-- Biography -->
-              <v-textarea
-                v-model="biography"
-                label="Biography"
-                rows="4"
-                prepend-inner-icon="mdi-card-account-details-outline"
-                variant="outlined"
-                class="mb-3"
-              ></v-textarea>
 
               <!-- Save button -->
               <v-btn
@@ -327,7 +318,6 @@ const showAuthModal = ref(false);
 // Form fields
 const username = ref('');
 const email = ref('');
-const biography = ref('');
 const profilePicture = ref(null);
 const previewUrl = ref(null);
 const currentPassword = ref('');
@@ -365,7 +355,6 @@ const initializeForm = () => {
   if (userStore.user) {
     username.value = userStore.user.username || '';
     email.value = userStore.user.email || '';
-    biography.value = userStore.user.biography || '';
   }
 
   // Load API key from localStorage if available
@@ -417,7 +406,6 @@ const saveProfile = async () => {
     const updatedUserData = {
       ...userStore.user,
       email: email.value,
-      biography: biography.value
     };
 
     // If there's a new profile picture, we would typically upload it

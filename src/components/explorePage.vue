@@ -437,6 +437,20 @@ onMounted(() => {
   }
 });
 
+// Persist Early Decision (savedColleges) changes
+watch(savedColleges, (newVal) => {
+  const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
+  data.earlyDecisionColleges = newVal.map(c => ({ name: c.name }));
+  localStorage.setItem('userProfileData', JSON.stringify(data));
+}, { deep: true });
+
+// Persist Regular Decision (recentlyViewed) changes
+watch(recentlyViewed, (newVal) => {
+  const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
+  data.regularDecisionColleges = newVal.map(c => ({ name: c.name }));
+  localStorage.setItem('userProfileData', JSON.stringify(data));
+}, { deep: true });
+
 // College action items for dropdown
 const collegeActionItems = [
   { title: 'View College Profile', action: 'view', icon: 'mdi-school' },

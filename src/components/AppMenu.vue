@@ -3,6 +3,7 @@
     :height="appBarHeight"
     color="surface"
     elevation="2"
+    class="app-bar-relative"
   >
     <!-- Logo Section (Left) -->
     <div class="d-flex align-center px-1">
@@ -19,7 +20,7 @@
     <v-spacer></v-spacer>
 
     <!-- Navigation Tabs (Middle) - Hidden on xs screens -->
-    <div class="d-none d-sm-flex">
+    <div class="d-none d-sm-flex nav-center-absolute">
       <v-tabs
         v-model="activeTab"
         :color="primary"
@@ -59,7 +60,7 @@
         <v-btn color="primary" variant="text" @click="openAuthModal('login')">
           Login
         </v-btn>
-        <v-btn color="primary" variant="outlined" class="ml-2" @click="openAuthModal('register')">
+        <v-btn color="primary" variant="outlined" class="ml-2  mr-3" @click="openAuthModal('register')">
           Register
         </v-btn>
       </div>
@@ -267,4 +268,20 @@
 .v-app-bar {
   transition: 0.2s ease-in-out;
 }
+/* Add relative positioning to the app bar for absolute centering context */
+.app-bar-relative {
+  position: relative;
+}
+/* Absolutely center the navigation tabs */
+.nav-center-absolute {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  transform: translateX(-50%);
+  align-items: center;
+  display: flex;
+  z-index: 1;
+}
 </style>
+
