@@ -5,8 +5,8 @@
     elevation="2"
     class="app-bar-relative"
   >
-    <!-- Logo Section (Left) -->
-    <div class="d-flex align-center px-1">
+    <!-- Logo Section (Left) - Updated to link to index/root -->
+    <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
       <v-img
         src="@/assets/a4c.svg"
         :width="logoSize"
@@ -14,7 +14,7 @@
         alt="Logo"
         class="ml-2"
       ></v-img>
-    </div>
+    </router-link>
 
     <!-- Spacer -->
     <v-spacer></v-spacer>
@@ -223,7 +223,7 @@
       title: 'Home',
       icon: 'mdi-view-dashboard',
       value: 'home',
-      to: '/',
+      to: '/home',
     },
     {
       title: 'Explore',

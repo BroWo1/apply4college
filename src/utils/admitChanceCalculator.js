@@ -25,6 +25,46 @@ export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
 };
 
 /**
+ * Adjust college acceptance rate based on the intended major and college type
+ * @param {number} baseAcceptanceRate - The college's overall acceptance rate
+ * @param {string} intendedMajor - The student's intended major ('STEM' or 'Liberal Arts')
+ * @param {string} collegeType - The college's focus ('STEM-heavy' or 'Liberal-arts')
+ * @returns {number} - The adjusted acceptance rate for the specific major
+ */
+export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, collegeType) => {
+  // Default adjustment factors
+  const competitiveMajorFactor = 0.7; // More competitive (multiply by 0.7 = 30% harder)
+  const lessFocusedMajorFactor = 1.2; // Less competitive (multiply by 1.2 = 20% easier)
+  const neutralFactor = 1.0; // No adjustment
+
+  // No adjustment if no intended major specified
+  if (!intendedMajor) return baseAcceptanceRate;
+
+  // STEM major at STEM-heavy school (highly competitive)
+  if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') {
+    return baseAcceptanceRate * competitiveMajorFactor;
+  }
+  
+  // Liberal Arts major at Liberal-arts school (competitive)
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') {
+    return baseAcceptanceRate * competitiveMajorFactor;
+  }
+  
+  // STEM major at Liberal-arts school (less competitive for STEM)
+  if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') {
+    return baseAcceptanceRate * lessFocusedMajorFactor;
+  }
+  
+  // Liberal Arts major at STEM-heavy school (less competitive for Liberal Arts)
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') {
+    return baseAcceptanceRate * lessFocusedMajorFactor;
+  }
+
+  // Default case - no adjustment
+  return baseAcceptanceRate;
+};
+
+/**
  * Calculate the admission chance for a college based on student profile
  * @param {Object} student - Student profile data
  * @param {Object} college - College data with stats and weights
@@ -33,7 +73,15 @@ export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
 export const calculateAdmissionChance = (student, college) => {
   try {
     const { stats, acceptanceRate, collegeType } = college;
-    const p0 = acceptanceRate / 100; // Convert percentage to decimal
+    
+    // Adjust the acceptance rate based on intended major
+    const adjustedAcceptanceRate = adjustAcceptanceRateByMajor(
+      acceptanceRate, 
+      student.intendedMajor, 
+      collegeType
+    );
+    
+    const p0 = adjustedAcceptanceRate / 100; // Convert percentage to decimal
 
     // Use either college-specific weights or defaults based on college type
     const weights = stats.weights || getDefaultWeights(collegeType);

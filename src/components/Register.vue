@@ -1,5 +1,5 @@
 <template>
-  <v-card-text>
+  <v-card-text class="pa-5">
     <div class="text-h5 mb-4">Create an Account</div>
     <v-alert
       v-if="error"

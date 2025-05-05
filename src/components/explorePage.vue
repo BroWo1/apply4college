@@ -9,7 +9,7 @@
         <v-text-field
         v-model="searchQuery"
         label="Search Colleges"
-        variant="solo"
+        variant="outlined"
         prepend-inner-icon="mdi-magnify"
         clearable
         class="mx-auto py-2"

@@ -16,12 +16,10 @@
             <v-text-field
               v-model="aiQuestion"
               label="Ask the AI Advisor"
-              variant="outlined" 
-              flat
+              variant="solo-filled" 
               hide-details
               clearable
               @keydown.enter="askAI"
-              class="text-h6"
             ></v-text-field>
           </v-col>
           <v-col cols="1" class="pa-1 text-center">
@@ -45,9 +43,8 @@
                 v-for="(suggestion, i) in suggestedQuestions"
                 :key="i"
                 @click="askSuggestedQuestion(suggestion)"
-                size="small"
-                variant="outlined"
                 color="primary"
+                size="small"
               >
                 {{ suggestion }}
               </v-chip>
@@ -93,118 +90,76 @@
     <!-- User's Saved Colleges Section -->
     <v-row class="mt-8">
       <v-col cols="12">
-        <v-card class="pa-4" rounded="lg">
-          <v-card-title class="text-h6 d-flex align-center">
-            Your Saved Colleges
-            <v-spacer></v-spacer>
-            <v-btn
-              variant="text"
-              color="primary"
-              to="/explore"
-              size="small"
-            >
-              Manage List
-            </v-btn>
-          </v-card-title>
-          <v-divider class="my-2"></v-divider>
+        <div class="d-flex align-center mb-4">
+          <h2 class="text-h6 font-weight-bold">Your Saved Colleges</h2>
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="text"
+            color="primary"
+            to="/explore"
+            size="small"
+          >
+            Manage List
+          </v-btn>
+        </div>
 
-          <!-- Early Decision Colleges -->
-          <div class="mb-6">
-            <h3 class="text-subtitle-1 font-weight-medium mb-2">Early Decision</h3>
-            <v-row v-if="earlyDecisionColleges.length > 0">
-              <v-col
-                v-for="(college, i) in earlyDecisionColleges"
-                :key="`ed-${i}`"
-                cols="12" sm="6" md="4"
-              >
-                <v-card class="h-100" variant="outlined" hover>
-                  <v-img :src="college.image" height="140" cover class="mb-2"></v-img>
-                  <v-card-title class="text-subtitle-1 font-weight-bold">{{ college.name }}</v-card-title>
-                  <v-card-subtitle>{{ college.location }}</v-card-subtitle>
-                  <v-card-text class="pb-0">
-                    <div class="d-flex align-center mb-2">
-                      <v-chip :color="getAcceptanceRateColor(college.acceptanceRate)" size="small" class="mr-2">
-                        {{ college.acceptanceRate }}% Acceptance
-                      </v-chip>
-                      <v-chip :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'" size="small">
-                        {{ college.collegeType }}
-                      </v-chip>
-                    </div>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn variant="text" color="primary" @click="viewCollege(college)">View Details</v-btn>
-                    <v-spacer></v-spacer>
-                    <v-rating
-                      :model-value="college.rating"
-                      color="amber"
-                      density="compact"
-                      size="x-small"
-                      readonly
-                    ></v-rating>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-alert
-              v-else
-              type="info"
-              variant="tonal"
-              border="start"
-              density="compact"
+        <!-- Combined ED/RD Colleges Horizontal Scroll -->
+        <div v-if="allSavedColleges.length > 0" class="saved-colleges-scroll">
+          <div class="d-flex overflow-x-auto py-2">
+            <v-card
+              v-for="(college, i) in allSavedColleges"
+              :key="`college-${i}`"
+              hover
+              class="college-card flex-shrink-0 me-4"
+              width="280"
             >
-              No colleges saved under Early Decision yet. Visit the <router-link to="/explore">Explore</router-link> page.
-            </v-alert>
+              <div class="d-flex align-center px-2 pt-2">
+                <v-chip 
+                  size="x-small" 
+                  :color="college.isEarlyDecision ? 'error' : 'primary'"
+                  class="text-caption"
+                >
+                  {{ college.isEarlyDecision ? 'ED' : 'RD' }}
+                </v-chip>
+                <v-spacer></v-spacer>
+                <v-rating
+                  :model-value="college.rating"
+                  color="amber"
+                  density="compact"
+                  size="x-small"
+                  readonly
+                ></v-rating>
+              </div>
+              <v-img :src="college.image" height="120" cover class="mb-2"></v-img>
+              <v-card-title class="text-subtitle-1 font-weight-bold pt-0">{{ college.name }}</v-card-title>
+              <v-card-subtitle>{{ college.location }}</v-card-subtitle>
+              <v-card-text class="pb-0">
+                <div class="d-flex align-center mb-2">
+                  <v-chip :color="getAcceptanceRateColor(college.acceptanceRate)" size="small" class="mr-2">
+                    {{ college.acceptanceRate }}% Acceptance
+                  </v-chip>
+                  <v-chip :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'" size="small">
+                    {{ college.collegeType }}
+                  </v-chip>
+                </div>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn variant="text" color="primary" @click="viewCollege(college)">View Details</v-btn>
+              </v-card-actions>
+            </v-card>
           </div>
+        </div>
 
-          <!-- Regular Decision Colleges -->
-          <div>
-            <h3 class="text-subtitle-1 font-weight-medium mb-2">Regular Decision</h3>
-            <v-row v-if="regularDecisionColleges.length > 0">
-              <v-col
-                v-for="(college, i) in regularDecisionColleges"
-                :key="`rd-${i}`"
-                cols="12" sm="6" md="4"
-              >
-                <v-card class="h-100" variant="outlined" hover>
-                  <v-img :src="college.image" height="140" cover class="mb-2"></v-img>
-                  <v-card-title class="text-subtitle-1 font-weight-bold">{{ college.name }}</v-card-title>
-                  <v-card-subtitle>{{ college.location }}</v-card-subtitle>
-                  <v-card-text class="pb-0">
-                    <div class="d-flex align-center mb-2">
-                      <v-chip :color="getAcceptanceRateColor(college.acceptanceRate)" size="small" class="mr-2">
-                        {{ college.acceptanceRate }}% Acceptance
-                      </v-chip>
-                      <v-chip :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'" size="small">
-                        {{ college.collegeType }}
-                      </v-chip>
-                    </div>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn variant="text" color="primary" @click="viewCollege(college)">View Details</v-btn>
-                    <v-spacer></v-spacer>
-                    <v-rating
-                      :model-value="college.rating"
-                      color="amber"
-                      density="compact"
-                      size="x-small"
-                      readonly
-                    ></v-rating>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-alert
-              v-else
-              type="info"
-              variant="tonal"
-              border="start"
-              density="compact"
-            >
-              No colleges saved under Regular Decision yet. Visit the <router-link to="/explore">Explore</router-link> page.
-            </v-alert>
-          </div>
-
-        </v-card>
+        <!-- Empty state message if no colleges -->
+        <v-alert
+          v-else
+          type="info"
+          variant="tonal"
+          border="start"
+          density="compact"
+        >
+          You haven't saved any colleges yet. Visit the <router-link to="/explore">Explore</router-link> page to add colleges to your list.
+        </v-alert>
       </v-col>
     </v-row>
 
@@ -259,7 +214,14 @@ const formattedAiResponse = computed(() => {
   return aiResponse.value.replace(/\n/g, '<br>');
 });
 
-// Removed savedCollegesDetails computed property
+// Combined computed property for all saved colleges
+const allSavedColleges = computed(() => {
+  // Combine both arrays and ensure no duplicates
+  const combined = [...earlyDecisionColleges.value, ...regularDecisionColleges.value];
+  const uniqueColleges = Array.from(new Set(combined.map(college => college.name)))
+    .map(name => combined.find(college => college.name === name));
+  return uniqueColleges;
+});
 
 // --- Methods ---
 const askAI = async () => {
@@ -278,12 +240,10 @@ const askAI = async () => {
     } else {
       // Fallback to a generic response if API call fails
       await new Promise(resolve => setTimeout(resolve, 800)); // Simulate delay
-      aiResponse.value = generateFallbackResponse();
     }
   } catch (error) {
     console.error('Error asking AI:', error);
     // Fallback response
-    aiResponse.value = generateFallbackResponse();
   } finally {
     loadingAiResponse.value = false;
   }
@@ -293,21 +253,6 @@ const askAI = async () => {
 const askSuggestedQuestion = (question) => {
   aiQuestion.value = question;
   askAI();
-};
-
-const generateFallbackResponse = () => {
-  const profile = userProfile.value || {};
-  const totalSAT = (profile.satReading || 0) + (profile.satMath || 0);
-  const responses = [
-    `Based on your profile with ${totalSAT > 0 ? `SAT score of ${totalSAT}` : 'your test scores'} and ${profile.gpa || 'your'} GPA, I recommend focusing on colleges that match your academic profile. Consider creating a balanced list with reach, match, and safety schools.`,
-    `Your question about "${aiQuestion.value}" is important. I recommend discussing this with your guidance counselor who can provide personalized advice for your specific situation.`,
-    `To improve your college applications, focus on maintaining strong grades, participating in meaningful extracurriculars, and crafting compelling essays that showcase your unique qualities.`
-  ];
-
-  // Clear the input after generating fallback
-  // aiQuestion.value = '';
-
-  return responses[Math.floor(Math.random() * responses.length)];
 };
 
 // Get color for acceptance rate chip (copied from explorePage)
@@ -337,15 +282,29 @@ onMounted(() => {
       // Load Early Decision colleges
       if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
         earlyDecisionColleges.value = profileData.earlyDecisionColleges
-          .map(savedCollege => colleges.find(c => c.name === savedCollege.name))
-          .filter(college => !!college); // Filter out nulls
+          .map(savedCollege => {
+            const college = colleges.find(c => c.name === savedCollege.name);
+            if (college) {
+              // Explicitly set isEarlyDecision to true for ED colleges
+              return { ...college, isEarlyDecision: true };
+            }
+            return null;
+          })
+          .filter(college => !!college);
       }
 
       // Load Regular Decision colleges
       if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
         regularDecisionColleges.value = profileData.regularDecisionColleges
-          .map(savedCollege => colleges.find(c => c.name === savedCollege.name))
-          .filter(college => !!college); // Filter out nulls
+          .map(savedCollege => {
+            const college = colleges.find(c => c.name === savedCollege.name);
+            if (college) {
+              // Explicitly set isEarlyDecision to false for RD colleges
+              return { ...college, isEarlyDecision: false };
+            }
+            return null;
+          })
+          .filter(college => !!college);
       }
 
       console.log('Home: Loaded ED/RD colleges from localStorage');
@@ -377,5 +336,14 @@ onMounted(() => {
 /* Style suggested question chips */
 .v-chip {
   cursor: pointer;
+}
+
+/* Custom styles for the saved colleges section */
+.saved-colleges-scroll {
+  padding: 8px 0;
+}
+
+.college-card {
+  width: 280px; /* Fixed width for cards in horizontal scroll */
 }
 </style>

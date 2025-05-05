@@ -92,14 +92,6 @@
             class="mb-3"
           ></v-slider>
 
-          <v-switch
-            v-model="isLegacy"
-            label="Legacy status (parent or sibling attended)"
-            color="primary"
-            hide-details
-            class="mb-3"
-          ></v-switch>
-
           <div class="text-h6 mt-6 mb-3">Demographics</div>
 
           <!-- Nationality Section -->

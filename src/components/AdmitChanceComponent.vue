@@ -31,6 +31,23 @@
             </div>
           </v-col>
           <v-col cols="12" sm="6">
+            <!-- Legacy Status Toggle -->
+            <v-card variant="outlined" class="pa-2 mb-3">
+              <div class="d-flex align-center justify-space-between">
+                <div>
+                  <div class="text-subtitle-2">Legacy Status</div>
+                  <div class="text-caption">Parent or sibling attended this college</div>
+                </div>
+                <v-switch
+                  v-model="localIsLegacy"
+                  color="primary"
+                  hide-details
+                  density="compact"
+                  @change="recalculateChance"
+                ></v-switch>
+              </div>
+            </v-card>
+            
             <v-list density="compact">
               <v-list-subheader>Your Profile Strengths</v-list-subheader>
 
@@ -217,6 +234,46 @@
               </v-col>
             </v-row>
 
+            <!-- Added Major Impact Information -->
+            <v-card variant="outlined" class="pa-3 mb-3">
+              <div class="d-flex justify-space-between align-center">
+                <div class="text-subtitle-2">Major Impact</div>
+                <v-chip
+                  :color="getMajorMatchColor(props.studentProfile.intendedMajor, props.college.collegeType)"
+                  size="small"
+                >
+                  {{ getMajorMatchText(props.studentProfile.intendedMajor, props.college.collegeType) }}
+                </v-chip>
+              </div>
+              
+              <div v-if="props.studentProfile.intendedMajor" class="mt-2">
+                <div class="d-flex justify-space-between">
+                  <span class="text-caption">Base acceptance rate:</span>
+                  <span class="text-caption font-weight-medium">{{ props.college.acceptanceRate }}%</span>
+                </div>
+                <div class="d-flex justify-space-between">
+                  <span class="text-caption">
+                    Adjusted for {{ props.studentProfile.intendedMajor }} at {{ props.college.collegeType }} college:
+                  </span>
+                  <span class="text-caption font-weight-medium">{{ adjustedAcceptanceRate }}%</span>
+                </div>
+                <div class="text-caption mt-1">
+                  <span v-if="isHarderMajor">
+                    <v-icon size="x-small" color="error" class="mr-1">mdi-arrow-down</v-icon>
+                    This major is more competitive at this college type.
+                  </span>
+                  <span v-else-if="isEasierMajor">
+                    <v-icon size="x-small" color="success" class="mr-1">mdi-arrow-up</v-icon> 
+                    This major is less competitive at this college type.
+                  </span>
+                </div>
+              </div>
+              
+              <div v-else class="text-caption mt-2">
+                Select an intended major in your profile to see how it affects your admission chances at this college.
+              </div>
+            </v-card>
+
             <div class="text-caption mt-2">
               <strong>Note:</strong> This calculator uses standardized scores (Z-scores) to compare your profile
               to the average applicant pool. A score of +1σ means you're one standard deviation above the average.
@@ -275,15 +332,35 @@ const dialog = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
+// Add local legacy status state
+const localIsLegacy = ref(false);
+
+// Initialize the local legacy status when dialog opens
+watch(() => dialog.value, (isOpen) => {
+  if (isOpen) {
+    // Default to false when opening, as this is a per-college setting
+    localIsLegacy.value = false;
+  }
+});
+
 // Define calculateChance function FIRST
 const calculateChance = () => {
   if (!props.college || !props.studentProfile) return;
 
   // Prepare student data for calculations
-  const studentData = prepareStudentData(props.studentProfile);
+  const studentData = prepareStudentData({
+    ...props.studentProfile,
+    // Override the legacy status with our local per-college setting
+    isLegacy: localIsLegacy.value
+  });
 
   // Calculate admission chance
   collegeChance.value = calculateAdmissionChance(studentData, props.college);
+};
+
+// Recalculate chance when legacy status changes
+const recalculateChance = () => {
+  calculateChance();
 };
 
 // THEN, define the watch that uses it
@@ -480,6 +557,60 @@ const formatNumber = (num) => {
 const normalizeBlock = (blockValue) => {
   // Convert block value to percentage for progress bar (typically ranges from -2 to +2)
   return Math.min(Math.max((blockValue + 2) * 25, 0), 100);
+};
+
+// Major impact functions and computed properties
+import { getMajorMatchAssessment, adjustAcceptanceRateByMajor } from '../utils/admitChanceCalculator';
+
+// Get adjusted acceptance rate for the current major and college
+const adjustedAcceptanceRate = computed(() => {
+  if (!props.college || !props.studentProfile.intendedMajor) return props.college?.acceptanceRate || 0;
+  
+  const adjusted = adjustAcceptanceRateByMajor(
+    props.college.acceptanceRate, 
+    props.studentProfile.intendedMajor, 
+    props.college.collegeType
+  );
+  
+  return adjusted.toFixed(1);
+});
+
+// Determine if this major is more competitive at this college
+const isHarderMajor = computed(() => {
+  if (!props.college || !props.studentProfile.intendedMajor) return false;
+  
+  return (
+    (props.studentProfile.intendedMajor === 'STEM' && props.college.collegeType === 'STEM-heavy') || 
+    (props.studentProfile.intendedMajor === 'Liberal Arts' && props.college.collegeType === 'Liberal-arts')
+  );
+});
+
+// Determine if this major is less competitive at this college
+const isEasierMajor = computed(() => {
+  if (!props.college || !props.studentProfile.intendedMajor) return false;
+  
+  return (
+    (props.studentProfile.intendedMajor === 'STEM' && props.college.collegeType === 'Liberal-arts') || 
+    (props.studentProfile.intendedMajor === 'Liberal Arts' && props.college.collegeType === 'STEM-heavy')
+  );
+});
+
+// Get major match text based on student's intended major and college type
+const getMajorMatchText = (intendedMajor, collegeType) => {
+  if (!intendedMajor) return 'Not Selected';
+  
+  return getMajorMatchAssessment({ collegeType }, intendedMajor);
+};
+
+// Get color for major match chip
+const getMajorMatchColor = (intendedMajor, collegeType) => {
+  if (!intendedMajor) return 'grey';
+  
+  const match = getMajorMatchText(intendedMajor, collegeType);
+  if (match === 'Excellent') return 'success';
+  if (match === 'Good') return 'info';
+  if (match === 'Fair') return 'warning';
+  return 'error';
 };
 
 const emitSaveDecision = () => {

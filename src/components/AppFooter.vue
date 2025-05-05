@@ -3,23 +3,13 @@
     app
     height="40"
   >
-    <a
-      v-for="item in items"
-      :key="item.title"
-      class="d-inline-block mx-2 social-link"
-      :href="item.href"
-      rel="noopener noreferrer"
-      target="_blank"
-      :title="item.title"
-    >
-      <v-icon
-        :icon="item.icon"
-        :size="item.icon === '$vuetify' ? 24 : 16"
-      />
-    </a>
+    <div
+      class="text-caption">
+      Apply 4 College ™
+    </div>
 
     <div
-      class="text-caption text-disabled"
+      class="text-caption"
       style="position: absolute; right: 16px;"
     >
       <a
