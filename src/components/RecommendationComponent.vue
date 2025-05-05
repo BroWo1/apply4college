@@ -165,6 +165,8 @@ const activeTab = ref('strategy');
 const essayTopics = ref(null);
 const loadingEssayTopics = ref(false);
 
+// Removed hasApiKey ref
+
 // Close dialog handler
 const closeDialog = () => {
   dialog.value = false;
@@ -273,8 +275,7 @@ const fetchRecommendations = async () => {
 
 // Get essay topics
 const getEssayTopics = async () => {
-  if (!hasApiKey.value) return;
-
+  // Removed hasApiKey check
   loadingEssayTopics.value = true;
 
   try {
@@ -308,12 +309,14 @@ const saveRecommendations = () => {
 
 // Watch for dialog open to trigger API call
 watch(() => dialog.value, (newValue) => {
-  if (newValue && hasApiKey.value && !recommendation.value && !loading.value) {
+  // Removed hasApiKey check from condition
+  if (newValue && !recommendation.value && !loading.value) {
     fetchRecommendations();
   }
 });
 
-// Check for stored API key on component mount
+// Removed API key check on mount
+
 // In a real app, you might use a more secure method to store the API key
 // This is just for demo purposes
 const checkStoredApiKey = () => {

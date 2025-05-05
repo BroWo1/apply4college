@@ -3,36 +3,12 @@
 
 // OpenAI API configuration
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
-let apiKey = ''; // Will be set through setApiKey method
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+console.log('API Key:', apiKey); // Log the API key
 
-/**
- * Set the OpenAI API key
- * @param {string} key - OpenAI API key
- */
-export const setApiKey = (key) => {
-  apiKey = key;
-  localStorage.setItem('openai_api_key', key);
-};
+// Removed setApiKey function
 
-/**
- * Check if API key is configured
- * @returns {boolean} - Whether API key is configured
- */
-export const isApiKeyConfigured = () => {
-  // First check if the key is already set in memory
-  if (apiKey) {
-    return true;
-  }
-
-  // If not in memory, try to load from localStorage
-  const storedKey = localStorage.getItem('openai_api_key');
-  if (storedKey) {
-    apiKey = storedKey;
-    return true;
-  }
-
-  return false;
-};
+// Removed isApiKeyConfigured function
 
 /**
  * Format student profile data for the AI prompt
@@ -97,8 +73,9 @@ Focus on actionable advice that considers the student's academic strengths, inte
  * @returns {Promise<Object>} - Response with recommendation data
  */
 export const getProfileRecommendations = async (studentProfile) => {
-  if (!isApiKeyConfigured()) {
-    throw new Error('OpenAI API key not set. Use setApiKey() method first.');
+  if (!apiKey) {
+    // Throw error if API key is not set in the environment
+    throw new Error('OpenAI API key not configured in the environment.');
   }
 
   try {
@@ -137,7 +114,7 @@ export const getProfileRecommendations = async (studentProfile) => {
       recommendation: data.choices[0].message.content,
       success: true
     };
-  } catch (error) {
+  } catch (error) { // Keep existing catch block
     console.error('Error getting AI recommendation:', error);
     return {
       recommendation: null,
@@ -154,8 +131,9 @@ export const getProfileRecommendations = async (studentProfile) => {
  * @returns {Promise<Object>} - Response with match analysis
  */
 export const getCollegeMatchAnalysis = async (studentProfile, college) => {
-  if (!isApiKeyConfigured()) {
-    throw new Error('OpenAI API key not set. Use setApiKey() method first.');
+  if (!apiKey) {
+    // Throw error if API key is not set in the environment
+    throw new Error('OpenAI API key not configured in the environment.');
   }
 
   try {
@@ -210,7 +188,7 @@ Analyze how good of a match this college is for this student. Consider academic 
       analysis: data.choices[0].message.content,
       success: true
     };
-  } catch (error) {
+  } catch (error) { // Keep existing catch block
     console.error('Error getting college match analysis:', error);
     return {
       analysis: null,
@@ -226,8 +204,9 @@ Analyze how good of a match this college is for this student. Consider academic 
  * @returns {Promise<Object>} - Response with essay topic suggestions
  */
 export const getEssayTopicSuggestions = async (studentProfile) => {
-  if (!isApiKeyConfigured()) {
-    throw new Error('OpenAI API key not set. Use setApiKey() method first.');
+  if (!apiKey) {
+    // Throw error if API key is not set in the environment
+    throw new Error('OpenAI API key not configured in the environment.');
   }
 
   // Extract student interests from extracurriculars
@@ -282,10 +261,81 @@ Make the suggestions personal and tailored to this specific student's interests 
       topics: data.choices[0].message.content,
       success: true
     };
-  } catch (error) {
+  } catch (error) { // Keep existing catch block
     console.error('Error getting essay topic suggestions:', error);
     return {
       topics: null,
+      error: error.message,
+      success: false
+    };
+  }
+};
+
+/**
+ * Get general advice based on student profile and a specific question
+ * @param {Object} studentProfile - The student profile data
+ * @param {string} question - The user's specific question
+ * @returns {Promise<Object>} - Response with advice
+ */
+export const getGeneralAdvice = async (studentProfile, question) => {
+  if (!apiKey) {
+    // Throw error if API key is not set in the environment
+    throw new Error('OpenAI API key not configured in the environment.');
+  }
+
+  try {
+    const profileSummary = `
+Student Profile Summary:
+- SAT Score: ${studentProfile.satReading + studentProfile.satMath}
+- GPA: ${studentProfile.gpa}
+- Intended Major: ${studentProfile.intendedMajor || 'Undecided'}
+- Key Interests/Activities: ${studentProfile.extracurriculars.map(ec => ec.name).join(', ') || 'None listed'}
+`;
+
+    const prompt = `
+${profileSummary}
+User Question: ${question}
+
+Based on the student profile summary and the user's question, provide concise and actionable advice (150-250 words). Address the specific question directly while considering the student's background. Be realistic and encouraging.
+`;
+
+    const response = await fetch(OPENAI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini', // Or gpt-3.5-turbo
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful college admissions advisor providing brief, targeted advice based on a student profile summary and a specific question.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.6,
+        max_tokens: 400
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API Error: ${error.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    return {
+      advice: data.choices[0].message.content,
+      success: true
+    };
+  } catch (error) {
+    console.error('Error getting general AI advice:', error);
+    return {
+      advice: null,
       error: error.message,
       success: false
     };

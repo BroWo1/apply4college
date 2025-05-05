@@ -240,8 +240,7 @@ import {
   prepareStudentData
 } from '../utils/admitChanceCalculator';
 import {
-  getCollegeMatchAnalysis,
-  isApiKeyConfigured
+  getCollegeMatchAnalysis
 } from '../utils/profileRecommendationService';
 
 const props = defineProps({
@@ -340,7 +339,7 @@ const basicRecommendation = computed(() => {
 
 // AI Recommendation Integration
 const useAiRecommendation = ref(false);
-const showNoApiKeyMessage = ref(false);
+// Removed showNoApiKeyMessage ref
 const aiRecommendation = ref('');
 const loadingAiRec = ref(false);
 const aiError = ref('');
@@ -370,14 +369,7 @@ const toggleAiRecommendation = () => {
     return;
   }
 
-  // Check if API key is configured
-  if (!isApiKeyConfigured()) {
-    showNoApiKeyMessage.value = true;
-    return;
-  }
-
-  // Hide no API key message if it was shown
-  showNoApiKeyMessage.value = false;
+  // Removed check for API key
 
   // Toggle to AI recommendation
   useAiRecommendation.value = true;
