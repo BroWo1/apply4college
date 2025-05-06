@@ -1,5 +1,5 @@
 <template>
-  <v-container class="product-page-container py-12">
+  <v-container class="product-page-container py-12" style="max-width: 1500px;">
     <!-- Header row with logo and title -->
     <v-row justify="center" class="header-row align-center mb-6">
       <v-col cols="12" md="10">
@@ -96,7 +96,7 @@
         <v-card class="feature-card pa-6" flat border rounded="lg">
           <div class="d-flex flex-column align-center mb-4">
             <v-avatar size="120" class="mb-3">
-              <v-img src="" alt="Frontend Developer"></v-img>
+              <v-img src="@/assets/will.jpg" alt="Frontend Developer"></v-img>
             </v-avatar>
             <v-card-title class="text-h5 font-weight-medium text-center pa-0">Will Li</v-card-title>
             <span class="text-subtitle-2 text-grey-darken-1">Frontend Developer</span>
@@ -122,7 +122,7 @@
         <v-card class="feature-card pa-6" flat border rounded="lg">
           <div class="d-flex flex-column align-center mb-4">
             <v-avatar size="120" class="mb-3">
-              <v-img src="" alt="Frontend Engineer"></v-img>
+              <v-img src="@/assets/andy.jpg" alt="Frontend Engineer"></v-img>
             </v-avatar>
             <v-card-title class="text-h5 font-weight-medium text-center pa-0">Andy Wang</v-card-title>
             <span class="text-subtitle-2 text-grey-darken-1">Backend Developer</span>

@@ -254,275 +254,275 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import AdmitChanceComponent from './AdmitChanceComponent.vue';
-import ProfileSummaryComponent from './ProfileSummaryComponent.vue';
-import { colleges, getCollegesByType, getCollegesByAcceptanceRate, sortCollegesBy, searchColleges } from '../data/colleges.js';
-import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
-import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
-import CollegeComparison from './CollegeComparison.vue';
+  import { ref, computed, onMounted, watch } from 'vue';
+  import AdmitChanceComponent from './AdmitChanceComponent.vue';
+  import ProfileSummaryComponent from './ProfileSummaryComponent.vue';
+  import { colleges, getCollegesByType, getCollegesByAcceptanceRate, sortCollegesBy, searchColleges } from '../data/colleges.js';
+  import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
+  import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
+  import CollegeComparison from './CollegeComparison.vue';
 
-// Filtering and pagination
-const searchQuery = ref('');
-const filterBy = ref('All');
-const sortBy = ref('acceptanceRate');
-const page = ref(1);
-const itemsPerPage = 5;
-const selectedCollege = ref(null);
-const admitChanceModalOpen = ref(false);
+  // Filtering and pagination
+  const searchQuery = ref('');
+  const filterBy = ref('All');
+  const sortBy = ref('acceptanceRate');
+  const page = ref(1);
+  const itemsPerPage = 5;
+  const selectedCollege = ref(null);
+  const admitChanceModalOpen = ref(false);
 
-// Filter options
-const filterOptions = [
-  'All',
-  'Elite (< 10%)',
-  'Target (10-20%)',
-  'Safety (> 20%)',
-  'STEM-focused',
-  'Liberal Arts'
-];
+  // Filter options
+  const filterOptions = [
+    'All',
+    'Elite (< 10%)',
+    'Target (10-20%)',
+    'Safety (> 20%)',
+    'STEM-focused',
+    'Liberal Arts'
+  ];
 
-// Sort options
-const sortOptions = [
-  { title: 'Acceptance Rate', value: 'acceptanceRate' },
-  { title: 'College Name', value: 'name' },
-  { title: 'Rating', value: 'rating' },
-  { title: 'Tuition', value: 'tuition' }
-];
+  // Sort options
+  const sortOptions = [
+    { title: 'Acceptance Rate', value: 'acceptanceRate' },
+    { title: 'College Name', value: 'name' },
+    { title: 'Rating', value: 'rating' },
+    { title: 'Tuition', value: 'tuition' }
+  ];
 
-// Saved and recently viewed colleges
-const savedColleges = ref([]);
-const recentlyViewed = ref([]);
+  // Saved and recently viewed colleges
+  const savedColleges = ref([]);
+  const recentlyViewed = ref([]);
 
-// Student profile data (now loaded from localStorage)
-const satReading = ref(500);
-const satMath = ref(500);
-const gpa = ref(3.0);
-const apClasses = ref([]);
-const extracurriculars = ref([]);
-const intendedMajor = ref("");
-const recScore = ref(2);
-const isLegacy = ref(false);
-const demoScore = ref(0);
+  // Student profile data (now loaded from localStorage)
+  const satReading = ref(500);
+  const satMath = ref(500);
+  const gpa = ref(3.0);
+  const apClasses = ref([]);
+  const extracurriculars = ref([]);
+  const intendedMajor = ref("");
+  const recScore = ref(2);
+  const isLegacy = ref(false);
+  const demoScore = ref(0);
 
-// Computed for filtered colleges based on filter option
-const filteredColleges = computed(() => {
-  let filtered = [];
+  // Computed for filtered colleges based on filter option
+  const filteredColleges = computed(() => {
+    let filtered = [];
 
-  // Apply filter
-  switch(filterBy.value) {
-    case 'Elite (< 10%)':
-      filtered = getCollegesByAcceptanceRate(0, 10);
-      break;
-    case 'Target (10-20%)':
-      filtered = getCollegesByAcceptanceRate(10, 20);
-      break;
-    case 'Safety (> 20%)':
-      filtered = getCollegesByAcceptanceRate(20, 100);
-      break;
-    case 'STEM-focused':
-      filtered = getCollegesByType('STEM-heavy');
-      break;
-    case 'Liberal Arts':
-      filtered = getCollegesByType('Liberal-arts');
-      break;
-    default:
-      filtered = colleges;
-  }
+    // Apply filter
+    switch(filterBy.value) {
+      case 'Elite (< 10%)':
+        filtered = getCollegesByAcceptanceRate(0, 10);
+        break;
+      case 'Target (10-20%)':
+        filtered = getCollegesByAcceptanceRate(10, 20);
+        break;
+      case 'Safety (> 20%)':
+        filtered = getCollegesByAcceptanceRate(20, 100);
+        break;
+      case 'STEM-focused':
+        filtered = getCollegesByType('STEM-heavy');
+        break;
+      case 'Liberal Arts':
+        filtered = getCollegesByType('Liberal-arts');
+        break;
+      default:
+        filtered = colleges;
+    }
 
-  // Apply search query
-  if (searchQuery.value) {
-    filtered = filtered.filter(college =>
-      college.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      college.location.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    // Apply search query
+    if (searchQuery.value) {
+      filtered = filtered.filter(college =>
+        college.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        college.location.toLowerCase().includes(searchQuery.value.toLowerCase())
+      );
+    }
 
-  // Apply sorting
-  return sortCollegesBy(filtered, sortBy.value);
-});
+    // Apply sorting
+    return sortCollegesBy(filtered, sortBy.value);
+  });
 
-// Computed for paginated colleges
-const displayedColleges = computed(() => {
-  const start = (page.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredColleges.value.slice(start, end);
-});
+  // Computed for paginated colleges
+  const displayedColleges = computed(() => {
+    const start = (page.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredColleges.value.slice(start, end);
+  });
 
-// Reset to page 1 when filter changes
-watch([filterBy, sortBy, searchQuery], () => {
-  page.value = 1;
-});
+  // Reset to page 1 when filter changes
+  watch([filterBy, sortBy, searchQuery], () => {
+    page.value = 1;
+  });
 
-// Helper function to determine chip color based on acceptance rate
-const getAcceptanceRateColor = (rate) => {
-  if (rate < 10) return 'error';
-  if (rate < 20) return 'warning';
-  if (rate < 40) return 'info';
-  return 'success';
-};
-
-// Reset filters
-const resetFilters = () => {
-  filterBy.value = 'All';
-  sortBy.value = 'acceptanceRate';
-  searchQuery.value = '';
-};
-
-// Handle search input
-const handleSearch = (value) => {
-  searchQuery.value = value;
-};
-
-// Computed student profile for admission calculations
-const studentProfile = computed(() => {
-  return {
-    satReading: satReading.value,
-    satMath: satMath.value,
-    gpa: gpa.value,
-    apClasses: apClasses.value,
-    extracurriculars: extracurriculars.value,
-    intendedMajor: intendedMajor.value,
-    recScore: recScore.value,
-    isLegacy: isLegacy.value,
-    demoScore: demoScore.value
+  // Helper function to determine chip color based on acceptance rate
+  const getAcceptanceRateColor = (rate) => {
+    if (rate < 10) return 'error';
+    if (rate < 20) return 'warning';
+    if (rate < 40) return 'info';
+    return 'success';
   };
-});
 
-// Load saved profile data
-onMounted(() => {
-  const savedData = localStorage.getItem('userProfileData');
-  if (savedData) {
-    try {
-      const profileData = JSON.parse(savedData);
+  // Reset filters
+  const resetFilters = () => {
+    filterBy.value = 'All';
+    sortBy.value = 'acceptanceRate';
+    searchQuery.value = '';
+  };
 
-      // Load standardized scores
-      satReading.value = profileData.satReading || 500;
-      satMath.value = profileData.satMath || 500;
-      gpa.value = profileData.gpa || 3.0;
+  // Handle search input
+  const handleSearch = (value) => {
+    searchQuery.value = value;
+  };
 
-      // Load AP classes
-      if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
-        apClasses.value = profileData.apClasses;
+  // Computed student profile for admission calculations
+  const studentProfile = computed(() => {
+    return {
+      satReading: satReading.value,
+      satMath: satMath.value,
+      gpa: gpa.value,
+      apClasses: apClasses.value,
+      extracurriculars: extracurriculars.value,
+      intendedMajor: intendedMajor.value,
+      recScore: recScore.value,
+      isLegacy: isLegacy.value,
+      demoScore: demoScore.value
+    };
+  });
+
+  // Load saved profile data
+  onMounted(() => {
+    const savedData = localStorage.getItem('userProfileData');
+    if (savedData) {
+      try {
+        const profileData = JSON.parse(savedData);
+
+        // Load standardized scores
+        satReading.value = profileData.satReading || 500;
+        satMath.value = profileData.satMath || 500;
+        gpa.value = profileData.gpa || 3.0;
+
+        // Load AP classes
+        if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
+          apClasses.value = profileData.apClasses;
+        }
+
+        // Load extracurriculars
+        if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
+          extracurriculars.value = profileData.extracurriculars;
+        }
+
+        // Load additional factors
+        intendedMajor.value = profileData.intendedMajor || "";
+        recScore.value = profileData.recScore || 2;
+        isLegacy.value = profileData.isLegacy || false;
+        demoScore.value = profileData.demoScore || 0;
+
+        // Load college lists
+        if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
+          // Map saved college names to full college objects
+          savedColleges.value = profileData.earlyDecisionColleges.map(savedCollege => {
+            const fullCollege = colleges.find(c => c.name === savedCollege.name);
+            return fullCollege || savedCollege;
+          });
+        }
+
+        if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
+          // Map saved college names to full college objects
+          recentlyViewed.value = profileData.regularDecisionColleges.map(savedCollege => {
+            const fullCollege = colleges.find(c => c.name === savedCollege.name);
+            return fullCollege || savedCollege;
+          });
+        }
+
+        console.log('Profile data loaded successfully');
+      } catch (e) {
+        console.error('Error parsing saved profile data:', e);
+        localStorage.removeItem('userProfileData');
       }
-
-      // Load extracurriculars
-      if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
-        extracurriculars.value = profileData.extracurriculars;
-      }
-
-      // Load additional factors
-      intendedMajor.value = profileData.intendedMajor || "";
-      recScore.value = profileData.recScore || 2;
-      isLegacy.value = profileData.isLegacy || false;
-      demoScore.value = profileData.demoScore || 0;
-
-      // Load college lists
-      if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
-        // Map saved college names to full college objects
-        savedColleges.value = profileData.earlyDecisionColleges.map(savedCollege => {
-          const fullCollege = colleges.find(c => c.name === savedCollege.name);
-          return fullCollege || savedCollege;
-        });
-      }
-
-      if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
-        // Map saved college names to full college objects
-        recentlyViewed.value = profileData.regularDecisionColleges.map(savedCollege => {
-          const fullCollege = colleges.find(c => c.name === savedCollege.name);
-          return fullCollege || savedCollege;
-        });
-      }
-
-      console.log('Profile data loaded successfully');
-    } catch (e) {
-      console.error('Error parsing saved profile data:', e);
-      localStorage.removeItem('userProfileData');
     }
-  }
-});
+  });
 
-// Persist Early Decision (savedColleges) changes
-watch(savedColleges, (newVal) => {
-  const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
-  data.earlyDecisionColleges = newVal.map(c => ({ name: c.name }));
-  localStorage.setItem('userProfileData', JSON.stringify(data));
-}, { deep: true });
+  // Persist Early Decision (savedColleges) changes
+  watch(savedColleges, (newVal) => {
+    const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
+    data.earlyDecisionColleges = newVal.map(c => ({ name: c.name }));
+    localStorage.setItem('userProfileData', JSON.stringify(data));
+  }, { deep: true });
 
-// Persist Regular Decision (recentlyViewed) changes
-watch(recentlyViewed, (newVal) => {
-  const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
-  data.regularDecisionColleges = newVal.map(c => ({ name: c.name }));
-  localStorage.setItem('userProfileData', JSON.stringify(data));
-}, { deep: true });
+  // Persist Regular Decision (recentlyViewed) changes
+  watch(recentlyViewed, (newVal) => {
+    const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
+    data.regularDecisionColleges = newVal.map(c => ({ name: c.name }));
+    localStorage.setItem('userProfileData', JSON.stringify(data));
+  }, { deep: true });
 
-// College action items for dropdown
-const collegeActionItems = [
-  { title: 'View College Profile', action: 'view', icon: 'mdi-school' },
-  { title: 'Save to Regular Decision', action: 'saveRegular', icon: 'mdi-bookmark-outline' },
-  { title: 'Save to Early Decision', action: 'saveEarly', icon: 'mdi-bookmark' },
-];
+  // College action items for dropdown
+  const collegeActionItems = [
+    { title: 'View College Profile', action: 'view', icon: 'mdi-school' },
+    { title: 'Save to Regular Decision', action: 'saveRegular', icon: 'mdi-bookmark-outline' },
+    { title: 'Save to Early Decision', action: 'saveEarly', icon: 'mdi-bookmark' },
+  ];
 
-// Handle college selection to open admission chance modal
-const selectCollege = (college) => {
-  selectedCollege.value = college;
-  admitChanceModalOpen.value = true;
-};
+  // Handle college selection to open admission chance modal
+  const selectCollege = (college) => {
+    selectedCollege.value = college;
+    admitChanceModalOpen.value = true;
+  };
 
-// Close the admission chance modal
-const closeAdmitChanceModal = () => {
-  admitChanceModalOpen.value = false;
-};
+  // Close the admission chance modal
+  const closeAdmitChanceModal = () => {
+    admitChanceModalOpen.value = false;
+  };
 
-// Handle college action selections
-const handleCollegeAction = (action, college) => {
-  console.log(`Action: ${action} for college: ${college.name}`);
+  // Handle college action selections
+  const handleCollegeAction = (action, college) => {
+    console.log(`Action: ${action} for college: ${college.name}`);
 
-  // Implement action handling
-  switch(action) {
-    case 'view':
-      selectCollege(college);
-      break;
-    case 'saveRegular':
-      handleSaveToRegular({ college, action: 'add' });
-      break;
-    case 'saveEarly':
-      handleSaveToEarly({ college, action: 'add' });
-      break;
-    // Additional cases can be implemented as needed
-  }
-};
-
-// Handle save to early decision
-const handleSaveToEarly = ({ college, action, index }) => {
-  if (action === 'add') {
-    if (!savedColleges.value.some(c => c.name === college.name)) {
-      savedColleges.value.push(college);
+    // Implement action handling
+    switch(action) {
+      case 'view':
+        selectCollege(college);
+        break;
+      case 'saveRegular':
+        handleSaveToRegular({ college, action: 'add' });
+        break;
+      case 'saveEarly':
+        handleSaveToEarly({ college, action: 'add' });
+        break;
+      // Additional cases can be implemented as needed
     }
-  } else if (action === 'remove' && index !== undefined) {
+  };
+
+  // Handle save to early decision
+  const handleSaveToEarly = ({ college, action, index }) => {
+    if (action === 'add') {
+      if (!savedColleges.value.some(c => c.name === college.name)) {
+        savedColleges.value.push(college);
+      }
+    } else if (action === 'remove' && index !== undefined) {
+      savedColleges.value.splice(index, 1);
+    }
+  };
+
+  // Handle save to regular decision
+  const handleSaveToRegular = ({ college, action, index }) => {
+    if (action === 'add') {
+      if (!recentlyViewed.value.some(c => c.name === college.name)) {
+        recentlyViewed.value.push(college);
+      }
+    } else if (action === 'remove' && index !== undefined) {
+      recentlyViewed.value.splice(index, 1);
+    }
+  };
+
+  // Function to remove a college from the saved list
+  const removeSavedCollege = (index) => {
     savedColleges.value.splice(index, 1);
-  }
-};
+  };
 
-// Handle save to regular decision
-const handleSaveToRegular = ({ college, action, index }) => {
-  if (action === 'add') {
-    if (!recentlyViewed.value.some(c => c.name === college.name)) {
-      recentlyViewed.value.push(college);
-    }
-  } else if (action === 'remove' && index !== undefined) {
+  // Function to remove a college from the recently viewed list
+  const removeRecentlyViewedCollege = (index) => {
     recentlyViewed.value.splice(index, 1);
-  }
-};
-
-// Function to remove a college from the saved list
-const removeSavedCollege = (index) => {
-  savedColleges.value.splice(index, 1);
-};
-
-// Function to remove a college from the recently viewed list
-const removeRecentlyViewedCollege = (index) => {
-  recentlyViewed.value.splice(index, 1);
-};
+  };
 </script>
 
 <style scoped>

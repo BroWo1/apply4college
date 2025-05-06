@@ -25,6 +25,30 @@ export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
 };
 
 /**
+ * Adjust college acceptance rate based on Early Decision vs Regular Decision
+ * @param {number} baseAcceptanceRate - The college's overall acceptance rate
+ * @param {boolean} isEarlyDecision - Whether the student is applying Early Decision
+ * @returns {number} - The adjusted acceptance rate based on application type
+ */
+export const adjustAcceptanceRateByEDRD = (baseAcceptanceRate, isEarlyDecision) => {
+  // Early Decision typically improves acceptance chances by about 1.5-2.5x
+  // The more selective the school, the greater the ED advantage
+
+  // For more selective schools (under 10%), ED advantage is greater
+  if (baseAcceptanceRate < 10) {
+    return isEarlyDecision ? baseAcceptanceRate * 2 : baseAcceptanceRate * 0.8;
+  }
+  // For moderately selective schools (10-20%)
+  else if (baseAcceptanceRate < 20) {
+    return isEarlyDecision ? baseAcceptanceRate * 1.5 : baseAcceptanceRate * 0.85;
+  }
+  // For less selective schools (above 20%)
+  else {
+    return isEarlyDecision ? baseAcceptanceRate * 1.2 : baseAcceptanceRate * 0.9;
+  }
+};
+
+/**
  * Adjust college acceptance rate based on the intended major and college type
  * @param {number} baseAcceptanceRate - The college's overall acceptance rate
  * @param {string} intendedMajor - The student's intended major ('STEM' or 'Liberal Arts')
@@ -44,17 +68,17 @@ export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, c
   if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') {
     return baseAcceptanceRate * competitiveMajorFactor;
   }
-  
+
   // Liberal Arts major at Liberal-arts school (competitive)
   if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') {
     return baseAcceptanceRate * competitiveMajorFactor;
   }
-  
+
   // STEM major at Liberal-arts school (less competitive for STEM)
   if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') {
     return baseAcceptanceRate * lessFocusedMajorFactor;
   }
-  
+
   // Liberal Arts major at STEM-heavy school (less competitive for Liberal Arts)
   if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') {
     return baseAcceptanceRate * lessFocusedMajorFactor;
@@ -73,14 +97,20 @@ export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, c
 export const calculateAdmissionChance = (student, college) => {
   try {
     const { stats, acceptanceRate, collegeType } = college;
-    
-    // Adjust the acceptance rate based on intended major
-    const adjustedAcceptanceRate = adjustAcceptanceRateByMajor(
-      acceptanceRate, 
-      student.intendedMajor, 
+
+    // Base acceptance rate adjustment based on intended major
+    let adjustedAcceptanceRate = adjustAcceptanceRateByMajor(
+      acceptanceRate,
+      student.intendedMajor,
       collegeType
     );
-    
+
+    // Further adjust based on Early Decision / Regular Decision status
+    adjustedAcceptanceRate = adjustAcceptanceRateByEDRD(
+      adjustedAcceptanceRate,
+      student.isEarlyDecision
+    );
+
     const p0 = adjustedAcceptanceRate / 100; // Convert percentage to decimal
 
     // Use either college-specific weights or defaults based on college type
@@ -144,7 +174,8 @@ export const calculateAdmissionChance = (student, college) => {
       fitScores,
       strengthBlock,
       alignmentBlock,
-      exponent
+      exponent,
+      isEarlyDecision: student.isEarlyDecision
     };
   } catch (error) {
     console.error("Error calculating admission chance:", error);
@@ -238,7 +269,8 @@ export const prepareStudentData = (profileData) => {
     isLegacy: profileData.isLegacy || false,
     demoScore: profileData.demoScore || 0,
     intendedMajor: profileData.intendedMajor,
-    enableBitterByCoffee: profileData.enableBitterByCoffee || false
+    enableBitterByCoffee: profileData.enableBitterByCoffee || false,
+    isEarlyDecision: profileData.isEarlyDecision || false  // Add Early Decision status
   };
 };
 

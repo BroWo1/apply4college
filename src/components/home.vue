@@ -3,23 +3,34 @@
     <v-row class="text-center py-6">
       <v-col cols="12">
         <h1 class="text-h2 font-weight-bold mb-6 pt-5">Apply 4 College <span class="text-body-1 font-weight-bold bg-primary white--text px-2 py-1 rounded">.org</span></h1>
-      
+
       </v-col>
     </v-row>
 
     <!-- AI Question Section -->
-    <v-row justify="center">
-      <v-col cols="12" md="8">
+    <!-- AI Question Section -->
+    <v-row justify="center" class="my-8">
+      <v-col cols="12" md="10" lg="9">
+        <!-- AI Advisor Header -->
+        <div class="d-flex align-center mb-4">
+          <v-avatar color="primary" class="mr-3" size="42">
+            <v-icon icon="mdi-robot" color="white"></v-icon>
+          </v-avatar>
+          <h2 class="text-h5 font-weight-bold">AI College Advisor</h2>
+        </div>
+
         <!-- Input Field Row -->
         <v-row align="center" class="mt-2 mb-1">
           <v-col cols="11" class="pa-1">
             <v-text-field
               v-model="aiQuestion"
-              label="Ask the AI Advisor"
-              variant="solo-filled" 
+              label="Ask about college admissions"
+              variant="solo-filled"
               hide-details
               clearable
               @keydown.enter="askAI"
+              class="ai-input"
+              density="comfortable"
             ></v-text-field>
           </v-col>
           <v-col cols="1" class="pa-1 text-center">
@@ -29,7 +40,7 @@
               @click="askAI"
               :loading="loadingAiResponse"
               :disabled="!aiQuestion || loadingAiResponse"
-              size="large" 
+              size="large"
             >
             </v-btn>
           </v-col>
@@ -40,11 +51,12 @@
           <v-col cols="12">
             <v-chip-group column>
               <v-chip
-                v-for="(suggestion, i) in suggestedQuestions"
+                v-for="(suggestion, i) in personalizedSuggestions"
                 :key="i"
                 @click="askSuggestedQuestion(suggestion)"
                 color="primary"
                 size="small"
+                class="ma-1"
               >
                 {{ suggestion }}
               </v-chip>
@@ -65,11 +77,15 @@
           v-if="aiResponse"
           variant="tonal"
           color="info"
-          class="mt-4 pa-3"
-          elevation="2"
+          class="mt-4 pa-4 elevation-3"
+          rounded="lg"
         >
           <v-card-text>
-            <div v-html="formattedAiResponse"></div>
+            <div class="d-flex align-center mb-3" v-if="Object.keys(userProfile).length > 0">
+              <v-chip size="small" color="primary" class="mr-2">Personalized</v-chip>
+              <span class="text-caption">Based on your profile</span>
+            </div>
+            <div v-html="formattedAiResponse" class="ai-response-text"></div>
           </v-card-text>
         </v-card>
 
@@ -114,8 +130,8 @@
               width="280"
             >
               <div class="d-flex align-center px-2 pt-2">
-                <v-chip 
-                  size="x-small" 
+                <v-chip
+                  size="x-small"
                   :color="college.isEarlyDecision ? 'error' : 'primary'"
                   class="text-caption"
                 >
@@ -223,7 +239,6 @@ const allSavedColleges = computed(() => {
   return uniqueColleges;
 });
 
-// --- Methods ---
 const askAI = async () => {
   if (!aiQuestion.value) return;
 
@@ -232,18 +247,26 @@ const askAI = async () => {
   aiResponse.value = '';
 
   try {
-    // First attempt to use the getGeneralAdvice function
+    // Get the user's profile data and pass it along with the question
     const result = await getGeneralAdvice(userProfile.value || {}, aiQuestion.value);
 
     if (result && result.success && result.advice) {
       aiResponse.value = result.advice;
     } else {
       // Fallback to a generic response if API call fails
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate delay
+      aiError.value = result?.error || 'Unable to get a response. Please try again.';
+
+      // Simulate delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // If no specific error message, provide a fallback response
+      if (!aiError.value) {
+        aiResponse.value = "I couldn't process your question with your profile information. Please try a different question or check your profile details.";
+      }
     }
   } catch (error) {
     console.error('Error asking AI:', error);
-    // Fallback response
+    aiError.value = 'An unexpected error occurred. Please try again.';
   } finally {
     loadingAiResponse.value = false;
   }
@@ -254,6 +277,32 @@ const askSuggestedQuestion = (question) => {
   aiQuestion.value = question;
   askAI();
 };
+
+const personalizedSuggestions = computed(() => {
+  const profile = userProfile.value || {};
+  const suggestions = [...suggestedQuestions.value]; // Start with default suggestions
+
+  // Add personalized suggestions based on profile
+  if (profile.intendedMajor === 'STEM') {
+    suggestions.push('How to showcase STEM projects?');
+    suggestions.push('Best STEM scholarships?');
+  } else if (profile.intendedMajor === 'Liberal Arts') {
+    suggestions.push('How to highlight humanities interests?');
+    suggestions.push('Liberal Arts scholarship opportunities?');
+  }
+
+  // Add suggestions based on test scores
+  if ((profile.satMath + profile.satReading) < 1200) {
+    suggestions.push('Colleges that focus less on SAT scores?');
+  }
+
+  // If they have AP classes
+  if (profile.apClasses && profile.apClasses.length > 0) {
+    suggestions.push('How AP scores affect admissions?');
+  }
+
+  return suggestions.slice(0, 6); // Limit to 6 suggestions
+});
 
 // Get color for acceptance rate chip (copied from explorePage)
 const getAcceptanceRateColor = (rate) => {
@@ -345,5 +394,24 @@ onMounted(() => {
 
 .college-card {
   width: 280px; /* Fixed width for cards in horizontal scroll */
+}
+/* AI Advisor specific styles */
+.ai-input >>> .v-field__input {
+
+  min-height: 56px;
+}
+
+.ai-response-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* For the AI Advisor section */
+.v-chip-group {
+  flex-wrap: wrap;
+}
+
+.v-chip {
+  margin: 4px;
 }
 </style>

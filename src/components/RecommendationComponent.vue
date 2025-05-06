@@ -22,32 +22,6 @@
           {{ error }}
         </v-alert>
 
-        <!-- API Key input state -->
-        <div v-else-if="!hasApiKey" class="pa-4">
-          <div class="text-h6 mb-3">Enter OpenAI API Key</div>
-          <div class="text-body-2 mb-4">
-            To get personalized AI recommendations, you'll need to provide your OpenAI API key.
-            You can get one from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI's website</a>.
-          </div>
-
-          <v-text-field
-            v-model="apiKey"
-            label="OpenAI API Key"
-            placeholder="sk-..."
-            variant="outlined"
-            hide-details
-            class="mb-4"
-          ></v-text-field>
-
-          <div class="text-caption mb-4">
-            Your API key is only used for this session and is not stored permanently.
-          </div>
-
-          <v-btn color="primary" @click="saveApiKey" :disabled="!apiKey || apiKey.length < 10">
-            Continue
-          </v-btn>
-        </div>
-
         <!-- Results state -->
         <div v-else-if="recommendation" class="recommendation-content">
           <v-tabs v-model="activeTab" grow>
@@ -128,9 +102,11 @@
   </v-dialog>
 &lt;/template>
 
+// RecommendationComponent.vue - Update script section
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { setApiKey, getProfileRecommendations, getEssayTopicSuggestions } from '../utils/profileRecommendationService';
+import { ref, computed, watch, onMounted } from 'vue';
+import { setApiKey, getProfileRecommendations, getEssayTopicSuggestions, getApiKey } from '../utils/profileRecommendationService';
+import { configService } from '../utils/configService';
 
 const props = defineProps({
   studentProfile: {
@@ -165,21 +141,28 @@ const activeTab = ref('strategy');
 const essayTopics = ref(null);
 const loadingEssayTopics = ref(false);
 
-// Removed hasApiKey ref
-
 // Close dialog handler
 const closeDialog = () => {
   dialog.value = false;
   emit('close');
 };
 
-// Save API key
-const saveApiKey = () => {
-  if (apiKey.value && apiKey.value.length > 10) {
-    setApiKey(apiKey.value);
-    hasApiKey.value = true;
-    // After setting API key, immediately fetch recommendations
-    fetchRecommendations();
+// Initialize API key from server
+const initializeApiKey = async () => {
+  try {
+    const serverKey = await configService.getOpenAIApiKey();
+    if (serverKey) {
+      apiKey.value = serverKey;
+      hasApiKey.value = true;
+      setApiKey(serverKey);
+      return true;
+    }
+
+    // Fallback to check if there's a locally stored key (for migration)
+    return checkStoredApiKey();
+  } catch (error) {
+    console.error('Failed to initialize API key:', error);
+    return checkStoredApiKey(); // Try fallback
   }
 };
 
@@ -214,47 +197,34 @@ const parseRecommendations = (response) => {
   };
 };
 
-// Format content for display (convert newlines to HTML)
-const formatContent = (text) => {
-  if (!text) return '';
-  return text
-    .replace(/\n\n/g, '<br><br>')
-    .replace(/\n/g, '<br>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+const checkApiKey = async () => {
+  try {
+    // Try to get API key from server through our service
+    const key = await getApiKey();
+    if (key) {
+      apiKey.value = key;
+      hasApiKey.value = true;
+      setApiKey(key);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking API key:', error);
+    return false;
+  }
 };
 
-// Extract title and details from improvement item
-const getImprovementTitle = (item) => {
-  const colonIndex = item.indexOf(':');
-  if (colonIndex > 0) {
-    return item.substring(0, colonIndex).trim();
-  }
-  // If no colon, return the first sentence or the first 60 characters
-  const firstSentenceEnd = item.indexOf('. ');
-  if (firstSentenceEnd > 0) {
-    return item.substring(0, firstSentenceEnd + 1).trim();
-  }
-  return item.length > 60 ? item.substring(0, 60) + '...' : item;
-};
-
-const getImprovementDetails = (item) => {
-  const colonIndex = item.indexOf(':');
-  if (colonIndex > 0) {
-    return item.substring(colonIndex + 1).trim();
-  }
-  // If no colon, return everything after the first sentence or after 60 chars
-  const firstSentenceEnd = item.indexOf('. ');
-  if (firstSentenceEnd > 0) {
-    return item.substring(firstSentenceEnd + 2).trim();
-  }
-  return item.length > 60 ? item.substring(60).trim() : '';
-};
-
-// Fetch recommendations from the API
+// Modified to use async/await with the new API key method
 const fetchRecommendations = async () => {
-  if (!hasApiKey.value) return;
+  if (!hasApiKey.value) {
+    const keyAvailable = await checkApiKey();
+    if (!keyAvailable) {
+      error.value = 'API key not available. Please configure the API key.';
+      return;
+    }
+  }
 
+  // Rest of the function remains the same
   loading.value = true;
   error.value = null;
 
@@ -273,9 +243,21 @@ const fetchRecommendations = async () => {
   }
 };
 
-// Get essay topics
+// Initialize on component mount
+onMounted(async () => {
+  await checkApiKey();
+});
+
+// Update getEssayTopics to use the new API key method
 const getEssayTopics = async () => {
-  // Removed hasApiKey check
+  if (!hasApiKey.value) {
+    const keyAvailable = await checkApiKey();
+    if (!keyAvailable) {
+      error.value = 'API key not available. Please configure the API key.';
+      return;
+    }
+  }
+
   loadingEssayTopics.value = true;
 
   try {
@@ -293,44 +275,32 @@ const getEssayTopics = async () => {
   }
 };
 
-// Save recommendations
-const saveRecommendations = () => {
-  if (recommendation.value) {
-    // This would save recommendations to local storage or your backend
-    localStorage.setItem('savedRecommendations', JSON.stringify(recommendation.value));
-
-    // Emit event to parent component
-    emit('save-recommendations', recommendation.value);
-
-    // Close the dialog
-    closeDialog();
-  }
-};
-
 // Watch for dialog open to trigger API call
 watch(() => dialog.value, (newValue) => {
-  // Removed hasApiKey check from condition
   if (newValue && !recommendation.value && !loading.value) {
     fetchRecommendations();
   }
 });
 
-// Removed API key check on mount
-
-// In a real app, you might use a more secure method to store the API key
-// This is just for demo purposes
+// Check for locally stored API key (fallback during migration)
 const checkStoredApiKey = () => {
   const storedKey = localStorage.getItem('openai_api_key');
   if (storedKey) {
     apiKey.value = storedKey;
     hasApiKey.value = true;
     setApiKey(storedKey);
+    return true;
   }
+  return false;
 };
 
-// Call this when the component is mounted
-checkStoredApiKey();
+// Initialize API key on component mount
+onMounted(async () => {
+  await initializeApiKey();
+});
 </script>
+
+
 
 <style scoped>
 .recommendation-content {

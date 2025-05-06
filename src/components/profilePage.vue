@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid style="max-width: 1200px">
+  <v-container fluid style="max-width: 1500px">
     <!-- Header -->
     <v-row class="text-center py-6">
       <v-col cols="12">

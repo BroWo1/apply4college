@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid style="max-width: 1200px">
+  <v-container fluid style="max-width: 1500px">
     <!-- Header -->
     <v-row class="text-center py-6">
       <v-col cols="12">
@@ -182,29 +182,6 @@
               class="mb-3"
             ></v-switch>
 
-            <!-- OpenAI API Key for AI Recommendations -->
-            <div class="text-h6 mt-6 mb-3">AI Recommendations</div>
-            <v-text-field
-              v-model="openaiApiKey"
-              label="OpenAI API Key"
-              placeholder="sk-..."
-              hint="Required for AI-powered recommendations"
-              variant="outlined"
-              prepend-inner-icon="mdi-key-variant"
-              class="mb-3"
-            ></v-text-field>
-
-            <v-btn
-              color="primary"
-              block
-              size="large"
-              :loading="apiKeyLoading"
-              :disabled="!openaiApiKey || openaiApiKey.length < 10"
-              @click="saveApiKey"
-              class="mt-4"
-            >
-              Save API Key
-            </v-btn>
           </v-card>
 
           <!-- Data Management -->
@@ -328,7 +305,6 @@ const deleteConfirmText = ref('');
 // App settings
 const darkMode = ref(false);
 const enableNotifications = ref(true);
-const openaiApiKey = ref('');
 
 // UI state
 const loading = ref(false);
@@ -357,11 +333,6 @@ const initializeForm = () => {
     email.value = userStore.user.email || '';
   }
 
-  // Load API key from localStorage if available
-  const storedApiKey = localStorage.getItem('openai_api_key');
-  if (storedApiKey) {
-    openaiApiKey.value = storedApiKey;
-  }
 
   // Load app settings from localStorage
   const appSettings = localStorage.getItem('app_settings');
@@ -474,25 +445,6 @@ const changePassword = async () => {
   }
 };
 
-// Save OpenAI API Key
-const saveApiKey = () => {
-  apiKeyLoading.value = true;
-  try {
-    localStorage.setItem('openai_api_key', openaiApiKey.value);
-
-    // Show success message
-    alertMessage.value = 'API key saved successfully';
-    alertType.value = 'success';
-    showAlert.value = true;
-  } catch (error) {
-    console.error('Error saving API key:', error);
-    alertMessage.value = 'Failed to save API key';
-    alertType.value = 'error';
-    showAlert.value = true;
-  } finally {
-    apiKeyLoading.value = false;
-  }
-};
 
 // Save app settings
 watch([darkMode, enableNotifications], () => {
