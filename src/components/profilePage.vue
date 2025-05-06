@@ -375,6 +375,19 @@
         </v-btn>
       </v-col>
     </v-row>
+    <v-snackbar
+      v-model="snackbar"
+      :timeout="3000"
+      color="warning"
+      location="top"
+    >
+      {{ snackbarText }}
+      <template v-slot:actions>
+        <v-btn color="white" variant="text" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -398,7 +411,13 @@ const apOptions = [
   "AP Computer Science A",
   "AP Computer Science Principles",
   "AP English Language and Composition",
-  "AP English Literature and Composition"
+  "AP English Literature and Composition",
+  "AP German Language and Culture",
+  "AP Psychology",
+  "AP US History",
+  "AP World History",
+  "AP Microeconomics",
+  "AP Macroeconomics"
 ];
 
 // Extracurricular Activities data
@@ -413,6 +432,9 @@ const activityOptions = [
   "STEM Club",
   "Website/App Development",
   "Community Service",
+  "Science Club",
+  "School Magazine",
+  "Aerospace Club",
 ];
 
 // Student profile data
@@ -478,16 +500,23 @@ const nationalityOptions = [
 const newApClass = ref("");
 const newApScore = ref("N/A");
 const dialog = ref(false);
+const snackbar = ref(false);
+const snackbarText = ref('');
 
 const addApClass = () => {
   if (newApClass.value) {
-    // Calculate fit score if intended major is selected
+    const existingClass = apClasses.value.find(apClass => apClass.name === newApClass.value);
+    if (existingClass) {
+      snackbarText.value = `AP Class "${newApClass.value}" already added.`;
+      snackbar.value = true;
+      return;
+    }
+
     let fitScore = 0;
     if (intendedMajor.value) {
       fitScore = calculateFitScore(newApClass.value, 'ap', intendedMajor.value);
     }
 
-    // Determine status automatically based on score
     const status = newApScore.value === "N/A" ? "ongoing" : "completed";
 
     apClasses.value.push({
