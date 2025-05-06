@@ -8,9 +8,9 @@
     <!-- Logo Section (Left) - Updated to link to index/root -->
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
       <v-img
-        src="@/assets/a4c.svg"
-        :width="logoSize"
+        src="@/assets/a4cLong.png"
         :height="logoSize"
+        :width="logoSize * 5.176"
         alt="Logo"
         class="ml-2"
       ></v-img>

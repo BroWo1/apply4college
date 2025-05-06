@@ -54,7 +54,13 @@ export const apSubjectAreas = {
   "AP Computer Science A": ["Computer Science", "Technology", "Data Science"],
   "AP Computer Science Principles": ["Computer Science", "Technology"],
   "AP English Language and Composition": ["English", "Communications", "Journalism"],
-  "AP English Literature and Composition": ["English", "Literature"]
+  "AP English Literature and Composition": ["English", "Literature"],
+  "AP German Language and Culture": ["Languages", "Literature"],
+  "AP Psychology": ["Psychology", "Sociology"],
+  "AP US History": ["History", "Political Science", "Sociology"],
+  "AP World History": ["History", "Political Science", "Sociology"],
+  "AP Microeconomics": ["Economics", "Statistics"],
+  "AP Macroeconomics": ["Economics", "Statistics"],
 };
 
 // Map extracurricular activities to their typical subject areas for major fit calculations
@@ -68,7 +74,10 @@ export const activitySubjectAreas = {
   "History Research": ["History", "Anthropology", "Political Science"],
   "STEM Club": ["Science", "Technology", "Engineering", "Mathematics"],
   "Website/App Development": ["Computer Science", "Technology", "Data Science"],
-  "Community Service": ["Social Work", "Education", "Sociology"]
+  "Community Service": ["Social Work", "Education", "Sociology"],
+  "Science Club": ["Science", "Technology", "Engineering"],
+  "School Magazine": ["Journalism", "Communications", "English"],
+  "Aerospace Club": ["Engineering", "Physics", "Astronomy"],
 };
 
 /**
