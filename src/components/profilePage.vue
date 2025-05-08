@@ -1,6 +1,5 @@
 <template>
   <v-container fluid style="max-width: 1500px">
-    <!-- Header -->
     <v-row class="text-center py-6">
       <v-col cols="12">
         <h1 class="text-h2 font-weight-bold mb-6 pt-5">Your Profile</h1>
@@ -11,7 +10,6 @@
     </v-row>
 
     <v-row>
-      <!-- Left Column - Basic Info -->
       <v-col cols="12" md="6">
         <v-card class="pa-4 mb-4" rounded="lg">
           <v-card-title class="text-h5">
@@ -20,7 +18,6 @@
           </v-card-title>
           <v-divider class="my-3"></v-divider>
 
-          <!-- Standardized Score Section -->
           <div class="text-h6 mb-3">Standardized Scores</div>
 
           <div class="text-body-1 pb-2">
@@ -53,11 +50,10 @@
             v-model="gpa"
             :max="4.0"
             :min="0.0"
-            :step="0.1"
+            :step="0.05"
             thumb-label
           ></v-slider>
 
-          <!-- Intended Major Section -->
           <div class="text-h6 mt-6 mb-3">Intended Major</div>
           <v-radio-group
             v-model="intendedMajor"
@@ -71,7 +67,6 @@
             extracurricular activities align with your academic goals, which impacts admission chances.
           </div>
 
-          <!-- Additional Factors Section -->
           <div class="text-h6 mt-6 mb-3">Additional Factors</div>
 
           <div class="text-body-1 mb-2">Recommendation Letters</div>
@@ -94,7 +89,6 @@
 
           <div class="text-h6 mt-6 mb-3">Demographics</div>
 
-          <!-- Nationality Section -->
           <div class="text-body-1 mb-2">Nationality</div>
           <v-select
             v-model="nationality"
@@ -107,7 +101,6 @@
             Some institutions have specific programs or considerations for international students.
           </div>
 
-          <!-- Gender Section -->
           <div class="text-body-1 mb-2">Gender</div>
           <v-radio-group
             v-model="gender"
@@ -123,7 +116,6 @@
             Some programs may consider gender balance in their admissions processes.
           </div>
 
-          <!-- Demographic Score Display -->
           <v-sheet class="pa-3 mb-6 rounded bg-surface-variant">
             <div class="d-flex align-center">
               <div>
@@ -141,8 +133,6 @@
               </v-tooltip>
             </div>
           </v-sheet>
-          <!-- Inside the v-card containing Basic Information -->
-          <!-- After the Demographics section and before the end of the card -->
 
           <div class="text-h6 mt-6 mb-3">Randomization</div>
 
@@ -179,9 +169,7 @@
         </v-card>
       </v-col>
 
-      <!-- Right Column - Courses & Activities -->
       <v-col cols="12" md="6">
-        <!-- AP Courses Panel -->
         <v-card class="pa-4 mb-4" rounded="lg">
           <v-card-title class="text-h5">
             <v-icon icon="mdi-book-open-page-variant" class="mr-2"></v-icon>
@@ -215,7 +203,6 @@
             </v-btn>
           </div>
 
-          <!-- AP Class Modal Dialog -->
           <v-dialog v-model="dialog" max-width="400px">
             <v-card>
               <v-card-title class="text-h6">Add AP Class</v-card-title>
@@ -262,7 +249,6 @@
           </v-dialog>
         </v-card>
 
-        <!-- Extracurricular Panel -->
         <v-card class="pa-4 mb-4" rounded="lg">
           <v-card-title class="text-h5">
             <v-icon icon="mdi-trophy" class="mr-2"></v-icon>
@@ -296,7 +282,6 @@
             </v-btn>
           </div>
 
-          <!-- Extracurricular Activity Modal Dialog -->
           <v-dialog v-model="activityDialog" max-width="400px">
             <v-card>
               <v-card-title class="text-h6">Add Extracurricular Activity</v-card-title>
@@ -353,14 +338,13 @@
       </v-col>
     </v-row>
 
-    <!-- Save and Navigation Buttons -->
     <v-row class="my-4">
       <v-col cols="12" class="d-flex justify-center">
         <v-btn
           color="primary"
           size="large"
           class="mx-2"
-          @click="saveUserProfile"
+          @click="manualSaveUserProfile"
           :loading="loading"
         >
           Save Profile
@@ -377,8 +361,8 @@
     </v-row>
     <v-snackbar
       v-model="snackbar"
-      :timeout="3000"
-      color="warning"
+      :timeout="2000"
+      :color="snackbarColor"
       location="top"
     >
       {{ snackbarText }}
@@ -392,7 +376,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
 import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
@@ -401,40 +385,18 @@ const router = useRouter();
 
 // AP Classes data
 const apOptions = [
-  "AP Calculus AB",
-  "AP Calculus BC",
-  "AP Statistics",
-  "AP Chemistry",
-  "AP Biology",
-  "AP Physics 1",
-  "AP Physics 2",
-  "AP Computer Science A",
-  "AP Computer Science Principles",
-  "AP English Language and Composition",
-  "AP English Literature and Composition",
-  "AP German Language and Culture",
-  "AP Psychology",
-  "AP US History",
-  "AP World History",
-  "AP Microeconomics",
-  "AP Macroeconomics"
+  "AP Calculus AB", "AP Calculus BC", "AP Statistics", "AP Chemistry", "AP Biology",
+  "AP Physics 1", "AP Physics 2", "AP Computer Science A", "AP Computer Science Principles",
+  "AP English Language and Composition", "AP English Literature and Composition",
+  "AP German Language and Culture", "AP Psychology", "AP US History", "AP World History",
+  "AP Microeconomics", "AP Macroeconomics"
 ];
 
 // Extracurricular Activities data
 const activityOptions = [
-  "Physics Competition",
-  "Math Competition",
-  "Writing Competition",
-  "Student Council",
-  "MUN",
-  "STEM Research",
-  "History Research",
-  "STEM Club",
-  "Website/App Development",
-  "Community Service",
-  "Science Club",
-  "School Magazine",
-  "Aerospace Club",
+  "Physics Competition", "Math Competition", "Writing Competition", "Student Council",
+  "MUN", "STEM Research", "History Research", "STEM Club", "Website/App Development",
+  "Community Service", "Science Club", "School Magazine", "Aerospace Club",
 ];
 
 // Student profile data
@@ -446,93 +408,127 @@ const extracurriculars = ref([]);
 const intendedMajor = ref("");
 const recScore = ref(2);
 const isLegacy = ref(false);
-// Demographics data
 const nationality = ref('United States');
 const gender = ref('Prefer not to say');
+const enableBitterByCoffee = ref(false);
 
-// Computed demographic score based on nationality and gender
+
+// Snackbar
+const snackbar = ref(false);
+const snackbarText = ref('');
+const snackbarColor = ref('success'); // Default color
+const loading = ref(false); // For the manual save button's loading state
+
+// Computed demographic score
 const demoScore = computed(() => {
   let scoreNationality = 0;
   let scoreGender = 0;
+  if (nationality.value === 'China') scoreNationality = 0;
+  else if (nationality.value === 'United States') scoreNationality = 0.5;
+  else scoreNationality = 0.25;
 
-  // Nationality score calculation
-  if (nationality.value === 'China') {
-    scoreNationality = 0;
-  } else if (nationality.value === 'United States') {
-    scoreNationality = 0.5;
-  } else {
-    scoreNationality = 0.25;
-  }
-
-  // Gender score calculation
-  if (gender.value === 'Male') {
-    scoreGender = 0;
-  } else if (gender.value === 'Female') {
-    scoreGender = 0.25;
-  } else if (gender.value === 'Non-binary') {
-    scoreGender = 0.5;
-  } else {
-    // "Prefer not to say" - default to 0
-    scoreGender = 0;
-  }
-
-  // Total score (capped at 1.0 for the maximum possible advantage)
+  if (gender.value === 'Male') scoreGender = 0;
+  else if (gender.value === 'Female') scoreGender = 0.25;
+  else if (gender.value === 'Non-binary') scoreGender = 0.5;
+  else scoreGender = 0;
   return Math.min(scoreNationality + scoreGender, 1.0);
 });
 
-// Nationality options
 const nationalityOptions = [
-  'United States',
-  'China',
-  'Canada',
-  'United Kingdom',
-  'India',
-  'South Korea',
-  'Japan',
-  'Germany',
-  'France',
-  'Australia',
-  'Brazil',
-  'Other'
+  'United States', 'China', 'Canada', 'United Kingdom', 'India', 'South Korea',
+  'Japan', 'Germany', 'France', 'Australia', 'Brazil', 'Other'
 ];
 
 // AP Classes functionality
 const newApClass = ref("");
 const newApScore = ref("N/A");
 const dialog = ref(false);
-const snackbar = ref(false);
-const snackbarText = ref('');
 
-const addApClass = () => {
-  if (newApClass.value) {
-    const existingClass = apClasses.value.find(apClass => apClass.name === newApClass.value);
-    if (existingClass) {
-      snackbarText.value = `AP Class "${newApClass.value}" already added.`;
-      snackbar.value = true;
-      return;
-    }
+// Extracurricular Activities functionality
+const newActivity = ref("");
+const newActivityLevel = ref(2);
+const activityDialog = ref(false);
 
-    let fitScore = 0;
-    if (intendedMajor.value) {
-      fitScore = calculateFitScore(newApClass.value, 'ap', intendedMajor.value);
-    }
+const studentProfile = computed(() => {
+  return {
+    satReading: satReading.value,
+    satMath: satMath.value,
+    gpa: gpa.value,
+    apClasses: apClasses.value,
+    extracurriculars: extracurriculars.value,
+    intendedMajor: intendedMajor.value,
+    recScore: recScore.value,
+    isLegacy: isLegacy.value,
+    nationality: nationality.value,
+    gender: gender.value,
+    demoScore: demoScore.value,
+    enableBitterByCoffee: enableBitterByCoffee.value
+  };
+});
 
-    const status = newApScore.value === "N/A" ? "ongoing" : "completed";
+// --- AUTO-SAVE LOGIC ---
+const initialLoadComplete = ref(false);
 
-    apClasses.value.push({
-      name: newApClass.value,
-      score: newApScore.value,
-      status: status,
-      fitScore: fitScore
-    });
-    newApClass.value = "";
-    newApScore.value = "N/A";
-  }
+function debounce(func, delay) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const performSaveOperation = (isAutoSave = false) => {
+  const profileData = {
+    satReading: satReading.value,
+    satMath: satMath.value,
+    gpa: gpa.value,
+    apClasses: apClasses.value,
+    extracurriculars: extracurriculars.value,
+    intendedMajor: intendedMajor.value,
+    recScore: recScore.value,
+    isLegacy: isLegacy.value,
+    nationality: nationality.value,
+    gender: gender.value,
+    demoScore: demoScore.value,
+    enableBitterByCoffee: enableBitterByCoffee.value,
+  };
+
+  localStorage.setItem('userProfileData', JSON.stringify(profileData));
+  console.log(isAutoSave ? 'Profile auto-saved:' : 'Profile saved manually:', profileData);
+
+  snackbarText.value = isAutoSave ? 'Profile auto-saved!' : 'Profile saved!';
+  snackbarColor.value = 'success'; // Green for successful save
+  snackbar.value = true;
 };
 
-const removeApClass = (index) => {
-  apClasses.value.splice(index, 1);
+const debouncedAutoSave = debounce(() => {
+  performSaveOperation(true);
+}, 2000); // Auto-save after 2 seconds of inactivity
+
+watch(
+  studentProfile,
+  (newValue, oldValue) => {
+    if (initialLoadComplete.value) {
+      // A simple check to ensure oldValue is not empty, indicating it's not the first paint after load
+      // This helps prevent saving if the initial studentProfile matches exactly what was loaded.
+      // JSON.stringify can be intensive for very large objects but is robust for comparison.
+      if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+        console.log('Profile data changed, queuing auto-save...');
+        debouncedAutoSave();
+      }
+    }
+  },
+  { deep: true }
+);
+
+const manualSaveUserProfile = () => {
+  loading.value = true;
+  performSaveOperation(false);
+  setTimeout(() => {
+    loading.value = false;
+  }, 500);
 };
+// --- END AUTO-SAVE LOGIC ---
 
 const getApScoreColor = (score) => {
   if (score === 5) return "success";
@@ -543,11 +539,39 @@ const getApScoreColor = (score) => {
 };
 
 const addApClassAndClose = () => {
-  addApClass();
+  if (newApClass.value) {
+    const existingClass = apClasses.value.find(apClass => apClass.name === newApClass.value);
+    if (existingClass) {
+      snackbarText.value = `AP Class "${newApClass.value}" already added.`;
+      snackbarColor.value = 'warning'; // Yellow for warning
+      snackbar.value = true;
+      // newApClass.value = ""; // Optionally reset
+      // newApScore.value = "N/A";
+      dialog.value = false; // Close dialog even on error
+      return;
+    }
+
+    let fitScore = 0;
+    if (intendedMajor.value) {
+      fitScore = calculateFitScore(newApClass.value, 'ap', intendedMajor.value);
+    }
+    const status = newApScore.value === "N/A" ? "ongoing" : "completed";
+    apClasses.value.push({
+      name: newApClass.value,
+      score: newApScore.value,
+      status: status,
+      fitScore: fitScore
+    });
+    newApClass.value = "";
+    newApScore.value = "N/A";
+  }
   dialog.value = false;
 };
 
-// Added functions to determine AP course alignment with major
+const removeApClass = (index) => {
+  apClasses.value.splice(index, 1);
+};
+
 const getApMajorMatchText = (apCourseName) => {
   const category = determineAPCourseCategory(apCourseName);
   if (category === intendedMajor.value) return 'Strong';
@@ -562,19 +586,21 @@ const getApMajorMatchColor = (apCourseName) => {
   return 'warning';
 };
 
-// Extracurricular Activities functionality
-const newActivity = ref("");
-const newActivityLevel = ref(2);
-const activityDialog = ref(false);
-
-const addActivity = () => {
+const addActivityAndClose = () => {
   if (newActivity.value) {
-    // Calculate fit score if intended major is selected
+    // Optional: Check for duplicate activity
+    // const existingActivity = extracurriculars.value.find(act => act.name === newActivity.value);
+    // if (existingActivity) {
+    //   snackbarText.value = `Activity "${newActivity.value}" already added.`;
+    //   snackbarColor.value = 'warning';
+    //   snackbar.value = true;
+    //   activityDialog.value = false;
+    //   return;
+    // }
     let fitScore = 0;
     if (intendedMajor.value) {
       fitScore = calculateFitScore(newActivity.value, 'activity', intendedMajor.value);
     }
-
     extracurriculars.value.push({
       name: newActivity.value,
       level: newActivityLevel.value,
@@ -583,18 +609,13 @@ const addActivity = () => {
     newActivity.value = "";
     newActivityLevel.value = 2;
   }
+  activityDialog.value = false;
 };
 
 const removeActivity = (index) => {
   extracurriculars.value.splice(index, 1);
 };
 
-const addActivityAndClose = () => {
-  addActivity();
-  activityDialog.value = false;
-};
-
-// Added functions to determine activity alignment with major
 const getActivityMajorMatchText = (activityName) => {
   const category = determineActivityCategory(activityName);
   if (category === intendedMajor.value) return 'Strong';
@@ -617,21 +638,12 @@ const getActivityLevelColor = (level) => {
 };
 
 const getLevelDescription = (level) => {
-  const levelDescriptions = {
-    1: 'Average',
-    2: 'Somewhat Strong',
-    3: 'Strong',
-    4: 'Very Strong'
-  };
+  const levelDescriptions = { 1: 'Average', 2: 'Somewhat Strong', 3: 'Strong', 4: 'Very Strong' };
   return levelDescriptions[level] || '';
 };
 
 const getRecDescription = (score) => {
-  const descriptions = {
-    1: 'Basic',
-    2: 'Strong',
-    3: 'Outstanding'
-  };
+  const descriptions = { 1: 'Basic', 2: 'Strong', 3: 'Outstanding' };
   return descriptions[score] || '';
 };
 
@@ -639,112 +651,35 @@ const openActivityDialog = () => {
   activityDialog.value = true;
 };
 
-// Add this with the other ref declarations at the top of the script
-const enableBitterByCoffee = ref(false);
-
-// Update the computed student profile to include the new property
-const studentProfile = computed(() => {
-  return {
-    satReading: satReading.value,
-    satMath: satMath.value,
-    gpa: gpa.value,
-    apClasses: apClasses.value,
-    extracurriculars: extracurriculars.value,
-    intendedMajor: intendedMajor.value,
-    recScore: recScore.value,
-    isLegacy: isLegacy.value,
-    nationality: nationality.value,
-    gender: gender.value,
-    demoScore: demoScore.value,
-    enableBitterByCoffee: enableBitterByCoffee.value
-  };
-});
-
-// Update the saveUserProfile function to include the new property
-const loading = ref(false);
-
-const saveUserProfile = () => {
-  loading.value = true;
-
-  const profileData = {
-    // Standardized scores
-    satReading: satReading.value,
-    satMath: satMath.value,
-    gpa: gpa.value,
-
-    // AP Classes
-    apClasses: apClasses.value,
-
-    // Extracurricular activities
-    extracurriculars: extracurriculars.value,
-
-    // Additional factors
-    intendedMajor: intendedMajor.value,
-    recScore: recScore.value,
-    isLegacy: isLegacy.value,
-
-    // Demographics
-    nationality: nationality.value,
-    gender: gender.value,
-    demoScore: demoScore.value,
-
-    // Bitter by Coffee randomization
-    enableBitterByCoffee: enableBitterByCoffee.value
-  };
-
-  // Save to localStorage
-  localStorage.setItem('userProfileData', JSON.stringify(profileData));
-  console.log('Profile data saved:', profileData);
-
-  setTimeout(() => {
-    loading.value = false;
-    // Optional: Navigate back to explore page or show success message
-  }, 500);
-};
-
-// Update the onMounted function to load the new property
 onMounted(() => {
   const savedData = localStorage.getItem('userProfileData');
   if (savedData) {
     try {
       const profileData = JSON.parse(savedData);
-
-      // Load standardized scores
       satReading.value = profileData.satReading || 500;
       satMath.value = profileData.satMath || 500;
       gpa.value = profileData.gpa || 3.0;
-
-      // Load AP classes
       if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
         apClasses.value = profileData.apClasses;
       }
-
-      // Load extracurriculars
       if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
         extracurriculars.value = profileData.extracurriculars;
       }
-
-      // Load additional factors
       intendedMajor.value = profileData.intendedMajor || "";
       recScore.value = profileData.recScore || 2;
-      isLegacy.value = profileData.isLegacy || false;
-
-      // Load demographics
-      if (profileData.nationality) {
-        nationality.value = profileData.nationality;
-      }
-      if (profileData.gender) {
-        gender.value = profileData.gender;
-      }
-
-      // Load Bitter by Coffee setting
+      isLegacy.value = profileData.isLegacy || false; // Ensure isLegacy is loaded
+      if (profileData.nationality) nationality.value = profileData.nationality;
+      if (profileData.gender) gender.value = profileData.gender;
       enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
-
       console.log('Profile data loaded successfully');
     } catch (e) {
       console.error('Error parsing saved profile data:', e);
     }
   }
+  nextTick(() => {
+    initialLoadComplete.value = true;
+    console.log('Initial load complete. Auto-save enabled.');
+  });
 });
 
 </script>
