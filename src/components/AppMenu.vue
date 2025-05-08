@@ -5,7 +5,6 @@
     elevation="2"
     class="app-bar-relative"
   >
-    <!-- Logo Section (Left) - Updated to link to index/root -->
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
       <v-img
         src="@/assets/a4cLong.png"
@@ -16,10 +15,8 @@
       ></v-img>
     </router-link>
 
-    <!-- Spacer -->
     <v-spacer></v-spacer>
 
-    <!-- Navigation Tabs (Middle) - Hidden on xs screens -->
     <div class="d-none d-sm-flex nav-center-absolute">
       <v-tabs
         v-model="activeTab"
@@ -39,33 +36,26 @@
       </v-tabs>
     </div>
 
-    <!-- Spacer -->
     <v-spacer></v-spacer>
 
-    <!-- Dev Button (Visible only in development) -->
     <v-btn
       v-if="isDevelopment"
       icon
       @click="showSchoolsDialog = true"
       title="Show Schools (Dev)"
-      class="mr-2"
-    >
+      class="mr-2 d-none d-sm-flex" >
       <v-icon>mdi-school</v-icon>
     </v-btn>
 
-    <!-- User Profile Section (Right) -->
     <div class="d-flex align-center">
-      <!-- Not authenticated state -->
-      <div v-if="!userStore.isAuthenticated">
-        <v-btn color="primary" variant="text" @click="openAuthModal('login')">
-          Login
-        </v-btn>
-        <v-btn color="primary" variant="outlined" class="ml-2  mr-3" @click="openAuthModal('register')">
+      <div v-if="!userStore.isAuthenticated" class="d-none d-sm-flex align-center"> <v-btn color="primary" variant="text" @click="openAuthModal('login')">
+        Login
+      </v-btn>
+        <v-btn color="primary" variant="outlined" class="ml-2 mr-3" @click="openAuthModal('register')">
           Register
         </v-btn>
       </div>
 
-      <!-- Authenticated state -->
       <v-menu
         v-else
         v-model="userMenu"
@@ -73,10 +63,8 @@
         location="bottom"
       >
         <template v-slot:activator="{ props }">
-          <div class="d-flex align-center" v-bind="props">
-            <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.username }}</span>
-            <v-avatar size="40" class="mr-2">
-              <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
+          <div class="d-flex align-center mr-1" v-bind="props"> <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.username }}</span>
+            <v-avatar size="40" :class="{'mr-2': breakpoint !== 'xs'}"> <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
               <v-icon v-else icon="mdi-account" />
             </v-avatar>
           </div>
@@ -92,14 +80,12 @@
       </v-menu>
     </div>
 
-    <!-- Mobile Menu Button (visible only on xs screens) -->
     <v-app-bar-nav-icon
       class="d-flex d-sm-none"
       @click="mobileDrawer = !mobileDrawer"
     ></v-app-bar-nav-icon>
   </v-app-bar>
 
-  <!-- Mobile Navigation Drawer (for small screens) -->
   <v-navigation-drawer
     v-model="mobileDrawer"
     temporary
@@ -126,35 +112,30 @@
         :title="item.title"
         :to="item.to"
         :value="item.value"
-      ></v-list-item>
+        @click="mobileDrawer = false" ></v-list-item>
 
-      <!-- Dev Button in Mobile Drawer -->
       <v-list-item
         v-if="isDevelopment"
         prepend-icon="mdi-school"
         title="Show Schools (Dev)"
-        @click="showSchoolsDialog = true"
-      ></v-list-item>
+        @click="showSchoolsDialog = true; mobileDrawer = false" ></v-list-item>
 
       <v-divider></v-divider>
 
-      <!-- Authentication buttons for mobile -->
       <template v-if="!userStore.isAuthenticated">
-        <v-list-item prepend-icon="mdi-login" title="Login" @click="openAuthModal('login')"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus" title="Register" @click="openAuthModal('register')"></v-list-item>
+        <v-list-item prepend-icon="mdi-login" title="Login" @click="openAuthModal('login'); mobileDrawer = false"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-plus" title="Register" @click="openAuthModal('register'); mobileDrawer = false"></v-list-item>
       </template>
-      <v-list-item v-else prepend-icon="mdi-logout" title="Logout" @click="logout"></v-list-item>
+      <v-list-item v-else prepend-icon="mdi-logout" title="Logout" @click="logout(); mobileDrawer = false"></v-list-item>
     </v-list>
   </v-navigation-drawer>
 
-  <!-- Auth Modal -->
   <AuthModal
     v-model="showAuthModal"
     :initial-tab="authModalTab"
     @login-success="handleLoginSuccess"
   />
 
-  <!-- Schools Dialog (Visible only in development) -->
   <v-dialog v-model="showSchoolsDialog" max-width="800px" v-if="isDevelopment">
     <v-card>
       <v-card-title>
@@ -173,100 +154,120 @@
 </template>
 
 <script setup>
-  import { ref, computed, onMounted } from 'vue'
-  import { useDisplay } from 'vuetify'
-  import { useUserStore } from '@/stores/user'
-  import Schools from '@/components/Schools.vue'
-  import AuthModal from '@/components/AuthModal.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useDisplay } from 'vuetify'
+import { useUserStore } from '@/stores/user' // Assuming path is correct
+import Schools from '@/components/Schools.vue'    // Assuming path is correct
+import AuthModal from '@/components/AuthModal.vue' // Assuming path is correct
+import { useRouter } from 'vue-router' // Import for navigation
 
-  const userStore = useUserStore()
-  const activeTab = ref('explore')
-  const userMenu = ref(false)
-  const mobileDrawer = ref(false)
-  const showSchoolsDialog = ref(false)
-  const showAuthModal = ref(false)
-  const authModalTab = ref('login')
-  const {name: breakpoint} = useDisplay()
+const userStore = useUserStore()
+const router = useRouter() // Initialize router
+const activeTab = ref('explore') // Default active tab
+const userMenu = ref(false)
+const mobileDrawer = ref(false)
+const showSchoolsDialog = ref(false)
+const showAuthModal = ref(false)
+const authModalTab = ref('login')
+const { name: breakpoint, primary } = useDisplay() // primary color from theme
 
-  // Initialize user store
-  onMounted(() => {
-    userStore.initialize()
-  })
+// Initialize user store
+onMounted(() => {
+  userStore.initialize()
+})
 
-  // Check if in development mode (Vite specific)
-  const isDevelopment = computed(() => import.meta.env.DEV);
+// Check if in development mode (Vite specific)
+const isDevelopment = computed(() => import.meta.env.DEV);
 
-  // Responsive sizes based on screen size
-  const appBarHeight = computed(() => {
-    if (breakpoint.value === 'xs') return 40
-    if (breakpoint.value === 'sm') return 48
-    if (breakpoint.value === 'md') return 56
-    return 64 // lg and xl
-  })
-
-  const logoSize = computed(() => {
-    if (breakpoint.value === 'xs') return 28
-    if (breakpoint.value === 'sm') return 32
-    if (breakpoint.value === 'md') return 36
-    return 40 // lg and xl
-  })
-
-  const textSizeClass = computed(() => {
-    if (breakpoint.value === 'xs') return 'text-body-4 font-weight-medium'
-    if (breakpoint.value === 'sm') return 'text-body-3 font-weight-medium'
-    if (breakpoint.value === 'md') return 'text-body-2 font-weight-medium'
-    return 'text-body-1 font-weight-medium' // lg and xl
-  })
-
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: 'mdi-view-dashboard',
-      value: 'home',
-      to: '/home',
-    },
-    {
-      title: 'Explore',
-      icon: 'mdi-folder',
-      value: 'explore',
-      to: '/explore',
-    },
-    {
-      title: 'Profile',
-      icon: 'mdi-account-group',
-      value: 'profile',
-      to: '/profile',
-    },
-    {
-      title: 'Settings',
-      icon: 'mdi-cog',
-      value: 'settings',
-      to: '/settings',
-    },
-  ]
-
-  // Open auth modal with specific tab
-  const openAuthModal = (tab) => {
-    authModalTab.value = tab
-    showAuthModal.value = true
+// Responsive sizes based on screen size
+const appBarHeight = computed(() => {
+  // Using Vuetify's breakpoint names
+  switch (breakpoint.value) {
+    case 'xs': return 48 // Increased slightly for better touch on mobile
+    case 'sm': return 56
+    case 'md': return 64
+    default: return 72 // lg and xl
   }
+})
 
-  // Handle successful login
-  const handleLoginSuccess = (userData) => {
-    showAuthModal.value = false
-    // No need to manually set user data as it's handled by the store
+const logoSize = computed(() => {
+  switch (breakpoint.value) {
+    case 'xs': return 30 // Slightly increased
+    case 'sm': return 32
+    case 'md': return 36
+    default: return 40 // lg and xl
   }
+})
 
-  // Logout function
-  const logout = () => {
-    userStore.logout()
-    userMenu.value = false
+// Using standard Vuetify typography classes for consistency
+// Or use your custom classes if they are defined elsewhere
+const textSizeClass = computed(() => {
+  switch (breakpoint.value) {
+    case 'xs': return 'text-caption font-weight-medium' // Smallest standard for tabs/text
+    case 'sm': return 'text-body-2 font-weight-medium'
+    case 'md': return 'text-body-2 font-weight-medium'
+    default: return 'text-body-1 font-weight-medium' // lg and xl
   }
+})
+
+const menuItems = [
+  {
+    title: 'Home',
+    icon: 'mdi-view-dashboard',
+    value: 'home',
+    to: '/home',
+  },
+  {
+    title: 'Explore',
+    icon: 'mdi-folder',
+    value: 'explore',
+    to: '/explore',
+  },
+  // Profile and Settings are often in user menu, but can be tabs too
+  // For this example, keeping them as tabs as in original
+  {
+    title: 'Profile',
+    icon: 'mdi-account-group', // Consider mdi-account for user's own profile
+    value: 'profile',
+    to: '/profile',
+  },
+  {
+    title: 'Settings',
+    icon: 'mdi-cog',
+    value: 'settings',
+    to: '/settings',
+  },
+]
+
+// Open auth modal with specific tab
+const openAuthModal = (tab) => {
+  authModalTab.value = tab
+  showAuthModal.value = true
+  mobileDrawer.value = false // Close drawer if opening modal from it
+}
+
+// Handle successful login
+const handleLoginSuccess = (userData) => {
+  showAuthModal.value = false
+  // User data is handled by the store, potentially redirect or update UI
+  // Example: router.push(userStore.redirectUrl || '/dashboard')
+}
+
+// Logout function
+const logout = () => {
+  userStore.logout()
+  userMenu.value = false
+  mobileDrawer.value = false // Close drawer if logging out from it
+  // Redirect to home or login page after logout
+  if (router.currentRoute.value.meta.requiresAuth) {
+    router.push('/')
+  }
+}
 </script>
 
 <style scoped>
 .v-app-bar {
-  transition: 0.2s ease-in-out;
+  transition: height 0.2s ease-in-out; /* Smooth height transition */
 }
 /* Add relative positioning to the app bar for absolute centering context */
 .app-bar-relative {
@@ -276,12 +277,16 @@
 .nav-center-absolute {
   position: absolute;
   left: 50%;
-  top: 0;
-  height: 100%;
-  transform: translateX(-50%);
+  top: 50%; /* Vertically center */
+  transform: translate(-50%, -50%); /* Correct transform for centering */
+  /* height: 100%; Removed, as v-tabs will define its own height */
   align-items: center;
   display: flex;
-  z-index: 1;
+  z-index: 1; /* Ensure tabs are above other elements if needed, but below app-bar content */
+}
+
+/* Ensure avatar has a pointer cursor when it's a menu activator */
+.v-avatar[role="button"] {
+  cursor: pointer;
 }
 </style>
-

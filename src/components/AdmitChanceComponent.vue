@@ -12,7 +12,6 @@
       </v-card-title>
 
       <v-card-text>
-        <!-- Application Type and Legacy Status Toggles (Horizontal Row) -->
         <v-row class="mb-4">
           <v-col cols="12">
             <v-card variant="outlined" class="pa-3">
@@ -135,7 +134,6 @@
 
         <v-divider class="my-3"></v-divider>
 
-        <!-- Recommendation Section - Modified to include AI toggle -->
         <div class="text-body-2 mb-3">
           <div class="d-flex align-center justify-space-between mb-2">
             <strong>Recommendation:</strong>
@@ -158,7 +156,6 @@
             ></v-progress-circular>
           </div>
 
-          <!-- No API key message -->
           <v-alert
             v-if="showNoApiKeyMessage"
             type="info"
@@ -168,11 +165,10 @@
             color="warning"
           >
             <div class="d-flex align-center">
-              <span>OpenAI API Key is not configured</span>
+              <span>OpenAI API Key is not configured. AI recommendations are disabled.</span>
             </div>
           </v-alert>
 
-          <!-- AI Recommendation Error -->
           <v-alert
             v-if="aiError"
             type="error"
@@ -192,7 +188,7 @@
         </div>
 
         <v-row class="mt-1">
-          <v-col cols="12" sm="6">
+          <v-col cols="12" sm="4">
             <v-btn
               color="primary"
               variant="outlined"
@@ -202,7 +198,17 @@
               {{ showDetails ? 'Hide Details' : 'Show Details' }}
             </v-btn>
           </v-col>
-          <v-col cols="12" sm="6">
+          <v-col cols="12" sm="4">
+            <v-btn
+              color="info"
+              variant="outlined"
+              block
+              @click="showAlgorithmExplanationDialog = true"
+            >
+              Algorithm Info
+            </v-btn>
+          </v-col>
+          <v-col cols="12" sm="4">
             <v-btn
               :color="saveButtonColor"
               variant="tonal"
@@ -249,62 +255,53 @@
               </v-col>
             </v-row>
 
-            <!-- Added Application Strategy Impact Information -->
             <v-card variant="outlined" class="pa-3 mb-3">
               <div class="text-subtitle-2 mb-2">Application Strategy Impact</div>
-
               <div class="d-flex justify-space-between align-center mb-3">
                 <div>
-                  <v-chip
-                    :color="localIsEarlyDecision ? 'success' : 'info'"
-                    size="small"
-                    class="me-2"
-                  >
+                  <v-chip :color="localIsEarlyDecision ? 'success' : 'info'" size="small" class="me-2">
                     {{ localIsEarlyDecision ? 'Early Decision' : 'Regular Decision' }}
                   </v-chip>
-                  <v-chip
-                    :color="localIsLegacy ? 'purple' : 'grey'"
-                    size="small"
-                  >
+                  <v-chip :color="localIsLegacy ? 'purple' : 'grey'" size="small">
                     {{ localIsLegacy ? 'Legacy Student' : 'Non-Legacy' }}
                   </v-chip>
                 </div>
               </div>
-
               <div class="mt-2">
                 <div class="d-flex justify-space-between">
-                  <span class="text-caption">Base acceptance rate:</span>
+                  <span class="text-caption">College base acceptance rate:</span>
                   <span class="text-caption font-weight-medium">{{ props.college.acceptanceRate }}%</span>
                 </div>
-                <div class="d-flex justify-space-between">
-                  <span class="text-caption">
-                    Application strategy adjusted rate:
-                  </span>
-                  <span class="text-caption font-weight-medium">{{ adjustedAcceptanceRate }}%</span>
+                <div class="d-flex justify-space-between" v-if="props.studentProfile.intendedMajor">
+                  <span class="text-caption">Rate adjusted for {{ props.studentProfile.intendedMajor }}:</span>
+                  <span class="text-caption font-weight-medium">{{ majorAdjustedRateForDisplay }}%</span>
                 </div>
-
+                <div class="d-flex justify-space-between">
+                  <span class="text-caption">Final adjusted rate (Major, ED/RD, Legacy):</span>
+                  <span class="text-caption font-weight-medium">{{ finalAdjustedRateForDisplay }}%</span>
+                </div>
                 <v-divider class="my-2"></v-divider>
-
                 <div class="text-caption my-1">
                   <v-icon size="x-small" :color="localIsEarlyDecision ? 'success' : 'info'" class="mr-1">
                     {{ localIsEarlyDecision ? 'mdi-arrow-up' : 'mdi-information' }}
                   </v-icon>
                   <span v-if="localIsEarlyDecision">
-                    Early Decision typically increases chances by 1.5-2.5x but is binding if accepted.
+                    Early Decision typically increases chances (e.g., by 1.2x-2x for relevant colleges) and is binding.
                   </span>
                   <span v-else>
-                    Regular Decision provides more flexibility but may have lower acceptance rates.
+                    Regular Decision offers flexibility; the displayed rate reflects standard chances.
                   </span>
                 </div>
-
                 <div class="text-caption mt-1" v-if="localIsLegacy">
                   <v-icon size="x-small" color="purple" class="mr-1">mdi-account-group</v-icon>
-                  Legacy status (family connection) can improve your chances at many institutions.
+                  Legacy Status provides an additional boost (e.g., ~1.2x) to admission chances.
+                </div>
+                <div class="text-caption mt-1">
+                  The "Final adjusted rate" is used as the starting point ($p_0$) for the overall chance calculation.
                 </div>
               </div>
             </v-card>
 
-            <!-- Added Major Impact Information -->
             <v-card variant="outlined" class="pa-3 mb-3">
               <div class="d-flex justify-space-between align-center">
                 <div class="text-subtitle-2">Major Impact</div>
@@ -315,7 +312,6 @@
                   {{ getMajorMatchText(props.studentProfile.intendedMajor, props.college.collegeType) }}
                 </v-chip>
               </div>
-
               <div v-if="props.studentProfile.intendedMajor" class="mt-2">
                 <div class="d-flex justify-space-between">
                   <span class="text-caption">Base acceptance rate:</span>
@@ -325,28 +321,32 @@
                   <span class="text-caption">
                     Adjusted for {{ props.studentProfile.intendedMajor }} at {{ props.college.collegeType }} college:
                   </span>
-                  <span class="text-caption font-weight-medium">{{ majorAdjustedAcceptanceRate }}%</span>
+                  <span class="text-caption font-weight-medium">{{ majorAdjustedRateForDisplay }}%</span>
                 </div>
                 <div class="text-caption mt-1">
                   <span v-if="isHarderMajor">
                     <v-icon size="x-small" color="error" class="mr-1">mdi-arrow-down</v-icon>
-                    This major is more competitive at this college type.
+                    This major is typically more competitive at this type of college.
                   </span>
                   <span v-else-if="isEasierMajor">
                     <v-icon size="x-small" color="success" class="mr-1">mdi-arrow-up</v-icon>
-                    This major is less competitive at this college type.
+                    This major is typically less competitive at this type of college.
+                  </span>
+                  <span v-else>
+                    <v-icon size="x-small" color="info" class="mr-1">mdi-information</v-icon>
+                    Major competitiveness is neutral or standard for this college type.
                   </span>
                 </div>
               </div>
-
               <div v-else class="text-caption mt-2">
-                Select an intended major in your profile to see how it affects your admission chances at this college.
+                Select an intended major in your profile to see its specific impact on admission chances.
               </div>
             </v-card>
 
             <div class="text-caption mt-2">
-              <strong>Note:</strong> This calculator uses standardized scores (Z-scores) to compare your profile
-              to the average applicant pool. A score of +1σ means you're one standard deviation above the average.
+              <strong>Note:</strong> This calculator uses standardized scores (Z-scores, σ) to compare your profile
+              to the average applicant pool. A score of +1σ means you're one standard deviation above average.
+              The final admission chance also considers adjustments to the college's base acceptance rate.
             </div>
           </div>
         </v-expand-transition>
@@ -355,392 +355,408 @@
         <v-btn color="grey-darken-1" variant="text" @click="closeDialog">Close</v-btn>
       </v-card-actions>
     </v-card>
+    <v-card v-else class="pa-4" rounded="lg" :elevation="4">
+      <v-card-title>Loading Calculator...</v-card-title>
+      <v-card-text class="text-center">
+        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+        <p class="mt-3">Please wait while we calculate the admission chance.</p>
+      </v-card-text>
+    </v-card>
   </v-dialog>
+
+  <v-dialog v-model="showAlgorithmExplanationDialog" max-width="700px">
+    <v-card class="pa-3" rounded="lg">
+      <v-card-title class="d-flex justify-space-between">
+        <span class="text-h6">Algorithm Explanation & Warnings</span>
+        <v-btn icon="mdi-close" variant="text" @click="showAlgorithmExplanationDialog = false"></v-btn>
+      </v-card-title>
+      <v-card-text>
+        <p class="mb-3">
+          This calculator estimates admission chances based on a model that incorporates several factors.
+          Here's a simplified overview:
+        </p>
+        <v-list density="compact">
+          <v-list-item>
+            <template v-slot:prepend><v-icon color="blue-darken-2" class="mr-2">mdi-numeric-1-box</v-icon></template>
+            <v-list-item-title><strong>Base Rate Adjustment (p<sub>0</sub>)</strong></v-list-item-title>
+            <v-list-item-subtitle>
+              The college's reported acceptance rate is adjusted for:
+              <ul class="my-1 ml-4" style="list-style-type: disc;">
+                <li><strong>Intended Major & College Type:</strong> Competitiveness varies (e.g., STEM at a STEM-heavy school is often more competitive).</li>
+                <li><strong>Early Decision (ED)/Regular Decision (RD):</strong> ED can offer a significant boost, especially at selective schools.</li>
+                <li><strong>Legacy Status:</strong> Having family alumni may provide an advantage.</li>
+              </ul>
+              This adjusted rate forms the initial probability (p<sub>0</sub>).
+            </v-list-item-subtitle>
+          </v-list-item>
+
+          <v-list-item>
+            <template v-slot:prepend><v-icon color="green-darken-2" class="mr-2">mdi-numeric-2-box</v-icon></template>
+            <v-list-item-title><strong>Profile Strength & Alignment</strong></v-list-item-title>
+            <v-list-item-subtitle>
+              Your profile is compared to the college's typical admitted student profile using:
+              <ul class="my-1 ml-4" style="list-style-type: disc;">
+                <li><strong>Z-Scores:</strong> Standardized scores for GPA, SAT/ACT, AP courses, and Extracurriculars (ECs) show how you compare to the average. A positive Z-score (e.g., +1.0σ) means you are above average.</li>
+                <li><strong>Strength Block:</strong> Combines weighted Z-scores for core academic and extracurricular achievements.</li>
+                <li><strong>Alignment Block:</strong> Considers factors like the fit of your APs/ECs with your major, recommendation letter strength (if quantified), and demographic factors.</li>
+              </ul>
+            </v-list-item-subtitle>
+          </v-list-item>
+
+          <v-list-item>
+            <template v-slot:prepend><v-icon color="orange-darken-2" class="mr-2">mdi-numeric-3-box</v-icon></template>
+            <v-list-item-title><strong>Final Probability Calculation</strong></v-list-item-title>
+            <v-list-item-subtitle>
+              The final chance is roughly: <code>Adjusted Base Rate (p<sub>0</sub>) * e<sup>(Strength Score + Alignment Score)</sup></code>.
+              This means your profile's strength and alignment act as a multiplier on the adjusted base rate.
+            </v-list-item-subtitle>
+          </v-list-item>
+
+          <v-list-item>
+            <template v-slot:prepend><v-icon color="purple-darken-2" class="mr-2">mdi-numeric-4-box</v-icon></template>
+            <v-list-item-title><strong>"Bitter by Coffee" Factor</strong></v-list-item-title>
+            <v-list-item-subtitle>
+              An optional, small random factor (0.75x to 1.25x) can be applied to simulate some of the inherent unpredictability in admissions.
+            </v-list-item-subtitle>
+          </v-list-item>
+        </v-list>
+
+        <v-divider class="my-4"></v-divider>
+        <strong class="text-h6">Important Warnings & Disclaimers:</strong>
+        <ul class="mt-2 ml-4" style="list-style-type: disc;">
+          <li><strong>Estimation Only:</strong> This tool provides an estimate, not a guarantee. Admission decisions are complex and multifaceted.</li>
+          <li><strong>Data Dependency:</strong> Accuracy relies on the quality of your input and the college data used (which may not always be perfectly up-to-date or reflect specific departmental nuances).</li>
+          <li><strong>Holistic Review:</strong> Many qualitative factors (essays, interviews, unique talents, letters of recommendation details, demonstrated interest) are difficult to quantify and play a crucial role, especially at selective institutions. This calculator simplifies these aspects.</li>
+          <li><strong>Weighting Assumptions:</strong> The importance (weights) of different factors (GPA, test scores, ECs) are generalized. Actual colleges may have different priorities.</li>
+          <li><strong>Dynamic Landscape:</strong> Admission criteria and competitiveness can change year to year.</li>
+        </ul>
+        <p class="mt-3 text-caption">
+          Use this calculator as one tool among others to gauge potential fit and chance, but always research individual college requirements and consult with counselors.
+        </p>
+      </v-card-text>
+      <v-card-actions class="d-flex justify-end">
+        <v-btn color="primary" variant="text" @click="showAlgorithmExplanationDialog = false">Got it</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
 </template>
 
 <script setup>
-  import { ref, computed, watch } from 'vue';
-  import {
-    getAdmissionChanceColor,
-    getAdmissionChanceDescription,
-    calculateAdmissionChance,
-    prepareStudentData,
-    adjustAcceptanceRateByEDRD,
-    adjustAcceptanceRateByMajor
-  } from '../utils/admitChanceCalculator';
-  import {
-    getCollegeMatchAnalysis
-  } from '../utils/profileRecommendationService';
+import { ref, computed, watch } from 'vue';
+import {
+  getAdmissionChanceColor,
+  getAdmissionChanceDescription,
+  calculateAdmissionChance,
+  prepareStudentData,
+  adjustAcceptanceRateByMajor,
+  adjustAcceptanceRateByStrategicFactors,
+  getMajorMatchAssessment
+} from '../utils/admitChanceCalculator'; //
+import {
+  getCollegeMatchAnalysis,
+  getApiKey
+} from '../utils/profileRecommendationService';
 
-  import { getApiKey } from '../utils/profileRecommendationService';
+const props = defineProps({
+  college: { type: Object, required: true },
+  studentProfile: { type: Object, required: true },
+  savedColleges: { type: Array, default: () => [] },
+  recentlyViewed: { type: Array, default: () => [] },
+  modelValue: { type: Boolean, default: false }
+});
 
+const emit = defineEmits(['saveToEarly', 'saveToRegular', 'update:modelValue', 'close']);
 
-  const props = defineProps({
-    college: {
-      type: Object,
-      required: true
-    },
-    studentProfile: {
-      type: Object,
-      required: true
-    },
-    savedColleges: {
-      type: Array,
-      default: () => []
-    },
-    recentlyViewed: {
-      type: Array,
-      default: () => []
-    },
-    modelValue: {
-      type: Boolean,
-      default: false
-    }
-  });
+const collegeChance = ref(null);
+const showDetails = ref(false);
+const dialog = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+});
 
-  const emit = defineEmits(['saveToEarly', 'saveToRegular', 'update:modelValue', 'close']);
+const localIsLegacy = ref(false);
+const localIsEarlyDecision = ref(false);
 
-  const collegeChance = ref(null);
-  const showDetails = ref(false);
-  const dialog = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
-  });
+// New ref for algorithm explanation dialog
+const showAlgorithmExplanationDialog = ref(false);
 
-  // Add local legacy and early decision status states
-  const localIsLegacy = ref(false);
-  const localIsEarlyDecision = ref(false);
-
-  // Initialize the local status variables when dialog opens
-  watch(() => dialog.value, (isOpen) => {
-    if (isOpen) {
-      // Default to false when opening, as these are per-college settings
-      localIsLegacy.value = false;
-      localIsEarlyDecision.value = false;
-    }
-  });
-
-  // Define calculateChance function FIRST
-  const calculateChance = () => {
-    if (!props.college || !props.studentProfile) return;
-
-    // Prepare student data for calculations
-    const studentData = prepareStudentData({
-      ...props.studentProfile,
-      // Override the legacy status with our local per-college setting
-      isLegacy: localIsLegacy.value,
-      // Add the early decision status
-      isEarlyDecision: localIsEarlyDecision.value
-    });
-
-    // Calculate admission chance
-    collegeChance.value = calculateAdmissionChance(studentData, props.college);
-  };
-
-  // Recalculate chance when any settings change
-  const recalculateChance = () => {
-    calculateChance();
-  };
-
-  // THEN, define the watch that uses it
-  watch(
-    [() => props.college, () => props.studentProfile, () => localIsLegacy.value, () => localIsEarlyDecision.value],
-    () => {
-      calculateChance(); // Now this is safe to call
-    },
-    { immediate: true, deep: true }
-  );
-
-  // Close dialog handler
-  const closeDialog = () => {
-    dialog.value = false;
-    emit('close');
-  };
-
-  // Computed properties for UI display
-  const chanceColor = computed(() => {
-    if (!collegeChance.value) return 'grey';
-    return getAdmissionChanceColor(collegeChance.value.probability);
-  });
-
-  const chanceDescription = computed(() => {
-    if (!collegeChance.value) return 'Unknown';
-    return getAdmissionChanceDescription(collegeChance.value.probability);
-  });
-
-  const timesAverage = computed(() => {
-    if (!collegeChance.value) return '0';
-    return collegeChance.value.timesAverageApplicant;
-  });
-
-  // Basic recommendation (original logic)
-  const basicRecommendation = computed(() => {
-    if (!collegeChance.value) return '';
-
-    const prob = collegeChance.value.probability;
-    const collegeType = props.college.collegeType;
-    const edStatus = localIsEarlyDecision.value ? 'Early Decision' : 'Regular Decision';
-
-    if (prob < 0.1) {
-      return `This is a serious reach school in the ${collegeType} category. ${localIsEarlyDecision.value ? 'Even with Early Decision,' : ''} Apply only if it's your dream school and you have other more realistic options.`;
-    } else if (prob < 0.3) {
-      return `This is a reach school for you. Applying ${edStatus} to this ${collegeType} school means you should highlight your ${collegeType === 'STEM-heavy' ? 'STEM' : 'Liberal Arts'} strengths in your application.`;
-    } else if (prob < 0.5) {
-      return `This could be a good target school. Your profile is competitive for this ${collegeType} school with ${edStatus}, but admission is not guaranteed.`;
-    } else if (prob < 0.8) {
-      return `You're a strong candidate for this ${collegeType} school with ${edStatus}. Consider it as a target school with good chances.`;
+watch(() => dialog.value, (isOpen) => {
+  if (isOpen) {
+    localIsLegacy.value = false;
+    localIsEarlyDecision.value = false;
+    showAlgorithmExplanationDialog.value = false; // Ensure explanation dialog is closed initially
+    if (props.college && props.studentProfile) {
+      calculateChance();
     } else {
-      return `This would be a safety school for you with your strong ${collegeType === 'STEM-heavy' ? 'STEM' : 'Liberal Arts'} profile, even with ${edStatus}.`;
+      collegeChance.value = null;
     }
+  } else {
+    useAiRecommendation.value = false;
+    aiRecommendation.value = '';
+    aiError.value = '';
+    showNoApiKeyMessage.value = false;
+  }
+});
+
+const calculateChance = () => {
+  if (!props.college || !props.studentProfile || !props.college.stats) {
+    collegeChance.value = null;
+    return;
+  }
+  const studentData = prepareStudentData({
+    ...props.studentProfile,
+    isLegacy: localIsLegacy.value,
+    isEarlyDecision: localIsEarlyDecision.value
   });
+  collegeChance.value = calculateAdmissionChance(studentData, props.college); //
+};
 
-  // AI Recommendation Integration
-  const useAiRecommendation = ref(false);
-  const showNoApiKeyMessage = ref(false);  // Re-adding this since it's referenced in the template
-  const aiRecommendation = ref('');
-  const loadingAiRec = ref(false);
-  const aiError = ref('');
-  // Track which college the recommendation is for
-  const currentRecommendationCollegeId = ref(null);
+const recalculateChance = () => {
+  calculateChance();
+};
 
-  // Watch for college changes to reset recommendation if needed
-  watch(() => props.college?.id, (newCollegeId, oldCollegeId) => {
-    if (newCollegeId !== oldCollegeId) {
-      // If the college changes, reset the AI recommendation
-      if (useAiRecommendation.value) {
-        // Only fetch new recommendation if we're actively using AI recs
-        getAiRecommendation();
-      } else {
-        // Otherwise just clear the stored recommendation
-        aiRecommendation.value = '';
-        currentRecommendationCollegeId.value = null;
-      }
-    }
-  }, { immediate: true });
+watch(
+  [() => props.college, () => props.studentProfile, localIsLegacy, localIsEarlyDecision],
+  () => {
+    calculateChance();
+  },
+  { immediate: true, deep: true }
+);
 
-  const toggleAiRecommendation = async () => {
-    // If already using AI recommendation, toggle back to basic
+const closeDialog = () => {
+  dialog.value = false;
+  emit('close');
+};
+
+const chanceColor = computed(() => {
+  if (!collegeChance.value) return 'grey';
+  return getAdmissionChanceColor(collegeChance.value.probability);
+});
+
+const chanceDescription = computed(() => {
+  if (!collegeChance.value) return 'Calculating...';
+  return getAdmissionChanceDescription(collegeChance.value.probability);
+});
+
+const timesAverage = computed(() => {
+  if (!collegeChance.value) return '0';
+  return collegeChance.value.timesAverageApplicant;
+});
+
+const basicRecommendation = computed(() => {
+  if (!collegeChance.value || !props.college) return 'Calculating recommendation...';
+
+  const prob = collegeChance.value.probability;
+  const collegeType = props.college.collegeType || 'this';
+  const edStatus = localIsEarlyDecision.value ? 'Early Decision' : 'Regular Decision';
+
+  if (prob < 0.1) {
+    return `This is a very hard reach school in the ${collegeType} category. ${localIsEarlyDecision.value ? 'Even with Early Decision,' : ''} Apply only if it's your dream school and you have strong alternatives.`;
+  } else if (prob < 0.3) {
+    return `This is a reach school. Applying ${edStatus} to this ${collegeType} school requires highlighting your absolute best ${collegeType === 'STEM-heavy' ? 'STEM' : 'Liberal Arts'} strengths.`;
+  } else if (prob < 0.5) {
+    return `This is a possible target school. Your profile is competitive for this ${collegeType} school with ${edStatus}, but admission isn't certain. Strengthen your application.`;
+  } else if (prob < 0.8) {
+    return `You're a strong candidate. This ${collegeType} school with ${edStatus} is a good chance. Consider it a solid target.`;
+  } else {
+    return `This appears to be a very likely school for you with your profile for ${edStatus} at this ${collegeType} institution.`;
+  }
+});
+
+const useAiRecommendation = ref(false);
+const showNoApiKeyMessage = ref(false);
+const aiRecommendation = ref('');
+const loadingAiRec = ref(false);
+const aiError = ref('');
+const currentRecommendationCollegeId = ref(null);
+
+watch(() => props.college?.id, (newCollegeId) => {
+  if (newCollegeId !== currentRecommendationCollegeId.value) {
+    aiRecommendation.value = '';
+    currentRecommendationCollegeId.value = newCollegeId;
     if (useAiRecommendation.value) {
+      getAiRecommendation();
+    }
+  }
+}, { immediate: true });
+
+
+const toggleAiRecommendation = async () => {
+  if (useAiRecommendation.value) {
+    useAiRecommendation.value = false;
+    return;
+  }
+  try {
+    const key = await getApiKey();
+    if (!key) {
+      showNoApiKeyMessage.value = true;
       useAiRecommendation.value = false;
       return;
     }
-
-    // Check for API key using our service
-    try {
-      const key = await getApiKey();
-      if (!key) {
-        showNoApiKeyMessage.value = true;
-        return;
-      }
-
-      // If we have a key, proceed with AI recommendation
-      useAiRecommendation.value = true;
-      showNoApiKeyMessage.value = false;
-
-      // Check if we need a new recommendation for the current college
-      if (!aiRecommendation.value || currentRecommendationCollegeId.value !== props.college.id) {
-        getAiRecommendation();
-      }
-    } catch (error) {
-      console.error('Error getting API key:', error);
-      showNoApiKeyMessage.value = true;
+    showNoApiKeyMessage.value = false;
+    useAiRecommendation.value = true;
+    if (!aiRecommendation.value || currentRecommendationCollegeId.value !== props.college?.id) {
+      getAiRecommendation();
     }
-  };
+  } catch (error) {
+    console.error('Error checking/getting API key:', error);
+    aiError.value = 'Could not verify AI service availability.';
+    showNoApiKeyMessage.value = true;
+    useAiRecommendation.value = false;
+  }
+};
 
-  // Format AI recommendation text (convert newlines and formatting)
-  const formatRecommendation = (text) => {
-    if (!text) return '';
-    return text
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
-  };
+const formatRecommendation = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+};
 
-  // Get AI recommendation from OpenAI
-  const getAiRecommendation = async () => {
-    if (!props.college || !props.studentProfile) return;
+const getAiRecommendation = async () => {
+  if (!props.college || !props.studentProfile || !useAiRecommendation.value) return;
 
-    loadingAiRec.value = true;
-    aiError.value = '';
-
-    try {
-      const result = await getCollegeMatchAnalysis(props.studentProfile, props.college);
-
-      if (result.success) {
-        aiRecommendation.value = result.analysis;
-        currentRecommendationCollegeId.value = props.college.id;
-      } else {
-        aiError.value = result.error || 'Failed to get AI recommendation';
-        useAiRecommendation.value = false;
-      }
-    } catch (error) {
-      aiError.value = error.message || 'An unexpected error occurred';
+  loadingAiRec.value = true;
+  aiError.value = '';
+  try {
+    const result = await getCollegeMatchAnalysis(props.studentProfile, props.college);
+    if (result.success) {
+      aiRecommendation.value = result.analysis;
+      currentRecommendationCollegeId.value = props.college.id;
+    } else {
+      aiError.value = result.error || 'Failed to get AI recommendation.';
       useAiRecommendation.value = false;
-    } finally {
-      loadingAiRec.value = false;
     }
-  };
+  } catch (error) {
+    aiError.value = error.message || 'An unexpected error occurred with AI recommendation.';
+    useAiRecommendation.value = false;
+  } finally {
+    loadingAiRec.value = false;
+  }
+};
 
-  // Reset recommendation when dialog opens
-  watch(() => dialog.value, (isOpen) => {
-    if (isOpen) {
-      // Reset to default recommendation view when opening dialog
-      useAiRecommendation.value = false;
+const isInEarlyDecision = computed(() => {
+  return props.savedColleges.some(c => c.name === props.college?.name);
+});
 
-      // Clear any previous recommendation if it's for a different college
-      if (currentRecommendationCollegeId.value !== props.college.id) {
-        aiRecommendation.value = '';
-        currentRecommendationCollegeId.value = null;
-      }
-    }
-  });
+const isInRegularDecision = computed(() => {
+  return props.recentlyViewed.some(c => c.name === props.college?.name);
+});
 
-  const isInEarlyDecision = computed(() => {
-    return props.savedColleges.some(c => c.name === props.college.name);
-  });
+const saveButtonText = computed(() => {
+  if (!props.college) return "Save Decision";
+  if (isInEarlyDecision.value) return 'Remove from Early Decision';
+  if (isInRegularDecision.value) return 'Remove from Regular Decision';
+  if (collegeChance.value && collegeChance.value.probability > 0.3) {
+    return 'Save to Regular Decision';
+  }
+  return 'Save to Early Decision';
+});
 
-  const isInRegularDecision = computed(() => {
-    return props.recentlyViewed.some(c => c.name === props.college.name);
-  });
+const saveButtonColor = computed(() => {
+  return (isInEarlyDecision.value || isInRegularDecision.value) ? 'error' : 'success';
+});
 
-  const saveButtonText = computed(() => {
-    if (isInEarlyDecision.value) {
-      return 'Remove from Early Decision';
-    } else if (isInRegularDecision.value) {
-      return 'Remove from Regular Decision';
+const getZScoreColor = (zScore) => {
+  if (zScore === undefined || zScore === null) return 'grey';
+  if (zScore >= 1.5) return 'success';
+  if (zScore >= 0.5) return 'info';
+  if (zScore >= -0.5) return 'warning';
+  return 'error';
+};
+
+const formatZScore = (zScore) => {
+  if (zScore === undefined || zScore === null) return 'N/A';
+  const sign = zScore >= 0 ? '+' : '';
+  return `${sign}${zScore.toFixed(1)}`;
+};
+
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return 'N/A';
+  return num.toFixed(2);
+};
+
+const normalizeBlock = (blockValue) => {
+  if (blockValue === undefined || blockValue === null) return 0;
+  return Math.min(Math.max((blockValue + 2) * 25, 0), 100);
+};
+
+const finalAdjustedRateForDisplay = computed(() => {
+  if (!props.college || !props.studentProfile || !props.college.stats) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
+  let rate = parseFloat(props.college.acceptanceRate);
+  rate = adjustAcceptanceRateByMajor(rate, props.studentProfile.intendedMajor, props.college.collegeType); //
+  rate = adjustAcceptanceRateByStrategicFactors(rate, localIsEarlyDecision.value, localIsLegacy.value); //
+  return rate.toFixed(1);
+});
+
+const majorAdjustedRateForDisplay = computed(() => {
+  if (!props.college || !props.studentProfile || !props.college.stats) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
+  const rate = adjustAcceptanceRateByMajor( //
+    parseFloat(props.college.acceptanceRate),
+    props.studentProfile.intendedMajor,
+    props.college.collegeType
+  );
+  return rate.toFixed(1);
+});
+
+const isHarderMajor = computed(() => {
+  if (!props.college || !props.studentProfile.intendedMajor) return false;
+  const baseRate = parseFloat(props.college.acceptanceRate);
+  const majorAdjusted = adjustAcceptanceRateByMajor(baseRate, props.studentProfile.intendedMajor, props.college.collegeType); //
+  return majorAdjusted < baseRate * 0.9;
+});
+
+const isEasierMajor = computed(() => {
+  if (!props.college || !props.studentProfile.intendedMajor) return false;
+  const baseRate = parseFloat(props.college.acceptanceRate);
+  const majorAdjusted = adjustAcceptanceRateByMajor(baseRate, props.studentProfile.intendedMajor, props.college.collegeType); //
+  return majorAdjusted > baseRate * 1.1;
+});
+
+const getMajorMatchText = (intendedMajor, collegeType) => {
+  if (!intendedMajor || !collegeType) return 'Not Selected';
+  return getMajorMatchAssessment({ collegeType }, intendedMajor); //
+};
+
+const getMajorMatchColor = (intendedMajor, collegeType) => {
+  if (!intendedMajor || !collegeType) return 'grey';
+  const match = getMajorMatchText(intendedMajor, collegeType);
+  if (match === 'Excellent') return 'success';
+  if (match === 'Good') return 'info';
+  if (match === 'Fair') return 'warning';
+  return 'error';
+};
+
+const emitSaveDecision = () => {
+  if (!props.college) return;
+  if (isInEarlyDecision.value) {
+    const index = props.savedColleges.findIndex(c => c.name === props.college.name);
+    if (index !== -1) emit('saveToEarly', { college: props.college, action: 'remove', index });
+  } else if (isInRegularDecision.value) {
+    const index = props.recentlyViewed.findIndex(c => c.name === props.college.name);
+    if (index !== -1) emit('saveToRegular', { college: props.college, action: 'remove', index });
+  } else {
+    if (collegeChance.value && collegeChance.value.probability > 0.3) {
+      emit('saveToRegular', { college: props.college, action: 'add' });
     } else {
-      // Check probability to suggest Early or Regular decision
-      if (collegeChance.value && collegeChance.value.probability > 0.3) {
-        return 'Save to Regular Decision';
-      } else {
-        return 'Save to Early Decision';
-      }
+      emit('saveToEarly', { college: props.college, action: 'add' });
     }
-  });
+  }
+};
 
-  const saveButtonColor = computed(() => {
-    if (isInEarlyDecision.value || isInRegularDecision.value) {
-      return 'error';
-    } else {
-      return 'success';
-    }
-  });
-
-  // Helper functions
-  const getZScoreColor = (zScore) => {
-    if (zScore >= 1.5) return 'success';
-    if (zScore >= 0.5) return 'info';
-    if (zScore >= -0.5) return 'warning';
-    return 'error';
-  };
-
-  const formatZScore = (zScore) => {
-    const sign = zScore >= 0 ? '+' : '';
-    return `${sign}${zScore.toFixed(1)}`;
-  };
-
-  const formatNumber = (num) => {
-    return num.toFixed(2);
-  };
-
-  const normalizeBlock = (blockValue) => {
-    // Convert block value to percentage for progress bar (typically ranges from -2 to +2)
-    return Math.min(Math.max((blockValue + 2) * 25, 0), 100);
-  };
-
-  // Get adjusted acceptance rate for ED/RD
-  const adjustedAcceptanceRate = computed(() => {
-    if (!props.college) return 0;
-
-    const adjusted = adjustAcceptanceRateByEDRD(
-      props.college.acceptanceRate,
-      localIsEarlyDecision.value
-    );
-
-    return adjusted.toFixed(1);
-  });
-
-  // Major impact functions and computed properties
-  import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
-
-  // Get adjusted acceptance rate for the current major and college
-  const majorAdjustedAcceptanceRate = computed(() => {
-    if (!props.college || !props.studentProfile.intendedMajor) return props.college?.acceptanceRate || 0;
-
-    const adjusted = adjustAcceptanceRateByMajor(
-      props.college.acceptanceRate,
-      props.studentProfile.intendedMajor,
-      props.college.collegeType
-    );
-
-    return adjusted.toFixed(1);
-  });
-
-  // Determine if this major is more competitive at this college
-  const isHarderMajor = computed(() => {
-    if (!props.college || !props.studentProfile.intendedMajor) return false;
-
-    return (
-      (props.studentProfile.intendedMajor === 'STEM' && props.college.collegeType === 'STEM-heavy') ||
-      (props.studentProfile.intendedMajor === 'Liberal Arts' && props.college.collegeType === 'Liberal-arts')
-    );
-  });
-
-  // Determine if this major is less competitive at this college
-  const isEasierMajor = computed(() => {
-    if (!props.college || !props.studentProfile.intendedMajor) return false;
-
-    return (
-      (props.studentProfile.intendedMajor === 'STEM' && props.college.collegeType === 'Liberal-arts') ||
-      (props.studentProfile.intendedMajor === 'Liberal Arts' && props.college.collegeType === 'STEM-heavy')
-    );
-  });
-
-  // Get major match text based on student's intended major and college type
-  const getMajorMatchText = (intendedMajor, collegeType) => {
-    if (!intendedMajor) return 'Not Selected';
-
-    return getMajorMatchAssessment({ collegeType }, intendedMajor);
-  };
-
-  // Get color for major match chip
-  const getMajorMatchColor = (intendedMajor, collegeType) => {
-    if (!intendedMajor) return 'grey';
-
-    const match = getMajorMatchText(intendedMajor, collegeType);
-    if (match === 'Excellent') return 'success';
-    if (match === 'Good') return 'info';
-    if (match === 'Fair') return 'warning';
-    return 'error';
-  };
-
-  const emitSaveDecision = () => {
-    if (isInEarlyDecision.value) {
-      // Remove from early decision
-      const index = props.savedColleges.findIndex(c => c.name === props.college.name);
-      if (index !== -1) {
-        emit('saveToEarly', { college: props.college, action: 'remove', index });
-      }
-    } else if (isInRegularDecision.value) {
-      // Remove from regular decision
-      const index = props.recentlyViewed.findIndex(c => c.name === props.college.name);
-      if (index !== -1) {
-        emit('saveToRegular', { college: props.college, action: 'remove', index });
-      }
-    } else {
-      // Add to appropriate list based on admission chance
-      if (collegeChance.value && collegeChance.value.probability > 0.3) {
-        emit('saveToRegular', { college: props.college, action: 'add' });
-      } else {
-        emit('saveToEarly', { college: props.college, action: 'add' });
-      }
-    }
-  };
 </script>
 
 <style scoped>
 .v-progress-circular {
   font-weight: 700;
+}
+.text-caption {
+  line-height: 1.4;
+}
+ul {
+  padding-left: 20px; /* Ensure bullets are visible */
 }
 </style>

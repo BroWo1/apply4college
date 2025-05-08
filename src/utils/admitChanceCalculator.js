@@ -1,5 +1,4 @@
 // Updated Admission Chance Calculator for College Application Tracker
-// This utility calculates standardized scores and admission chances based on the mathematical model
 
 /**
  * Calculate a standardized Z-score
@@ -19,34 +18,54 @@ export const calculateZScore = (value, mean, stdDev) => {
  * @returns {number} - Random factor between 0.75 and 1.25, or 1.0 if disabled
  */
 export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
-  if (!enableBitterByCoffee) return 1.0; // Return 1.0 (neutral) if not enabled
-  // Generate random number between 0.75 and 1.25
+  if (!enableBitterByCoffee) return 1.0;
   return 0.75 + (Math.random() * 0.5);
 };
 
-/**
- * Adjust college acceptance rate based on Early Decision vs Regular Decision
- * @param {number} baseAcceptanceRate - The college's overall acceptance rate
- * @param {boolean} isEarlyDecision - Whether the student is applying Early Decision
- * @returns {number} - The adjusted acceptance rate based on application type
- */
-export const adjustAcceptanceRateByEDRD = (baseAcceptanceRate, isEarlyDecision) => {
-  // Early Decision typically improves acceptance chances by about 1.5-2.5x
-  // The more selective the school, the greater the ED advantage
+// Define legacy boost factor
+const LEGACY_BOOST_FACTOR = 1.3; // Example: 20% increase in chances if legacy
 
-  // For more selective schools (under 10%), ED advantage is greater
-  if (baseAcceptanceRate < 10) {
-    return isEarlyDecision ? baseAcceptanceRate * 2 : baseAcceptanceRate * 0.8;
+/**
+ * Adjust college acceptance rate based on Early Decision, Legacy status.
+ * @param {number} baseAcceptanceRate - The college's overall acceptance rate (can be pre-adjusted for major)
+ * @param {boolean} isEarlyDecision - Whether the student is applying Early Decision
+ * @param {boolean} isLegacy - Whether the student has legacy status
+ * @returns {number} - The adjusted acceptance rate
+ */
+export const adjustAcceptanceRateByStrategicFactors = (baseAcceptanceRate, isEarlyDecision, isLegacy) => {
+  let adjustedRate = parseFloat(baseAcceptanceRate);
+
+  // Apply Early Decision / Regular Decision Boost/Adjustment
+  if (isEarlyDecision) {
+    // Early Decision typically improves acceptance chances
+    if (baseAcceptanceRate < 10) { // Use the initial base rate for decision logic for multipliers
+      adjustedRate *= 1.5; // For more selective schools (under 10%), ED advantage is greater
+    } else if (baseAcceptanceRate < 20) {
+      adjustedRate *= 1.35; // For moderately selective schools (10-20%)
+    } else {
+      adjustedRate *= 1.15; // For less selective schools (above 20%)
+    }
+  } else {
+    // Regular Decision: Apply adjustments if ED provides a significant boost.
+    // These factors represent the 'cost' of not applying ED to schools where ED has an advantage.
+    if (baseAcceptanceRate < 10) {
+      adjustedRate *= 0.8;
+    } else if (baseAcceptanceRate < 20) {
+      adjustedRate *= 0.85;
+    } else {
+      adjustedRate *= 0.9;
+    }
   }
-  // For moderately selective schools (10-20%)
-  else if (baseAcceptanceRate < 20) {
-    return isEarlyDecision ? baseAcceptanceRate * 1.5 : baseAcceptanceRate * 0.85;
+
+  // Apply Legacy Boost
+  if (isLegacy) {
+    adjustedRate *= LEGACY_BOOST_FACTOR;
   }
-  // For less selective schools (above 20%)
-  else {
-    return isEarlyDecision ? baseAcceptanceRate * 1.2 : baseAcceptanceRate * 0.9;
-  }
+
+  // Ensure the rate doesn't exceed a practical maximum like 99% or fall below a minimum like 1%
+  return Math.min(Math.max(adjustedRate, 1), 99);
 };
+
 
 /**
  * Adjust college acceptance rate based on the intended major and college type
@@ -56,41 +75,27 @@ export const adjustAcceptanceRateByEDRD = (baseAcceptanceRate, isEarlyDecision) 
  * @returns {number} - The adjusted acceptance rate for the specific major
  */
 export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, collegeType) => {
-  // Default adjustment factors
-  const competitiveMajorFactor = 0.7; // More competitive (multiply by 0.7 = 30% harder)
-  const lessFocusedMajorFactor = 1.2; // Less competitive (multiply by 1.2 = 20% easier)
-  const neutralFactor = 1.0; // No adjustment
+  let rate = parseFloat(baseAcceptanceRate);
+  const competitiveMajorFactor = 0.7; // 30% harder
+  const lessFocusedMajorFactor = 1.2; // 20% easier
 
-  // No adjustment if no intended major specified
-  if (!intendedMajor) return baseAcceptanceRate;
+  if (!intendedMajor) return rate;
 
-  // STEM major at STEM-heavy school (highly competitive)
   if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') {
-    return baseAcceptanceRate * competitiveMajorFactor;
+    rate *= competitiveMajorFactor;
+  } else if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') {
+    rate *= competitiveMajorFactor;
+  } else if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') {
+    rate *= lessFocusedMajorFactor;
+  } else if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') {
+    rate *= lessFocusedMajorFactor;
   }
-
-  // Liberal Arts major at Liberal-arts school (competitive)
-  if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') {
-    return baseAcceptanceRate * competitiveMajorFactor;
-  }
-
-  // STEM major at Liberal-arts school (less competitive for STEM)
-  if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') {
-    return baseAcceptanceRate * lessFocusedMajorFactor;
-  }
-
-  // Liberal Arts major at STEM-heavy school (less competitive for Liberal Arts)
-  if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') {
-    return baseAcceptanceRate * lessFocusedMajorFactor;
-  }
-
-  // Default case - no adjustment
-  return baseAcceptanceRate;
+  return rate;
 };
 
 /**
  * Calculate the admission chance for a college based on student profile
- * @param {Object} student - Student profile data
+ * @param {Object} student - Student profile data (includes isEarlyDecision, isLegacy)
  * @param {Object} college - College data with stats and weights
  * @returns {Object} - Admission chance details
  */
@@ -98,25 +103,34 @@ export const calculateAdmissionChance = (student, college) => {
   try {
     const { stats, acceptanceRate, collegeType } = college;
 
-    // Base acceptance rate adjustment based on intended major
-    let adjustedAcceptanceRate = adjustAcceptanceRateByMajor(
-      acceptanceRate,
+    // 1. Start with the college's raw acceptance rate
+    let currentAcceptanceRate = parseFloat(acceptanceRate);
+    const originalBaseRate = currentAcceptanceRate; // Keep for ED/RD factor calculation logic if needed
+
+    // 2. Adjust for intended major
+    currentAcceptanceRate = adjustAcceptanceRateByMajor(
+      currentAcceptanceRate,
       student.intendedMajor,
       collegeType
     );
 
-    // Further adjust based on Early Decision / Regular Decision status
-    adjustedAcceptanceRate = adjustAcceptanceRateByEDRD(
-      adjustedAcceptanceRate,
-      student.isEarlyDecision
+    // 3. Adjust for strategic factors (ED/RD and Legacy)
+    // Pass the originalBaseRate to adjustAcceptanceRateByStrategicFactors if its internal logic
+    // for choosing ED multipliers depends on the college's raw selectivity,
+    // otherwise pass currentAcceptanceRate (major-adjusted) if multipliers apply to that.
+    // For simplicity, current implementation of adjustAcceptanceRateByStrategicFactors uses the rate passed to it
+    // for its <10, <20, >=20 logic. If that should be based on raw college selectivity, pass originalBaseRate.
+    // Let's assume the multipliers are based on the major-adjusted rate's tier.
+    currentAcceptanceRate = adjustAcceptanceRateByStrategicFactors(
+      currentAcceptanceRate, // This is now the major-adjusted rate
+      student.isEarlyDecision,
+      student.isLegacy
     );
 
-    const p0 = adjustedAcceptanceRate / 100; // Convert percentage to decimal
+    const p0 = currentAcceptanceRate / 100; // Convert percentage to decimal
 
-    // Use either college-specific weights or defaults based on college type
     const weights = stats.weights || getDefaultWeights(collegeType);
 
-    // Calculate Z-scores for student attributes
     const zScores = {
       gpa: calculateZScore(student.gpa, stats.gpa.mean, stats.gpa.stdDev),
       sat: calculateZScore(student.satTotal, stats.sat.mean, stats.sat.stdDev),
@@ -124,44 +138,32 @@ export const calculateAdmissionChance = (student, college) => {
       ec: calculateZScore(student.ecStrengthTotal, stats.ec.mean, stats.ec.stdDev)
     };
 
-    // Calculate Z-scores for fit and other factors (if available)
+    // Legacy is now handled in p0 calculation, so it's removed from fitScores for alignmentBlock
     const fitScores = {
       apFit: student.apFit ? calculateZScore(student.apFit, 2, 0.5) : 0,
       ecFit: student.ecFit ? calculateZScore(student.ecFit, 2, 0.5) : 0,
       rec: student.recScore ? calculateZScore(student.recScore, 2, 0.5) : 0,
-      legacy: student.isLegacy ? 1 : 0,
       demo: student.demoScore ? student.demoScore : 0
     };
 
-    // Calculate the "Strength" block
     const strengthBlock =
       weights.strength.gpa * zScores.gpa +
       weights.strength.sat * zScores.sat +
       weights.strength.ap * zScores.ap +
       weights.strength.ec * zScores.ec;
 
-    // Calculate the "Alignment" block
+    // Legacy term removed from alignmentBlock
     const alignmentBlock =
       weights.alignment.apFit * fitScores.apFit +
       weights.alignment.ecFit * fitScores.ecFit +
       weights.alignment.rec * fitScores.rec +
-      weights.alignment.legacy * fitScores.legacy +
-      weights.alignment.demo * fitScores.demo;
+      weights.alignment.demo * fitScores.demo; // weights.alignment.legacy is 0 or term is removed
 
-    // Calculate the final admission probability using the formula
     const exponent = strengthBlock + alignmentBlock;
     const probability = p0 * Math.exp(exponent);
-
-    // Generate bitter by coffee factor (randomness)
     const bitterByCoffeeFactor = generateBitterByCoffeeFactor(student.enableBitterByCoffee);
-
-    // Apply the bitter by coffee factor to the probability
     const adjustedProbability = probability * bitterByCoffeeFactor;
-
-    // Ensure probability is between 0 and 1
     const cappedProbability = Math.min(Math.max(adjustedProbability, 0), 1);
-
-    // Calculate how the student compares to the average applicant
     const comparisonToAverage = Math.exp(exponent);
 
     return {
@@ -175,56 +177,35 @@ export const calculateAdmissionChance = (student, college) => {
       strengthBlock,
       alignmentBlock,
       exponent,
-      isEarlyDecision: student.isEarlyDecision
+      isEarlyDecision: student.isEarlyDecision,
+      finalAdjustedAcceptanceRateForP0: currentAcceptanceRate
     };
   } catch (error) {
     console.error("Error calculating admission chance:", error);
     return {
       probability: 0,
       probabilityPercentage: 0,
-      error: true
+      error: true,
+      finalAdjustedAcceptanceRateForP0: parseFloat(college.acceptanceRate) // Fallback
     };
   }
 };
 
 /**
- * Get default weights based on college type
+ * Get default weights based on college type. Legacy weight set to 0 as its effect is now in p0.
  * @param {string} collegeType - 'Liberal-arts' or 'STEM-heavy'
  * @returns {Object} - Default weights for the college type
  */
 export const getDefaultWeights = (collegeType) => {
   if (collegeType === 'STEM-heavy') {
     return {
-      strength: {
-        gpa: 0.35,
-        sat: 0.30,
-        ap: 0.15,
-        ec: 0.20
-      },
-      alignment: {
-        apFit: 0.30,
-        ecFit: 0.20,
-        rec: 0.15,
-        legacy: 0.15,
-        demo: 0.20
-      }
+      strength: { gpa: 0.35, sat: 0.30, ap: 0.15, ec: 0.20 },
+      alignment: { apFit: 0.30, ecFit: 0.20, rec: 0.15, legacy: 0.0, demo: 0.20 }
     };
-  } else {
-    // Default to Liberal Arts weights
+  } else { // Default to Liberal Arts weights
     return {
-      strength: {
-        gpa: 0.30,
-        sat: 0.25,
-        ap: 0.15,
-        ec: 0.30
-      },
-      alignment: {
-        apFit: 0.25,
-        ecFit: 0.25,
-        rec: 0.20,
-        legacy: 0.15,
-        demo: 0.15
-      }
+      strength: { gpa: 0.30, sat: 0.25, ap: 0.15, ec: 0.30 },
+      alignment: { apFit: 0.25, ecFit: 0.25, rec: 0.20, legacy: 0.0, demo: 0.15 }
     };
   }
 };
@@ -235,31 +216,20 @@ export const getDefaultWeights = (collegeType) => {
  * @returns {Object} - Processed student data for calculations
  */
 export const prepareStudentData = (profileData) => {
-  // Calculate total SAT score
-  const satTotal = profileData.satReading + profileData.satMath;
+  const satTotal = (profileData.satReading || 0) + (profileData.satMath || 0);
+  const apCount = (profileData.apClasses || []).reduce((total, ap) => total + (ap.status === 'ongoing' ? 0.5 : 1), 0);
+  const ecStrengthTotal = (profileData.extracurriculars || []).reduce((total, ec) => total + (ec.level || 0), 0);
 
-  // Count AP classes (completed = 1, ongoing = 0.5)
-  const apCount = profileData.apClasses.reduce((total, ap) => {
-    return total + (ap.status === 'ongoing' ? 0.5 : 1);
-  }, 0);
-
-  // Calculate total EC strength
-  const ecStrengthTotal = profileData.extracurriculars.reduce((total, ec) => {
-    return total + ec.level;
-  }, 0);
-
-  // Calculate average AP fit with intended major category
-  const apFit = profileData.intendedMajor && profileData.apClasses.length > 0
-    ? profileData.apClasses.reduce((total, ap) => total + (ap.fitScore || 0), 0) / profileData.apClasses.length
+  const apFit = profileData.intendedMajor && (profileData.apClasses || []).length > 0
+    ? (profileData.apClasses || []).reduce((total, ap) => total + (ap.fitScore || 0), 0) / profileData.apClasses.length
     : 0;
 
-  // Calculate average EC fit with intended major category
-  const ecFit = profileData.intendedMajor && profileData.extracurriculars.length > 0
-    ? profileData.extracurriculars.reduce((total, ec) => total + (ec.fitScore || 0), 0) / profileData.extracurriculars.length
+  const ecFit = profileData.intendedMajor && (profileData.extracurriculars || []).length > 0
+    ? (profileData.extracurriculars || []).reduce((total, ec) => total + (ec.fitScore || 0), 0) / profileData.extracurriculars.length
     : 0;
 
   return {
-    gpa: profileData.gpa,
+    gpa: profileData.gpa || 0,
     satTotal,
     apCount,
     ecStrengthTotal,
@@ -270,7 +240,7 @@ export const prepareStudentData = (profileData) => {
     demoScore: profileData.demoScore || 0,
     intendedMajor: profileData.intendedMajor,
     enableBitterByCoffee: profileData.enableBitterByCoffee || false,
-    isEarlyDecision: profileData.isEarlyDecision || false  // Add Early Decision status
+    isEarlyDecision: profileData.isEarlyDecision || false
   };
 };
 
@@ -280,10 +250,10 @@ export const prepareStudentData = (profileData) => {
  * @returns {string} - Color code for UI display
  */
 export const getAdmissionChanceColor = (probability) => {
-  if (probability < 0.1) return 'error'; // Red
-  if (probability < 0.3) return 'warning'; // Orange/Amber
-  if (probability < 0.6) return 'info'; // Blue
-  return 'success'; // Green
+  if (probability < 0.1) return 'error';
+  if (probability < 0.3) return 'warning';
+  if (probability < 0.6) return 'info';
+  return 'success';
 };
 
 /**
@@ -292,13 +262,13 @@ export const getAdmissionChanceColor = (probability) => {
  * @returns {string} - Text description
  */
 export const getAdmissionChanceDescription = (probability) => {
-  if (probability < 0.05) return 'Reach++';
-  if (probability < 0.15) return 'Reach';
-  if (probability < 0.30) return 'High Reach';
-  if (probability < 0.50) return 'Target/Reach';
-  if (probability < 0.70) return 'Target';
-  if (probability < 0.85) return 'Safety/Target';
-  return 'Safety';
+  if (probability < 0.05) return 'Very Hard Reach'; // Changed from Reach++ for clarity
+  if (probability < 0.15) return 'Hard Reach';      // Changed from Reach
+  if (probability < 0.30) return 'Reach';           // Changed from High Reach
+  if (probability < 0.50) return 'Possible';      // Changed from Target/Reach
+  if (probability < 0.70) return 'Good Chance';   // Changed from Target
+  if (probability < 0.85) return 'Likely';        // Changed from Safety/Target
+  return 'Very Likely';                           // Changed from Safety
 };
 
 /**
@@ -308,21 +278,21 @@ export const getAdmissionChanceDescription = (probability) => {
  * @returns {string} - Match assessment ('Excellent', 'Good', 'Fair', or 'Poor')
  */
 export const getMajorMatchAssessment = (college, intendedMajor) => {
-  // Perfect match: STEM major applying to STEM-heavy college or Liberal Arts major applying to Liberal Arts college
+  if (!intendedMajor) return 'Good'; // Default if no major
+
   if ((intendedMajor === 'STEM' && college.collegeType === 'STEM-heavy') ||
-      (intendedMajor === 'Liberal Arts' && college.collegeType === 'Liberal-arts')) {
+    (intendedMajor === 'Liberal Arts' && college.collegeType === 'Liberal-arts')) {
     return 'Excellent';
   }
 
-  // Mismatch: STEM major applying to Liberal Arts college or vice versa
   if ((intendedMajor === 'STEM' && college.collegeType === 'Liberal-arts') ||
-      (intendedMajor === 'Liberal Arts' && college.collegeType === 'STEM-heavy')) {
+    (intendedMajor === 'Liberal Arts' && college.collegeType === 'STEM-heavy')) {
     // Check if the college has a strong program in the opposite category
-    const hasCrossDisciplinaryStrength = college.crossDisciplinaryStrengths &&
-      college.crossDisciplinaryStrengths.includes(intendedMajor);
-
-    return hasCrossDisciplinaryStrength ? 'Good' : 'Fair';
+    // This property 'crossDisciplinaryStrengths' would need to be added to your college data structure if used
+    // const hasCrossDisciplinaryStrength = college.crossDisciplinaryStrengths &&
+    //   college.crossDisciplinaryStrengths.includes(intendedMajor);
+    // return hasCrossDisciplinaryStrength ? 'Good' : 'Fair';
+    return 'Fair'; // If focusing strictly on primary type vs major
   }
-
-  return 'Good'; // Default if no major specified or other scenario
+  return 'Good'; // Default for other scenarios or if cross-disciplinary isn't detailed
 };
