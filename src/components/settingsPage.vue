@@ -3,37 +3,36 @@
     <!-- Header -->
     <v-row class="text-center py-6">
       <v-col cols="12">
-        <h1 class="text-h2 font-weight-bold mb-6 pt-5">Settings</h1>
+        <h1 class="text-h2 font-weight-bold mb-6 pt-5">{{ $t('settingsPage.settings') }}</h1>
         <p class="text-body-1 mb-6">
-          Manage your account settings and preferences
+          {{ $t('settingsPage.manageAccount') }}
         </p>
       </v-col>
     </v-row>
 
     <v-row>
       <!-- Not logged in state -->
-      <v-col v-if="!userStore.isAuthenticated" cols="12" class="text-center">
+      <v-col v-if="!userStore.isAuthenticated" cols="12" md="6" class="text-center">
         <v-card class="pa-6 mx-auto" max-width="500">
           <v-card-title class="text-h5 text-center">
-            Login Required
+            {{ $t('settingsPage.loginRequired') }}
           </v-card-title>
           <v-card-text class="text-center pa-4">
-            <p class="mb-6">Please login to access your account settings</p>
+            <p class="mb-6">{{ $t('settingsPage.pleaseLogin') }}</p>
             <v-btn color="primary" size="large" @click="openAuthModal">
-              Login
+              {{ $t('appMenu.login') }}
             </v-btn>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- Logged in state - Settings content -->
-      <template v-else>
-        <!-- Left panel - Account settings -->
+      <!-- Logged in state - Account settings (left panel) -->
+      <template v-if="userStore.isAuthenticated">
         <v-col cols="12" md="6">
           <v-card class="pa-4 mb-4" rounded="lg">
             <v-card-title class="text-h5">
               <v-icon icon="mdi-account-cog" class="mr-2"></v-icon>
-              Account Settings
+              {{ $t('settingsPage.accountSettings') }}
             </v-card-title>
             <v-divider class="my-3"></v-divider>
 
@@ -47,7 +46,7 @@
                 <div>
                   <v-file-input
                     v-model="profilePicture"
-                    label="Change Profile Picture"
+                    :label="$t('settingsPage.changeProfilePicture')"
                     accept="image/*"
                     prepend-icon="mdi-camera"
                     variant="outlined"
@@ -61,7 +60,7 @@
               <!-- Username -->
               <v-text-field
                 v-model="username"
-                label="Username"
+                :label="$t('settingsPage.username')"
                 required
                 prepend-inner-icon="mdi-account"
                 variant="outlined"
@@ -75,14 +74,13 @@
               <!-- Email -->
               <v-text-field
                 v-model="email"
-                label="Email"
+                :label="$t('settingsPage.email')"
                 type="email"
                 required
                 prepend-inner-icon="mdi-email"
                 variant="outlined"
                 class="mb-3"
               ></v-text-field>
-
 
               <!-- Save button -->
               <v-btn
@@ -93,7 +91,7 @@
                 :loading="loading"
                 class="mt-4"
               >
-                Save Profile
+                {{ $t('settingsPage.saveProfile') }}
               </v-btn>
             </v-form>
           </v-card>
@@ -102,14 +100,14 @@
           <v-card class="pa-4 mb-4" rounded="lg">
             <v-card-title class="text-h5">
               <v-icon icon="mdi-lock" class="mr-2"></v-icon>
-              Change Password
+              {{ $t('settingsPage.changePassword') }}
             </v-card-title>
             <v-divider class="my-3"></v-divider>
 
             <v-form @submit.prevent="changePassword">
               <v-text-field
                 v-model="currentPassword"
-                label="Current Password"
+                :label="$t('settingsPage.currentPassword')"
                 type="password"
                 required
                 prepend-inner-icon="mdi-lock-outline"
@@ -119,7 +117,7 @@
 
               <v-text-field
                 v-model="newPassword"
-                label="New Password"
+                :label="$t('settingsPage.newPassword')"
                 type="password"
                 required
                 prepend-inner-icon="mdi-lock"
@@ -130,7 +128,7 @@
 
               <v-text-field
                 v-model="confirmPassword"
-                label="Confirm New Password"
+                :label="$t('settingsPage.confirmNewPassword')"
                 type="password"
                 required
                 prepend-inner-icon="mdi-lock-check"
@@ -148,79 +146,41 @@
                 :disabled="!currentPassword || !newPassword || newPassword !== confirmPassword || newPassword.length < 8"
                 class="mt-4"
               >
-                Update Password
+                {{ $t('settingsPage.updatePassword') }}
               </v-btn>
             </v-form>
           </v-card>
         </v-col>
-
-        <!-- Right panel - App settings & Notifications -->
-        <v-col cols="12" md="6">
-          <v-card class="pa-4 mb-4" rounded="lg">
-            <v-card-title class="text-h5">
-              <v-icon icon="mdi-tune" class="mr-2"></v-icon>
-              Application Settings
-            </v-card-title>
-            <v-divider class="my-3"></v-divider>
-
-            <div class="text-h6 mt-4 mb-3">General</div>
-
-            <!-- Theme Preference -->
-            <v-switch
-              v-model="darkMode"
-              label="Dark Mode"
-              color="primary"
-              hide-details
-              class="mb-3"
-            ></v-switch>
-
-            <v-switch
-              v-model="enableNotifications"
-              label="Enable Notifications"
-              color="primary"
-              hide-details
-              class="mb-3"
-            ></v-switch>
-
-          </v-card>
-
-          <!-- Data Management -->
-          <v-card class="pa-4 mb-4" rounded="lg">
-            <v-card-title class="text-h5">
-              <v-icon icon="mdi-database" class="mr-2"></v-icon>
-              Data Management
-            </v-card-title>
-            <v-divider class="my-3"></v-divider>
-
-            <div class="pa-4">
-              <p class="text-body-1 mb-4">
-                Manage your data and account options
-              </p>
-
-              <v-btn
-                color="primary"
-                variant="outlined"
-                block
-                class="mb-3"
-                @click="exportData"
-              >
-                <v-icon class="mr-2">mdi-download</v-icon>
-                Export Your Data
-              </v-btn>
-
-              <v-btn
-                color="error"
-                variant="outlined"
-                block
-                @click="showDeleteConfirm = true"
-              >
-                <v-icon class="mr-2">mdi-delete</v-icon>
-                Delete Account
-              </v-btn>
-            </div>
-          </v-card>
-        </v-col>
       </template>
+
+      <!-- Right panel - App settings & Notifications (always visible) -->
+      <v-col cols="12" md="6">
+        <v-card class="pa-4 mb-4" rounded="lg">
+          <v-card-title class="text-h5">
+            <v-icon icon="mdi-tune" class="mr-2"></v-icon>
+            {{ $t('settingsPage.applicationSettings') }}
+          </v-card-title>
+          <v-divider class="my-3"></v-divider>
+
+          <div class="text-h6 mt-4 mb-3">General</div>
+
+          <!-- Language Selection -->
+          <v-select
+            v-model="selectedLanguage"
+            :label="$t('settingsPage.language')"
+            :items="languageOptions"
+            item-title="label"
+            item-value="value"
+            class="mb-3"
+            @update:model-value="changeLanguage"
+            hide-details
+            density="compact"
+          ></v-select>
+
+        </v-card>
+
+      
+      </v-col>
     </v-row>
 
     <!-- Success/Error Alerts -->
@@ -235,7 +195,7 @@
           variant="text"
           @click="showAlert = false"
         >
-          Close
+          {{ $t('settingsPage.close') }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -244,7 +204,7 @@
     <v-dialog v-model="showDeleteConfirm" max-width="500">
       <v-card>
         <v-card-title class="text-h5 bg-error text-white">
-          Delete Account
+          {{ $t('settingsPage.deleteAccountConfirm') }}
         </v-card-title>
         <v-card-text class="pa-4 mt-4">
           <p class="text-body-1">
@@ -252,7 +212,7 @@
           </p>
           <v-text-field
             v-model="deleteConfirmText"
-            label="Type 'DELETE' to confirm"
+            :label="$t('settingsPage.typeDelete')"
             variant="outlined"
             class="mt-4"
           ></v-text-field>
@@ -260,7 +220,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="showDeleteConfirm = false">
-            Cancel
+            {{ $t('settingsPage.cancel') }}
           </v-btn>
           <v-btn
             color="error"
@@ -268,7 +228,7 @@
             :disabled="deleteConfirmText !== 'DELETE'"
             @click="deleteAccount"
           >
-            Delete My Account
+            {{ $t('settingsPage.deleteMyAccount') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -285,9 +245,11 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import AuthModal from '@/components/AuthModal.vue';
 import api from '@/api';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const userStore = useUserStore();
+const { locale } = useI18n();
 
 // Auth modal control
 const showAuthModal = ref(false);
@@ -314,6 +276,21 @@ const showAlert = ref(false);
 const alertMessage = ref('');
 const alertType = ref('success');
 const showDeleteConfirm = ref(false);
+
+const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: '中文', value: 'zh' }
+];
+const selectedLanguage = ref(localStorage.getItem('app_language') || locale.value || 'en');
+
+const changeLanguage = (lang) => {
+  locale.value = lang;
+  localStorage.setItem('app_language', lang);
+};
+
+watch(selectedLanguage, (lang) => {
+  changeLanguage(lang);
+});
 
 // Helper function for handling file uploads
 const handleFileChange = (file) => {
@@ -359,6 +336,11 @@ onMounted(() => {
   if (userStore.isAuthenticated) {
     initializeForm();
   }
+  // Only update the dropdown value, not the global locale
+  const savedLang = localStorage.getItem('app_language');
+  if (savedLang && savedLang !== selectedLanguage.value) {
+    selectedLanguage.value = savedLang;
+  }
 });
 
 // Open authentication modal
@@ -380,7 +362,7 @@ const saveProfile = async () => {
     };
 
     // If there's a new profile picture, we would typically upload it
-    // Since we don't have an endpoint, we'll just show a message
+    // Since we don't have an endpoint, we'll just update the UI with the preview
     if (profilePicture.value) {
       // In a real app, you'd upload this file to the server
       // For now, we'll just update the UI with the preview

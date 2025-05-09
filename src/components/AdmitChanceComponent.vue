@@ -294,7 +294,7 @@
                 </div>
                 <div class="text-caption mt-1" v-if="localIsLegacy">
                   <v-icon size="x-small" color="purple" class="mr-1">mdi-account-group</v-icon>
-                  Legacy Status provides an additional boost (e.g., ~1.2x) to admission chances.
+                  Legacy Status provides an additional boost (e.g., ~1.5x) to admission chances.
                 </div>
                 <div class="text-caption mt-1">
                   The "Final adjusted rate" is used as the starting point ($p_0$) for the overall chance calculation.
@@ -407,8 +407,13 @@
             <template v-slot:prepend><v-icon color="orange-darken-2" class="mr-2">mdi-numeric-3-box</v-icon></template>
             <v-list-item-title><strong>Final Probability Calculation</strong></v-list-item-title>
             <v-list-item-subtitle>
-              The final chance is roughly: <code>Adjusted Base Rate (p<sub>0</sub>) * e<sup>(Strength Score + Alignment Score)</sup></code>.
-              This means your profile's strength and alignment act as a multiplier on the adjusted base rate.
+              The final chance calculation varies by college selectivity:
+              <ul class="my-1 ml-4" style="list-style-type: disc;">
+                <li><strong>Highly Selective Schools (< 20%):</strong> Uses exponential model: <code>Adjusted Base Rate (p<sub>0</sub>) * e<sup>(Strength Score + Alignment Score)</sup></code></li>
+                <li><strong>Moderately Selective (20-50%):</strong> Uses a blended approach with dampened exponential effects for more conservative estimates</li>
+                <li><strong>Less Selective (> 50%):</strong> Uses a highly conservative approach with reduced baseline probabilities and limited impact from profile strength</li>
+              </ul>
+              This tiered approach ensures more accurate and appropriately conservative predictions across different types of schools.
             </v-list-item-subtitle>
           </v-list-item>
 
@@ -429,6 +434,7 @@
           <li><strong>Holistic Review:</strong> Many qualitative factors (essays, interviews, unique talents, letters of recommendation details, demonstrated interest) are difficult to quantify and play a crucial role, especially at selective institutions. This calculator simplifies these aspects.</li>
           <li><strong>Weighting Assumptions:</strong> The importance (weights) of different factors (GPA, test scores, ECs) are generalized. Actual colleges may have different priorities.</li>
           <li><strong>Dynamic Landscape:</strong> Admission criteria and competitiveness can change year to year.</li>
+          <li><strong>School Selectivity Matters:</strong> Less selective schools often have more straightforward admissions criteria and our algorithm now better accounts for these differences.</li>
         </ul>
         <p class="mt-3 text-caption">
           Use this calculator as one tool among others to gauge potential fit and chance, but always research individual college requirements and consult with counselors.
@@ -651,9 +657,9 @@ const saveButtonText = computed(() => {
   if (isInEarlyDecision.value) return 'Remove from Early Decision';
   if (isInRegularDecision.value) return 'Remove from Regular Decision';
   if (collegeChance.value && collegeChance.value.probability > 0.3) {
-    return 'Save to Regular Decision';
+    return 'Save to RD';
   }
-  return 'Save to Early Decision';
+  return 'Save to ED';
 });
 
 const saveButtonColor = computed(() => {

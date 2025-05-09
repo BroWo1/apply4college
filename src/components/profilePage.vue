@@ -265,7 +265,7 @@
           <v-list v-else>
             <v-list-item v-for="(activity, i) in extracurriculars" :key="i">
               <template v-slot:prepend>
-                <v-chip :color="getActivityLevelColor(activity.level)" size="small" class="mx-3">
+                <v-chip :color="getActivityLevelColor(activity.level, activity.name)" size="small" class="mx-3">
                   {{ activity.level }}
                 </v-chip>
               </template>
@@ -303,7 +303,7 @@
                   <v-slider
                     v-model="newActivityLevel"
                     :min="1"
-                    :max="4"
+                    :max="currentNewActivityMaxLevel"
                     :step="1"
                     thumb-label
                     :thumb-size="20"
@@ -449,6 +449,33 @@ const newActivity = ref("");
 const newActivityLevel = ref(2);
 const activityDialog = ref(false);
 
+const isSpecialActivityType = (activityName) => {
+  if (!activityName) return false;
+  const nameLower = activityName.toLowerCase();
+  return nameLower.includes('research') || nameLower.includes('competition');
+};
+
+const currentNewActivityMaxLevel = computed(() => {
+  return isSpecialActivityType(newActivity.value) ? 5 : 4;
+});
+
+watch(currentNewActivityMaxLevel, (newMax) => {
+  if (newActivityLevel.value > newMax) {
+    newActivityLevel.value = newMax;
+  }
+});
+
+// Watch newActivity to reset level if type changes, or cap if already set
+watch(newActivity, (val) => {
+    // When activity changes, adjust level to be within new max, or default for new type
+    const max = isSpecialActivityType(val) ? 5 : 4;
+    if (newActivityLevel.value > max) {
+        newActivityLevel.value = max;
+    }
+    // Optional: reset to a default like 2 if you prefer when type changes
+    // else if (newActivityLevel.value < 1) newActivityLevel.value = 1;
+}, { immediate: false });
+
 const studentProfile = computed(() => {
   return {
     satReading: satReading.value,
@@ -509,13 +536,11 @@ watch(
   studentProfile,
   (newValue, oldValue) => {
     if (initialLoadComplete.value) {
-      // A simple check to ensure oldValue is not empty, indicating it's not the first paint after load
-      // This helps prevent saving if the initial studentProfile matches exactly what was loaded.
-      // JSON.stringify can be intensive for very large objects but is robust for comparison.
-      if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-        console.log('Profile data changed, queuing auto-save...');
-        debouncedAutoSave();
-      }
+      // If the watcher fires after initial load, assume a relevant change.
+      // Vue's deep watcher should ensure it fires on actual data changes within studentProfile.
+      // The previous JSON.stringify comparison might have been too restrictive for array mutations.
+      console.log('Profile data changed (watcher fired), queuing auto-save...');
+      debouncedAutoSave();
     }
   },
   { deep: true }
@@ -630,15 +655,31 @@ const getActivityMajorMatchColor = (activityName) => {
   return 'warning';
 };
 
-const getActivityLevelColor = (level) => {
-  if (level === 4) return "success";
-  if (level === 3) return "info";
-  if (level === 2) return "warning";
-  return "grey";
+const getActivityLevelColor = (level, activityName = "") => {
+  const special = isSpecialActivityType(activityName);
+  if (special) { // Max 5 for special types
+    if (level === 5) return "success";
+    if (level === 4) return "info";
+    if (level === 3) return "warning";
+    if (level === 2) return "grey-darken-1";
+    return "grey"; // Level 1
+  } else { // Max 4 for normal types
+    if (level === 4) return "success";
+    if (level === 3) return "info";
+    if (level === 2) return "warning";
+    return "grey"; // Level 1
+  }
 };
 
 const getLevelDescription = (level) => {
-  const levelDescriptions = { 1: 'Average', 2: 'Somewhat Strong', 3: 'Strong', 4: 'Very Strong' };
+  // Descriptions are now universal up to 5; slider max controls availability of level 5
+  const levelDescriptions = {
+    1: 'Average / Participation',
+    2: 'Somewhat Strong / Notable Achievement',
+    3: 'Strong / Significant Award',
+    4: 'Very Strong / High Distinction',
+    5: 'Exceptional / Top Tier'
+  };
   return levelDescriptions[level] || '';
 };
 

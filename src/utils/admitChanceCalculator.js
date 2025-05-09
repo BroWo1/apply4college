@@ -23,7 +23,7 @@ export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
 };
 
 // Define legacy boost factor
-const LEGACY_BOOST_FACTOR = 1.3; // Example: 20% increase in chances if legacy
+const LEGACY_BOOST_FACTOR = 1.5; // 50% increase in chances if legacy
 
 /**
  * Adjust college acceptance rate based on Early Decision, Legacy status.
@@ -38,22 +38,22 @@ export const adjustAcceptanceRateByStrategicFactors = (baseAcceptanceRate, isEar
   // Apply Early Decision / Regular Decision Boost/Adjustment
   if (isEarlyDecision) {
     // Early Decision typically improves acceptance chances
-    if (baseAcceptanceRate < 10) { // Use the initial base rate for decision logic for multipliers
-      adjustedRate *= 1.5; // For more selective schools (under 10%), ED advantage is greater
-    } else if (baseAcceptanceRate < 20) {
-      adjustedRate *= 1.35; // For moderately selective schools (10-20%)
+    if (baseAcceptanceRate < 20) { // Use the initial base rate for decision logic for multipliers
+      adjustedRate *= 1.5; // For more selective schools (under 20%), ED advantage is greater
+    } else if (baseAcceptanceRate < 40) {
+      adjustedRate *= 1.25; // For moderately selective schools (20-40%)
     } else {
-      adjustedRate *= 1.15; // For less selective schools (above 20%)
+      adjustedRate *= 1.1; // For less selective schools (over 50%) - minimal ED advantage
     }
   } else {
     // Regular Decision: Apply adjustments if ED provides a significant boost.
     // These factors represent the 'cost' of not applying ED to schools where ED has an advantage.
-    if (baseAcceptanceRate < 10) {
+    if (baseAcceptanceRate < 20) {
       adjustedRate *= 0.8;
-    } else if (baseAcceptanceRate < 20) {
+    } else if (baseAcceptanceRate < 40) {
       adjustedRate *= 0.85;
     } else {
-      adjustedRate *= 0.9;
+      adjustedRate *= 0.95; // Minimal penalty for not using ED at less selective schools
     }
   }
 
@@ -160,7 +160,35 @@ export const calculateAdmissionChance = (student, college) => {
       weights.alignment.demo * fitScores.demo; // weights.alignment.legacy is 0 or term is removed
 
     const exponent = strengthBlock + alignmentBlock;
-    const probability = p0 * Math.exp(exponent);
+    
+    // Adjust probability calculation based on school selectivity
+    let probability;
+    if (originalBaseRate >= 50) {
+      // For less selective schools, use a more conservative approach
+      // This prevents overly high probabilities for schools with high acceptance rates
+      const baseChance = p0 * 0.75; // Reduced from 0.9 to 0.75 - only 75% of acceptance rate as base
+      
+      // Make exponent impact more conservative for less selective schools
+      const conservativeExponent = Math.min(exponent, 1.5); // Cap the exponent effect
+      
+      // Use a more conservative formula for high acceptance rate schools
+      if (originalBaseRate >= 70) {
+        // For very high acceptance rate schools, be even more conservative
+        probability = baseChance + (1 - baseChance) * (0.5 + 0.25 * Math.tanh(conservativeExponent));
+      } else {
+        // For moderately high acceptance rate schools
+        probability = baseChance + (1 - baseChance) * (0.6 + 0.3 * Math.tanh(conservativeExponent));
+      }
+    } else if (originalBaseRate >= 20) {
+      // For moderately selective schools, use a blend of exponential and linear approaches
+      const baseChance = p0 * 0.7; // Reduced from 0.8 to 0.7
+      const expComponent = p0 * Math.exp(exponent * 0.7); // Further dampened exponential effect
+      probability = baseChance + (expComponent - baseChance) * 0.7; // Weighted average with more conservative weight
+    } else {
+      // For highly selective schools, keep the original exponential model
+      probability = p0 * Math.exp(exponent);
+    }
+    
     const bitterByCoffeeFactor = generateBitterByCoffeeFactor(student.enableBitterByCoffee);
     const adjustedProbability = probability * bitterByCoffeeFactor;
     const cappedProbability = Math.min(Math.max(adjustedProbability, 0), 1);

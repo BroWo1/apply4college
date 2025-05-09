@@ -31,7 +31,7 @@
           :class="textSizeClass"
         >
           <v-icon :icon="item.icon" class="mr-2"></v-icon>
-          {{ item.title }}
+          {{ $t('appMenu.' + item.title) }}
         </v-tab>
       </v-tabs>
     </div>
@@ -42,17 +42,17 @@
       v-if="isDevelopment"
       icon
       @click="showSchoolsDialog = true"
-      title="Show Schools (Dev)"
+      :title="$t('appMenu.showSchoolsDev')"
       class="mr-2 d-none d-sm-flex" >
       <v-icon>mdi-school</v-icon>
     </v-btn>
 
     <div class="d-flex align-center">
       <div v-if="!userStore.isAuthenticated" class="d-none d-sm-flex align-center"> <v-btn color="primary" variant="text" @click="openAuthModal('login')">
-        Login
+        {{ $t('appMenu.login') }}
       </v-btn>
         <v-btn color="primary" variant="outlined" class="ml-2 mr-3" @click="openAuthModal('register')">
-          Register
+          {{ $t('appMenu.register') }}
         </v-btn>
       </div>
 
@@ -63,7 +63,7 @@
         location="bottom"
       >
         <template v-slot:activator="{ props }">
-          <div class="d-flex align-center mr-1" v-bind="props"> <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.username }}</span>
+          <div class="d-flex align-center mr-1" v-bind="props"> <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.isAuthenticated ? userStore.username : $t('appMenu.guest') }}</span>
             <v-avatar size="40" :class="{'mr-2': breakpoint !== 'xs'}"> <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
               <v-icon v-else icon="mdi-account" />
             </v-avatar>
@@ -71,10 +71,10 @@
         </template>
         <v-card min-width="200">
           <v-list>
-            <v-list-item prepend-icon="mdi-account" title="Profile" :to="'/profile'"></v-list-item>
-            <v-list-item prepend-icon="mdi-cog" title="Settings" :to="'/settings'"></v-list-item>
+            <v-list-item prepend-icon="mdi-account" :title="$t('appMenu.profile')" :to="'/profile'"></v-list-item>
+            <v-list-item prepend-icon="mdi-cog" :title="$t('appMenu.settings')" :to="'/settings'"></v-list-item>
             <v-divider></v-divider>
-            <v-list-item prepend-icon="mdi-logout" title="Logout" @click="logout"></v-list-item>
+            <v-list-item prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout"></v-list-item>
           </v-list>
         </v-card>
       </v-menu>
@@ -93,7 +93,7 @@
   >
     <v-list>
       <v-list-item
-        :title="userStore.isAuthenticated ? userStore.username : 'Guest'"
+        :title="userStore.isAuthenticated ? userStore.username : $t('appMenu.guest')"
       >
         <template v-slot:prepend>
           <v-avatar size="40">
@@ -109,7 +109,7 @@
         v-for="item in menuItems"
         :key="item.title"
         :prepend-icon="item.icon"
-        :title="item.title"
+        :title="$t('appMenu.' + item.title)"
         :to="item.to"
         :value="item.value"
         @click="mobileDrawer = false" ></v-list-item>
@@ -117,16 +117,16 @@
       <v-list-item
         v-if="isDevelopment"
         prepend-icon="mdi-school"
-        title="Show Schools (Dev)"
+        :title="$t('appMenu.showSchoolsDev')"
         @click="showSchoolsDialog = true; mobileDrawer = false" ></v-list-item>
 
       <v-divider></v-divider>
 
       <template v-if="!userStore.isAuthenticated">
-        <v-list-item prepend-icon="mdi-login" title="Login" @click="openAuthModal('login'); mobileDrawer = false"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus" title="Register" @click="openAuthModal('register'); mobileDrawer = false"></v-list-item>
+        <v-list-item prepend-icon="mdi-login" :title="$t('appMenu.login')" @click="openAuthModal('login'); mobileDrawer = false"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-plus" :title="$t('appMenu.register')" @click="openAuthModal('register'); mobileDrawer = false"></v-list-item>
       </template>
-      <v-list-item v-else prepend-icon="mdi-logout" title="Logout" @click="logout(); mobileDrawer = false"></v-list-item>
+      <v-list-item v-else prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout(); mobileDrawer = false"></v-list-item>
     </v-list>
   </v-navigation-drawer>
 
@@ -139,7 +139,7 @@
   <v-dialog v-model="showSchoolsDialog" max-width="800px" v-if="isDevelopment">
     <v-card>
       <v-card-title>
-        <span class="headline">Schools Component (Dev View)</span>
+        <span class="headline">{{ $t('appMenu.schoolsComponentDev') }}</span>
         <v-spacer></v-spacer>
         <v-btn icon @click="showSchoolsDialog = false">
           <v-icon>mdi-close</v-icon>
@@ -160,6 +160,9 @@ import { useUserStore } from '@/stores/user' // Assuming path is correct
 import Schools from '@/components/Schools.vue'    // Assuming path is correct
 import AuthModal from '@/components/AuthModal.vue' // Assuming path is correct
 import { useRouter } from 'vue-router' // Import for navigation
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n();
 
 const userStore = useUserStore()
 const router = useRouter() // Initialize router
@@ -212,27 +215,25 @@ const textSizeClass = computed(() => {
 
 const menuItems = [
   {
-    title: 'Home',
+    title: 'home',
     icon: 'mdi-view-dashboard',
     value: 'home',
     to: '/home',
   },
   {
-    title: 'Explore',
+    title: 'explore',
     icon: 'mdi-folder',
     value: 'explore',
     to: '/explore',
   },
-  // Profile and Settings are often in user menu, but can be tabs too
-  // For this example, keeping them as tabs as in original
   {
-    title: 'Profile',
-    icon: 'mdi-account-group', // Consider mdi-account for user's own profile
+    title: 'profile',
+    icon: 'mdi-account-group',
     value: 'profile',
     to: '/profile',
   },
   {
-    title: 'Settings',
+    title: 'settings',
     icon: 'mdi-cog',
     value: 'settings',
     to: '/settings',

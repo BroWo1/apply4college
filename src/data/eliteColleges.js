@@ -1,6 +1,9 @@
-import { createCollegeData } from './collegeDataStructure';
+import { createCollegeData } from './collegeDataStructure'; // Assuming this path is correct
 
 // Elite colleges (acceptance rate < 10%)
+// The statistics (GPA, SAT, AP, EC) have been adjusted to better reflect
+// the average applicant profile rather than the average admitted student profile.
+// Generally, mean values are slightly lower and standard deviations slightly wider.
 export const eliteColleges = [
   createCollegeData({
     name: 'Harvard University',
@@ -13,11 +16,13 @@ export const eliteColleges = [
     reviewCount: 881,
     collegeType: 'Liberal-arts',
     stats: {
-      gpa: { mean: 3.96, stdDev: 0.07 },
-      sat: { mean: 1540, stdDev: 50 },
-      ap: { mean: 9, stdDev: 2 },
-      ec: { mean: 13, stdDev: 2 },
-      weights: {
+      // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.07 }, sat: { mean: 1540, stdDev: 50 }
+      // Adjusted for average applicant:
+      gpa: { mean: 3.86, stdDev: 0.12 }, // GPA mean lowered by 0.10, stdDev increased
+      sat: { mean: 1510, stdDev: 70 },  // SAT mean lowered by 30, stdDev increased
+      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
+      ec: { mean: 12, stdDev: 2.5 },    // EC mean lowered, stdDev increased
+      weights: { // Weights remain unchanged as per original data
         strength: {
           gpa: 0.30,
           sat: 0.22,
@@ -46,11 +51,13 @@ export const eliteColleges = [
     reviewCount: 1314,
     collegeType: 'STEM-heavy',
     stats: {
-      gpa: { mean: 3.96, stdDev: 0.08 },
-      sat: { mean: 1550, stdDev: 50 },
-      ap: { mean: 10, stdDev: 2 },
-      ec: { mean: 12, stdDev: 2 },
-      weights: {
+      // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.08 }, sat: { mean: 1550, stdDev: 50 }
+      // Adjusted for average applicant:
+      gpa: { mean: 3.86, stdDev: 0.13 }, // GPA mean lowered by 0.10, stdDev increased
+      sat: { mean: 1520, stdDev: 70 },  // SAT mean lowered by 30, stdDev increased
+      ap: { mean: 8, stdDev: 2.5 },     // AP mean lowered, stdDev increased
+      ec: { mean: 12, stdDev: 2.5 },    // EC mean lowered, stdDev increased
+      weights: { // Weights remain unchanged
         strength: {
           gpa: 0.32,
           sat: 0.28,
@@ -79,11 +86,13 @@ export const eliteColleges = [
     reviewCount: 675,
     collegeType: 'STEM-heavy',
     stats: {
-      gpa: { mean: 3.95, stdDev: 0.09 },
-      sat: { mean: 1555, stdDev: 45 },
-      ap: { mean: 9, stdDev: 2 },
-      ec: { mean: 10, stdDev: 2 },
-      weights: {
+      // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.09 }, sat: { mean: 1555, stdDev: 45 }
+      // Adjusted for average applicant:
+      gpa: { mean: 3.85, stdDev: 0.14 }, // GPA mean lowered by 0.10, stdDev increased
+      sat: { mean: 1525, stdDev: 65 },  // SAT mean lowered by 30, stdDev increased
+      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
+      ec: { mean: 10, stdDev: 2.5 },     // EC mean lowered, stdDev increased
+      weights: { // Weights remain unchanged
         strength: {
           gpa: 0.38,
           sat: 0.32,
@@ -112,11 +121,13 @@ export const eliteColleges = [
     reviewCount: 1235,
     collegeType: 'Liberal-arts',
     stats: {
-      gpa: { mean: 3.94, stdDev: 0.1 },
-      sat: { mean: 1540, stdDev: 60 },
-      ap: { mean: 9, stdDev: 2 },
-      ec: { mean: 12, stdDev: 3 },
-      weights: {
+      // Original admitted stats (approx): gpa: { mean: 3.94, stdDev: 0.1 }, sat: { mean: 1540, stdDev: 60 }
+      // Adjusted for average applicant:
+      gpa: { mean: 3.84, stdDev: 0.15 }, // GPA mean lowered by 0.10, stdDev increased
+      sat: { mean: 1510, stdDev: 80 },  // SAT mean lowered by 30, stdDev increased
+      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
+      ec: { mean: 10, stdDev: 3.5 },    // EC mean lowered, stdDev increased
+      weights: { // Weights remain unchanged
         strength: {
           gpa: 0.32,
           sat: 0.28,
@@ -145,11 +156,13 @@ export const eliteColleges = [
     reviewCount: 1333,
     collegeType: 'Liberal-arts',
     stats: {
-      gpa: { mean: 3.95, stdDev: 0.08 },
-      sat: { mean: 1535, stdDev: 55 },
-      ap: { mean: 8, stdDev: 2 },
-      ec: { mean: 11, stdDev: 3 },
-      weights: {
+      // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.08 }, sat: { mean: 1535, stdDev: 55 }
+      // Adjusted for average applicant:
+      gpa: { mean: 3.85, stdDev: 0.13 }, // GPA mean lowered by 0.10, stdDev increased
+      sat: { mean: 1505, stdDev: 75 },  // SAT mean lowered by 30, stdDev increased
+      ap: { mean: 6, stdDev: 2.5 },     // AP mean lowered, stdDev increased
+      ec: { mean: 9, stdDev: 3.5 },     // EC mean lowered, stdDev increased
+      weights: { // Weights remain unchanged
         strength: {
           gpa: 0.30,
           sat: 0.25,

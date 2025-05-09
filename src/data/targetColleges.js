@@ -16,7 +16,7 @@ export const targetColleges = [
       gpa: { mean: 3.89, stdDev: 0.12 },
       sat: { mean: 1480, stdDev: 70 },
       ap: { mean: 7, stdDev: 2 },
-      ec: { mean: 9, stdDev: 3 },
+      ec: { mean: 10, stdDev: 3 },
       weights: {
         strength: {
           gpa: 0.35,
@@ -49,7 +49,7 @@ export const targetColleges = [
       gpa: { mean: 3.85, stdDev: 0.15 },
       sat: { mean: 1460, stdDev: 75 },
       ap: { mean: 6, stdDev: 2 },
-      ec: { mean: 8, stdDev: 3 },
+      ec: { mean: 9, stdDev: 3 },
       weights: {
         strength: {
           gpa: 0.32,
@@ -114,7 +114,7 @@ export const targetColleges = [
       gpa: { mean: 3.85, stdDev: 0.14 },
       sat: { mean: 1510, stdDev: 65 },
       ap: { mean: 8, stdDev: 2 },
-      ec: { mean: 9, stdDev: 3 },
+      ec: { mean: 10, stdDev: 3 },
       weights: {
         strength: {
           gpa: 0.35,

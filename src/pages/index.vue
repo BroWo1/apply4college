@@ -6,10 +6,10 @@
         <v-row>
           <v-col cols="12" md="8">
             <h1 class="text-h3 text-md-h2 font-weight-bold">
-              Simplify Your College Journey with A4C
+              {{ $t('indexPage.title') }}
             </h1>
             <p class="text-h6 text-grey-darken-1 font-weight-regular mb-4">
-              Apply4College.org provides the tools and insights you need to navigate the application process with confidence.
+              {{ $t('indexPage.subtitle') }}
             </p>
             <!-- Added Get Started button -->
             <v-btn
@@ -20,7 +20,7 @@
               class="mb-10 mt-2"
               append-icon="mdi-arrow-right"
             >
-              Get Started
+              {{ $t('indexPage.getStarted') }}
             </v-btn>
           </v-col>
           <v-col cols="12" md="4" class="text-center text-md-end d-flex justify-md-end align-center">
@@ -34,23 +34,23 @@
       <!-- Feature Card 1: Core Tools -->
       <v-col cols="12" md="5">
         <v-card class="feature-card pa-6" flat border rounded="lg">
-          <v-card-title class="text-h5 font-weight-medium mb-4">Explore & Analyze</v-card-title>
+          <v-card-title class="text-h5 font-weight-medium mb-4">{{ $t('indexPage.exploreAnalyze') }}</v-card-title>
           <v-list density="compact" bg-color="transparent">
             <v-list-item prepend-icon="mdi-school" class="mb-2">
-              <v-list-item-title class="font-weight-regular">Comprehensive College Database</v-list-item-title>
-              <v-list-item-subtitle>Access detailed profiles.</v-list-item-subtitle>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.collegeDb') }}</v-list-item-title>
+              <v-list-item-subtitle>{{ $t('indexPage.collegeDbSub') }}</v-list-item-subtitle>
             </v-list-item>
             <v-list-item prepend-icon="mdi-calculator-variant" class="mb-2">
-              <v-list-item-title class="font-weight-regular">Admissions Chance Calculator</v-list-item-title>
-              <v-list-item-subtitle>Estimate acceptance likelihood.</v-list-item-subtitle>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.chanceCalc') }}</v-list-item-title>
+              <v-list-item-subtitle>{{ $t('indexPage.chanceCalcSub') }}</v-list-item-subtitle>
             </v-list-item>
              <v-list-item prepend-icon="mdi-lightbulb-on-outline">
-                <v-list-item-title class="font-weight-regular">AI-Powered Advisor</v-list-item-title>
-                <v-list-item-subtitle>Get instant answers.</v-list-item-subtitle>
+                <v-list-item-title class="font-weight-regular">{{ $t('indexPage.aiAdvisor') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('indexPage.aiAdvisorSub') }}</v-list-item-subtitle>
               </v-list-item>
           </v-list>
           <v-card-actions class="mt-4">
-            <v-btn color="primary" variant="elevated" to="/explore" block>Explore Colleges</v-btn>
+            <v-btn color="primary" variant="elevated" to="/explore" block>{{ $t('indexPage.exploreColleges') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -58,23 +58,23 @@
       <!-- Feature Card 2: Personalization -->
       <v-col cols="12" md="5">
         <v-card class="feature-card pa-6" flat border rounded="lg">
-          <v-card-title class="text-h5 font-weight-medium mb-4">Organize & Plan</v-card-title>
+          <v-card-title class="text-h5 font-weight-medium mb-4">{{ $t('indexPage.organizePlan') }}</v-card-title>
            <v-list density="compact" bg-color="transparent">
              <v-list-item prepend-icon="mdi-format-list-checks" class="mb-2">
-                <v-list-item-title class="font-weight-regular">Personalized College Lists</v-list-item-title>
-                <v-list-item-subtitle>Save and categorize schools.</v-list-item-subtitle>
+                <v-list-item-title class="font-weight-regular">{{ $t('indexPage.personalLists') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('indexPage.personalListsSub') }}</v-list-item-subtitle>
               </v-list-item>
               <v-list-item prepend-icon="mdi-account-circle" class="mb-2">
-                <v-list-item-title class="font-weight-regular">Profile Management</v-list-item-title>
-                <v-list-item-subtitle>Keep your info organized.</v-list-item-subtitle>
+                <v-list-item-title class="font-weight-regular">{{ $t('indexPage.profileMgmt') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('indexPage.profileMgmtSub') }}</v-list-item-subtitle>
               </v-list-item>
                <v-list-item prepend-icon="mdi-calendar-check" class="mb-2">
-                <v-list-item-title class="font-weight-regular">Deadline Tracking</v-list-item-title>
-                <v-list-item-subtitle>Manage application dates.</v-list-item-subtitle>
+                <v-list-item-title class="font-weight-regular">{{ $t('indexPage.deadlineTracking') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('indexPage.deadlineTrackingSub') }}</v-list-item-subtitle>
               </v-list-item>
           </v-list>
           <v-card-actions class="mt-4">
-             <v-btn color="secondary" variant="outlined" to="/profile" block>Update Your Profile</v-btn>
+             <v-btn color="secondary" variant="outlined" to="/profile" block>{{ $t('indexPage.updateProfile') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -83,9 +83,9 @@
      <!-- Developer Team Section -->
      <v-row justify="center" class="mt-12">
        <v-col cols="12" md="10" class="text-center mb-6">
-         <h2 class="text-h4 font-weight-bold">Meet Our Team</h2>
+         <h2 class="text-h4 font-weight-bold">{{ $t('indexPage.meetTeam') }}</h2>
          <p class="text-subtitle-1 text-grey-darken-1">
-           The high school developers behind Apply 4 College
+           {{ $t('indexPage.teamSubtitle') }}
          </p>
        </v-col>
      </v-row>
@@ -99,19 +99,19 @@
               <v-img src="@/assets/will.jpg" alt="Frontend Developer"></v-img>
             </v-avatar>
             <v-card-title class="text-h5 font-weight-medium text-center pa-0">Will Li</v-card-title>
-            <span class="text-subtitle-2 text-grey-darken-1">Frontend Developer</span>
+            <span class="text-subtitle-2 text-grey-darken-1">{{ $t('indexPage.frontendDev') }}</span>
           </div>
           <v-list density="compact" bg-color="transparent">
             <v-list-item prepend-icon="mdi-school" class="mb-2">
-              <v-list-item-title class="font-weight-regular">Tsinghua International School</v-list-item-title>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.school') }}</v-list-item-title>
             </v-list-item>
             <v-list-item prepend-icon="mdi-briefcase" class="mb-2">
-              <v-list-item-title class="font-weight-regular">GPE Club</v-list-item-title>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.gpeClub') }}</v-list-item-title>
             </v-list-item>
           </v-list>
           <v-card-actions class="mt-4">
             <v-btn color="primary" variant="outlined" href="https://github.com/browo1" target="_blank" block>
-              <v-icon start>mdi-github</v-icon> GitHub Profile
+              <v-icon start>mdi-github</v-icon> {{ $t('indexPage.githubProfile') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -125,19 +125,19 @@
               <v-img src="@/assets/andy.jpg" alt="Frontend Engineer"></v-img>
             </v-avatar>
             <v-card-title class="text-h5 font-weight-medium text-center pa-0">Andy Wang</v-card-title>
-            <span class="text-subtitle-2 text-grey-darken-1">Backend Developer</span>
+            <span class="text-subtitle-2 text-grey-darken-1">{{ $t('indexPage.backendDev') }}</span>
           </div>
           <v-list density="compact" bg-color="transparent">
             <v-list-item prepend-icon="mdi-school" class="mb-2">
-              <v-list-item-title class="font-weight-regular">Tsinghua International School</v-list-item-title>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.school') }}</v-list-item-title>
             </v-list-item>
             <v-list-item prepend-icon="mdi-briefcase" class="mb-2">
-              <v-list-item-title class="font-weight-regular">GPE Club</v-list-item-title>
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.gpeClub') }}</v-list-item-title>
             </v-list-item>
           </v-list>
           <v-card-actions class="mt-4">
             <v-btn color="primary" variant="outlined" href="https://github.com/humanoid-a" target="_blank" block>
-              <v-icon start>mdi-github</v-icon> GitHub Profile
+              <v-icon start>mdi-github</v-icon> {{ $t('indexPage.githubProfile') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -149,10 +149,10 @@
       <v-col cols="12" md="10">
         <v-card flat class="text-center pa-6" color="grey-lighten-4" rounded="lg">
           <p class="text-body-1 mb-4">
-            Made By GPE Club
+            {{ $t('indexPage.madeBy') }}
           </p>
           <v-btn color="primary" variant="tonal" href="https://gpeclub.com" class="mt-2">
-            Visit GPE Club Website
+            {{ $t('indexPage.visitGpe') }}
           </v-btn>
         </v-card>
       </v-col>
@@ -162,7 +162,8 @@
 </template>
 
 <script setup>
-// No script logic needed for this static page yet
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 </script>
 
 <style scoped>
