@@ -39,9 +39,9 @@ export const adjustAcceptanceRateByStrategicFactors = (baseAcceptanceRate, isEar
   if (isEarlyDecision) {
     // Early Decision typically improves acceptance chances
     if (baseAcceptanceRate < 20) { // Use the initial base rate for decision logic for multipliers
-      adjustedRate *= 1.5; // For more selective schools (under 20%), ED advantage is greater
+      adjustedRate *= 1.3; // For more selective schools (under 20%), ED advantage is greater
     } else if (baseAcceptanceRate < 40) {
-      adjustedRate *= 1.25; // For moderately selective schools (20-40%)
+      adjustedRate *= 1.2; // For moderately selective schools (20-40%)
     } else {
       adjustedRate *= 1.1; // For less selective schools (over 50%) - minimal ED advantage
     }

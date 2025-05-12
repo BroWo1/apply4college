@@ -93,7 +93,7 @@
                 :key="`saved-${i}`"
                 :title="college.name"
                 :subtitle="college.location"
-                @click="selectCollege(college)"
+                @click="navigateToCollegeProfilePage(college)"
               >
                 <template v-slot:prepend>
                   <v-avatar size="40">
@@ -122,7 +122,7 @@
                 :key="`recent-${i}`"
                 :title="college.name"
                 :subtitle="college.location"
-                @click="selectCollege(college)"
+                @click="navigateToCollegeProfilePage(college)"
               >
                 <template v-slot:prepend>
                   <v-avatar size="40">
@@ -195,7 +195,7 @@
           class="mb-4"
           rounded="lg"
           :elevation="4"
-          @click="selectCollege(college)"
+          @click="navigateToCollegeProfilePage(college)"
         >
           <v-row class="ma-0">
             <v-col sm="4" class="pa-0 d-none d-sm-block">
@@ -230,17 +230,23 @@
                   </v-chip>
                 </div>
               </div>
+              
               <p class="text-body-2 mb-2">{{ college.description }}</p>
-              <div class="d-flex align-center mt-auto">
-                <v-rating
-                  :model-value="college.rating"
-                  color="amber"
-                  density="compact"
-                  size="small"
-                  readonly
-                ></v-rating>
-                <span class="text-body-2 ml-2">({{ college.reviewCount }} reviews)</span>
-                <v-spacer></v-spacer>
+              
+              <v-spacer class="my-2"></v-spacer>
+              <v-divider class="my-2"></v-divider>
+              
+              <div class="d-flex align-center justify-space-between mt-2">
+                <div class="d-flex align-center">
+                  <v-chip
+                    :color="getAdmissionChanceColor(getAdmissionChance(college))"
+                    size="small"
+                    class="mr-2"
+                  >
+                    {{ Math.round(getAdmissionChance(college) * 100) }}% Chance
+                  </v-chip>
+                  <span class="text-body-2">{{ getAdmissionChanceDescription(getAdmissionChance(college)) }}</span>
+                </div>
                 <v-menu>
                   <template v-slot:activator="{ props }">
                     <v-btn
@@ -315,7 +321,7 @@
               :key="`saved-${i}`"
               :title="college.name"
               :subtitle="college.location"
-              @click="selectCollege(college)"
+              @click="navigateToCollegeProfilePage(college)"
             >
               <template v-slot:prepend>
                 <v-avatar size="40">
@@ -344,7 +350,7 @@
               :key="`recent-${i}`"
               :title="college.name"
               :subtitle="college.location"
-              @click="selectCollege(college)"
+              @click="navigateToCollegeProfilePage(college)"
             >
               <template v-slot:prepend>
                 <v-avatar size="40">
@@ -366,16 +372,25 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'; // Added onUnmounted
+import { useRouter } from 'vue-router';
 import AdmitChanceComponent from './AdmitChanceComponent.vue';
 import ProfileSummaryComponent from './ProfileSummaryComponent.vue';
 import { colleges, getCollegesByType, getCollegesByAcceptanceRate, sortCollegesBy, searchColleges } from '../data/colleges.js';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
-import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
+import { 
+  getMajorMatchAssessment, 
+  getAdmissionChanceColor, 
+  getAdmissionChanceDescription,
+  calculateAdmissionChance,
+  prepareStudentData 
+} from '../utils/admitChanceCalculator';
 import CollegeComparison from './CollegeComparison.vue';
 
 // State for responsive side panels
 const leftPanelOpen = ref(false);
 const rightPanelOpen = ref(false);
+
+const router = useRouter();
 
 // Close panels when screen size changes to desktop
 const handleResize = () => {
@@ -604,11 +619,20 @@ const collegeActionItems = [
 ];
 
 // Handle college selection to open admission chance modal
-const selectCollege = (college) => {
+const openAdmitChanceModal = (college) => {
   selectedCollege.value = college;
   admitChanceModalOpen.value = true;
 
   // Close mobile panels when selecting a college
+  leftPanelOpen.value = false;
+  rightPanelOpen.value = false;
+};
+
+// Navigate to the dedicated college profile page
+const navigateToCollegeProfilePage = (college) => {
+  // Encode the college name to ensure it's URL-safe
+  // Assuming a route named 'CollegeProfile' will be set up with a 'collegeIdentifier' param
+  router.push({ path: `/college/${encodeURIComponent(college.name)}` });
   leftPanelOpen.value = false;
   rightPanelOpen.value = false;
 };
@@ -626,7 +650,7 @@ const handleCollegeAction = (action, college) => {
   // Implement action handling
   switch(action) {
     case 'view':
-      selectCollege(college);
+      openAdmitChanceModal(college);
       break;
     case 'saveRegular':
       handleSaveToRegular({ college, action: 'add' });
@@ -668,6 +692,27 @@ const removeSavedCollege = (index) => {
 // Function to remove a college from the recently viewed list
 const removeRecentlyViewedCollege = (index) => {
   recentlyViewed.value.splice(index, 1);
+};
+
+// Function to calculate admission chance for a college
+const getAdmissionChance = (college) => {
+  // Create student profile from current values
+  const studentData = prepareStudentData({
+    satReading: satReading.value,
+    satMath: satMath.value,
+    gpa: gpa.value,
+    apClasses: apClasses.value,
+    extracurriculars: extracurriculars.value,
+    intendedMajor: intendedMajor.value,
+    recScore: recScore.value,
+    isLegacy: isLegacy.value,
+    demoScore: demoScore.value,
+    isEarlyDecision: false // Default to Regular Decision in the listing
+  });
+  
+  // Calculate chance
+  const chanceResult = calculateAdmissionChance(studentData, college);
+  return chanceResult.probability || 0;
 };
 </script>
 

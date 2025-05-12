@@ -339,11 +339,11 @@
     </v-row>
 
     <v-row class="my-4">
-      <v-col cols="12" class="d-flex justify-center">
+      <v-col cols="12" class="d-flex flex-column flex-md-row justify-center align-center">
         <v-btn
           color="primary"
           size="large"
-          class="mx-2"
+          class="mx-md-2 my-2 my-md-0"
           @click="manualSaveUserProfile"
           :loading="loading"
         >
@@ -352,7 +352,7 @@
         <v-btn
           color="secondary"
           size="large"
-          class="mx-2"
+          class="mx-md-2 my-2 my-md-0"
           to="/explore"
         >
           Back to College Explorer
@@ -729,4 +729,5 @@ onMounted(() => {
 .v-card {
   transition: all 0.3s;
 }
+
 </style>
