@@ -71,11 +71,11 @@ Apply4College currently supports English and Spanish languages. To add or modify
 
 ## 👥 Team
 
-Apply4College is developed by high school students from the GPE Club:
+Apply4College is developed by high school students:
 
 - Frontend Developers
 - Backend Developers 
-- AI Developers
+- AI Developers - Jiace Zhao 
 
 ## 📄 License
 
