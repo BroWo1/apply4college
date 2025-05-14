@@ -2,9 +2,9 @@
   <v-container fluid style="max-width: 1500px">
     <v-row class="text-center py-6">
       <v-col cols="12">
-        <h1 class="text-h2 font-weight-bold mb-6 pt-5">Your Profile</h1>
+        <h1 class="text-h2 font-weight-bold mb-6 pt-5">{{ $t('profilePage.title') }}</h1>
         <p class="text-body-1 mb-6">
-          Complete your profile to get personalized college recommendations and accurate admission chances.
+          {{ $t('profilePage.subtitle') }}
         </p>
       </v-col>
     </v-row>
@@ -14,17 +14,17 @@
         <v-card class="pa-4 mb-4" rounded="lg">
           <v-card-title class="text-h5">
             <v-icon icon="mdi-account" class="mr-2"></v-icon>
-            Basic Information
+            {{ $t('profilePage.basicInfo') }}
           </v-card-title>
           <v-divider class="my-3"></v-divider>
 
-          <div class="text-h6 mb-3">Standardized Scores</div>
+          <div class="text-h6 mb-3">{{ $t('profilePage.standardizedScores') }}</div>
 
           <div class="text-body-1 pb-2">
             SAT ({{satReading + satMath}})
           </div>
           <div class="text-body-2">
-            Reading ({{satReading}})
+            {{ $t('profilePage.satReading') }} ({{satReading}})
           </div>
           <v-slider
             v-model="satReading"
@@ -34,7 +34,7 @@
             thumb-label
           ></v-slider>
           <div class="text-body-2">
-            Math ({{satMath}})
+            {{ $t('profilePage.satMath') }} ({{satMath}})
           </div>
           <v-slider
             v-model="satMath"
@@ -44,7 +44,7 @@
             thumb-label
           ></v-slider>
           <div class="text-body-1 pt-2 pb-1">
-            GPA ({{gpa}})
+            {{ $t('profilePage.gpa') }} ({{gpa}})
           </div>
           <v-slider
             v-model="gpa"
@@ -54,24 +54,23 @@
             thumb-label
           ></v-slider>
 
-          <div class="text-h6 mt-6 mb-3">Intended Major</div>
+          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.intendedMajor') }}</div>
           <v-radio-group
             v-model="intendedMajor"
-            label="Select your major category"
+            :label="$t('profilePage.selectMajor')"
           >
-            <v-radio value="STEM" label="STEM (Science, Technology, Engineering, Math)"></v-radio>
-            <v-radio value="Liberal Arts" label="Liberal Arts & Humanities"></v-radio>
+            <v-radio value="STEM" :label="$t('profilePage.stem')"></v-radio>
+            <v-radio value="Liberal Arts" :label="$t('profilePage.liberalArts')"></v-radio>
           </v-radio-group>
           <div v-if="intendedMajor" class="mt-2 text-caption">
-            {{ intendedMajor === 'STEM' ? 'STEM' : 'Liberal Arts' }} focus will help us calculate how well your AP courses and
-            extracurricular activities align with your academic goals, which impacts admission chances.
+            {{ intendedMajor === 'STEM' ? $t('profilePage.stemFocus') : $t('profilePage.artsHumanitiesFocus') }}
           </div>
 
-          <div class="text-h6 mt-6 mb-3">Additional Factors</div>
+          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.additionalFactors') }}</div>
 
-          <div class="text-body-1 mb-2">Recommendation Letters</div>
+          <div class="text-body-1 mb-2">{{ $t('profilePage.recommendationLetters') }}</div>
           <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">Expected strength (1-3)</span>
+            <span class="text-caption">{{ $t('profilePage.recStrength') }}</span>
             <span class="text-caption">
               {{ recScore }} - {{ getRecDescription(recScore) }}
             </span>
@@ -87,33 +86,33 @@
             class="mb-3"
           ></v-slider>
 
-          <div class="text-h6 mt-6 mb-3">Demographics</div>
+          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.demographics') }}</div>
 
-          <div class="text-body-1 mb-2">Nationality</div>
+          <div class="text-body-1 mb-2">{{ $t('profilePage.nationality') }}</div>
           <v-select
             v-model="nationality"
             :items="nationalityOptions"
-            label="Select your nationality"
+            :label="$t('profilePage.nationality')"
             hide-details
             class="mb-3"
           ></v-select>
           <div class="text-caption mb-4">
-            Some institutions have specific programs or considerations for international students.
+            {{ $t('profilePage.nationalityHelp') }}
           </div>
 
-          <div class="text-body-1 mb-2">Gender</div>
+          <div class="text-body-1 mb-2">{{ $t('profilePage.gender') }}</div>
           <v-radio-group
             v-model="gender"
             class="mt-1 mb-2"
             hide-details
           >
-            <v-radio value="Male" label="Male"></v-radio>
-            <v-radio value="Female" label="Female"></v-radio>
-            <v-radio value="Non-binary" label="Non-binary"></v-radio>
-            <v-radio value="Prefer not to say" label="Prefer not to say"></v-radio>
+            <v-radio value="Male" :label="$t('profilePage.male')"></v-radio>
+            <v-radio value="Female" :label="$t('profilePage.female')"></v-radio>
+            <v-radio value="Non-binary" :label="$t('profilePage.nonBinary')"></v-radio>
+            <v-radio value="Prefer not to say" :label="$t('profilePage.preferNotToSay')"></v-radio>
           </v-radio-group>
           <div class="text-caption mb-3">
-            Some programs may consider gender balance in their admissions processes.
+            {{ $t('profilePage.genderHelp') }}
           </div>
 
           <v-sheet class="pa-3 mb-6 rounded bg-surface-variant">
@@ -378,10 +377,16 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import AuthModal from '@/components/AuthModal.vue';
+import api from '@/api';
+import { useI18n } from 'vue-i18n';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
 import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
 
 const router = useRouter();
+const userStore = useUserStore();
+const { t } = useI18n();
 
 // AP Classes data
 const apOptions = [
@@ -684,8 +689,16 @@ const getLevelDescription = (level) => {
 };
 
 const getRecDescription = (score) => {
-  const descriptions = { 1: 'Basic', 2: 'Strong', 3: 'Outstanding' };
-  return descriptions[score] || '';
+  switch (score) {
+    case 1:
+      return t('profilePage.recAverage');
+    case 2:
+      return t('profilePage.recGood');
+    case 3:
+      return t('profilePage.recExcellent');
+    default:
+      return '';
+  }
 };
 
 const openActivityDialog = () => {

@@ -279,7 +279,8 @@ const showDeleteConfirm = ref(false);
 
 const languageOptions = [
   { label: 'English', value: 'en' },
-  { label: '中文', value: 'zh' }
+  { label: '中文', value: 'zh' },
+  { label: 'Español', value: 'es' }
 ];
 const selectedLanguage = ref(localStorage.getItem('app_language') || locale.value || 'en');
 

@@ -2,7 +2,7 @@
   <v-container fluid style="max-width: 1200px">
     <v-row class="text-center py-6">
       <v-col cols="12">
-        <h1 class="text-h2 font-weight-bold mb-6 pt-5">Apply 4 College <span class="text-body-1 font-weight-bold bg-primary white--text px-2 py-1 rounded">.org</span></h1>
+        <h1 class="text-h2 font-weight-bold mb-6 pt-5">{{ $t('homePage.title') }} <span class="text-body-1 font-weight-bold bg-primary white--text px-2 py-1 rounded">.org</span></h1>
       </v-col>
     </v-row>
 
@@ -12,14 +12,14 @@
             <v-avatar color="primary" class="mr-3" size="42">
               <v-icon icon="mdi-robot" color="white"></v-icon>
             </v-avatar>
-            <h2 class="text-h5 font-weight-bold">AI College Advisor</h2>
+            <h2 class="text-h5 font-weight-bold">{{ $t('homePage.aiAdvisor') }}</h2>
           </div>
 
           <v-row align="center" class="mt-2 mb-2">
             <v-col cols="11" class="pa-1 pe-2">
               <v-text-field
                 v-model="aiQuestion"
-                label="Ask about college admissions"
+                :label="$t('homePage.askPlaceholder')"
                 variant="solo-filled" hide-details
                 clearable
                 @keydown.enter="askAI"
@@ -73,8 +73,8 @@
           >
             <v-card-text>
               <div class="d-flex align-center mb-3" v-if="Object.keys(userProfile).length > 0">
-                <v-chip size="small" color="primary" class="mr-2">Personalized</v-chip>
-                <span class="text-caption">Based on your profile</span>
+                <v-chip size="small" color="primary" class="mr-2">{{ $t('homePage.personalizedChip') }}</v-chip>
+                <span class="text-caption">{{ $t('homePage.basedOnProfile') }}</span>
               </div>
               <div v-html="formattedAiResponse" class="ai-response-text"></div>
             </v-card-text>
@@ -96,7 +96,7 @@
     <v-row class="mt-10">
       <v-col cols="12">
         <div class="d-flex align-center mb-4">
-          <h2 class="text-h6 font-weight-bold">Your Saved Colleges</h2>
+          <h2 class="text-h6 font-weight-bold">{{ $t('homePage.savedColleges') }}</h2>
           <v-spacer></v-spacer>
           <v-btn
             variant="tonal"
@@ -104,7 +104,7 @@
             to="/explore"
             size="small"
           >
-            Manage List
+            {{ $t('homePage.manageList') }}
           </v-btn>
         </div>
 
@@ -142,15 +142,15 @@
               <v-card-text class="pb-2 px-3">
                 <div class="d-flex align-center my-2">
                   <v-chip :color="getAcceptanceRateColor(college.acceptanceRate)" size="small" class="mr-2">
-                    {{ college.acceptanceRate }}% Acceptance
+                    {{ college.acceptanceRate }}% {{ $t('explorePage.acceptanceRate') }}
                   </v-chip>
                   <v-chip :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'" size="small">
-                    {{ college.collegeType }}
+                    {{ college.collegeType === 'STEM-heavy' ? $t('explorePage.collegeTypeSTEM') : $t('explorePage.collegeTypeLiberal') }}
                   </v-chip>
                 </div>
               </v-card-text>
               <v-card-actions class="px-3 pb-3 pt-0">
-                <v-btn variant="text" color="primary" @click="viewCollege(college)" block>View Details</v-btn>
+                <v-btn variant="text" color="primary" @click="viewCollege(college)" block>{{ $t('homePage.viewDetails') }}</v-btn>
               </v-card-actions>
             </v-card>
           </div>
@@ -164,7 +164,7 @@
           density="compact"
           class="py-3"
         >
-          You haven't saved any colleges yet. Visit the <router-link to="/explore" class="text-primary font-weight-medium">Explore</router-link> page to add colleges to your list.
+          {{ $t('homePage.noColleges') }} <router-link to="/explore" class="text-primary font-weight-medium">{{ $t('homePage.explorePage') }}</router-link> {{ $t('homePage.toAddColleges') }}
         </v-alert>
       </v-col>
     </v-row>
@@ -179,9 +179,11 @@ import { useUserStore } from '@/stores/user';
 import { getGeneralAdvice } from '@/utils/profileRecommendationService';
 import { colleges } from '@/data/colleges.js';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const userStore = useUserStore();
 const router = useRouter();
+const { t } = useI18n();
 
 const aiQuestion = ref('');
 const aiResponse = ref('');
@@ -191,11 +193,11 @@ const loadingAiResponse = ref(false);
 const earlyDecisionColleges = ref([]);
 const regularDecisionColleges = ref([]);
 
-const suggestedQuestions = ref([
-  'What are common essay topics?',
-  'How important are extracurriculars?',
-  'Tips for SAT/ACT prep?',
-  'Difference between Early Action and Early Decision?',
+const suggestedQuestions = computed(() => [
+  t('homePage.suggestedQuestions.essayTopics'),
+  t('homePage.suggestedQuestions.extracurriculars'),
+  t('homePage.suggestedQuestions.testPrep'),
+  t('homePage.suggestedQuestions.earlyOptions'),
 ]);
 
 const userProfile = computed(() => {
@@ -260,19 +262,23 @@ const askSuggestedQuestion = (question) => {
 const personalizedSuggestions = computed(() => {
   const profile = userProfile.value || {};
   const suggestions = [...suggestedQuestions.value];
+  
   if (profile.intendedMajor === 'STEM') {
-    suggestions.push('How to showcase STEM projects?');
-    suggestions.push('Best STEM scholarships?');
+    suggestions.push(t('homePage.suggestedQuestions.stemProjects'));
+    suggestions.push(t('homePage.suggestedQuestions.stemScholarships'));
   } else if (profile.intendedMajor === 'Liberal Arts') {
-    suggestions.push('How to highlight humanities interests?');
-    suggestions.push('Liberal Arts scholarship opportunities?');
+    suggestions.push(t('homePage.suggestedQuestions.humanities'));
+    suggestions.push(t('homePage.suggestedQuestions.liberalArtsScholarships'));
   }
+  
   if (profile.satMath && profile.satReading && (profile.satMath + profile.satReading) < 1200) {
-    suggestions.push('Colleges that focus less on SAT scores?');
+    suggestions.push(t('homePage.suggestedQuestions.testOptional'));
   }
+  
   if (profile.apClasses && profile.apClasses.length > 0) {
-    suggestions.push('How AP scores affect admissions?');
+    suggestions.push(t('homePage.suggestedQuestions.apScores'));
   }
+  
   const finalSuggestions = Array.from(new Set(suggestions));
   return finalSuggestions.slice(0, 6);
 });

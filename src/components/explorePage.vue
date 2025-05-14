@@ -1,13 +1,13 @@
 <template>
   <v-container fluid class="" style="max-width: 2000px">
     <v-container class="text-center py-6">
-      <h1 class="text-h2 font-weight-bold mb-4 pt-5">Explore Colleges</h1>
+      <h1 class="text-h2 font-weight-bold mb-4 pt-5">{{ $t('explorePage.title') }}</h1>
       <p class="text-body-1 mb-6">
-        Discover colleges that match your profile and preferences.
+        {{ $t('explorePage.subtitle') }}
       </p>
       <v-text-field
         v-model="searchQuery"
-        label="Search Colleges"
+        :label="$t('explorePage.searchPlaceholder')"
         variant="outlined"
         prepend-inner-icon="mdi-magnify"
         clearable
@@ -78,13 +78,13 @@
         ></v-btn>
         <div class="pa-3">
           <v-card class="pa-4" rounded="lg">
-            <v-card-title class="text-h6">Early Decision</v-card-title>
+            <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
             <v-divider class="my-2"></v-divider>
 
             <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
               <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-              <div>No saved colleges yet</div>
-              <div class="text-caption">Your saved colleges will appear here</div>
+              <div>{{ $t('explorePage.noSavedColleges') }}</div>
+              <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
             </div>
 
             <v-list v-else lines="two" density="compact">
@@ -110,11 +110,11 @@
 
             <v-divider class="my-4"></v-divider>
 
-            <v-card-title class="text-h6">Regular Decision</v-card-title>
+            <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
             <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
               <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-              <div>No saved colleges yet</div>
-              <div class="text-caption">Your saved colleges will appear here</div>
+              <div>{{ $t('explorePage.noSavedColleges') }}</div>
+              <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
             </div>
             <v-list v-else lines="two" density="compact">
               <v-list-item
@@ -155,12 +155,12 @@
 
         <v-card class="mb-4 no-hover" variant="outlined" rounded="lg">
           <v-card-title class="d-flex align-center">
-            <span class="text-h6">Colleges ({{ displayedColleges.length }})</span>
+            <span class="text-h6">{{ $t('explorePage.collegesCount') }} ({{ displayedColleges.length }})</span>
             <v-spacer></v-spacer>
             <v-select
               v-model="filterBy"
               :items="filterOptions"
-              label="Filter"
+              :label="$t('explorePage.filter')"
               hide-details
               density="compact"
               style="max-width: 150px"
@@ -169,7 +169,7 @@
             <v-select
               v-model="sortBy"
               :items="sortOptions"
-              label="Sort"
+              :label="$t('explorePage.sort')"
               hide-details
               density="compact"
               style="max-width: 150px"
@@ -263,7 +263,7 @@
                     size="small"
                     class="mr-2"
                   >
-                    {{ Math.round(getAdmissionChance(college) * 100) }}% Chance
+                    {{ Math.round(getAdmissionChance(college) * 100) }}% {{ $t('explorePage.admissionChance') }}
                   </v-chip>
                   <span class="text-body-2">{{ getAdmissionChanceDescription(getAdmissionChance(college)) }}</span>
                 </div>
@@ -275,7 +275,7 @@
                       color="primary"
                       density="comfortable"
                     >
-                      Options
+                      {{ $t('explorePage.options') }}
                     </v-btn>
                   </template>
                   <v-list>
@@ -303,14 +303,14 @@
           rounded="lg"
         >
           <v-icon icon="mdi-school-outline" size="x-large" class="mb-3"></v-icon>
-          <h3 class="text-h6 mb-2">No colleges match your criteria</h3>
-          <p class="text-body-2">Try adjusting your filters or search term.</p>
+          <h3 class="text-h6 mb-2">{{ $t('explorePage.noMatches') }}</h3>
+          <p class="text-body-2">{{ $t('explorePage.adjustFilters') }}</p>
           <v-btn
             color="primary"
             class="mt-3"
             @click="resetFilters"
           >
-            Reset Filters
+            {{ $t('explorePage.resetFilters') }}
           </v-btn>
         </v-card>
 
@@ -326,13 +326,13 @@
 
       <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
         <v-card class="pa-4" rounded="lg">
-          <v-card-title class="text-h6">Early Decision</v-card-title>
+          <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
           <v-divider class="my-2"></v-divider>
 
           <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
             <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-            <div>No saved colleges yet</div>
-            <div class="text-caption">Your saved colleges will appear here</div>
+            <div>{{ $t('explorePage.noSavedColleges') }}</div>
+            <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
           </div>
 
           <v-list v-else lines="two" density="compact">
@@ -358,11 +358,11 @@
 
           <v-divider class="my-4"></v-divider>
 
-          <v-card-title class="text-h6">Regular Decision</v-card-title>
+          <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
           <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
             <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-            <div>No saved colleges yet</div>
-            <div class="text-caption">Your saved colleges will appear here</div>
+            <div>{{ $t('explorePage.noSavedColleges') }}</div>
+            <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
           </div>
           <v-list v-else lines="two" density="compact">
             <v-list-item
@@ -405,6 +405,9 @@ import {
   prepareStudentData 
 } from '../utils/admitChanceCalculator';
 import CollegeComparison from './CollegeComparison.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 // State for responsive side panels
 const leftPanelOpen = ref(false);
