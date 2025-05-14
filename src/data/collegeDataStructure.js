@@ -9,7 +9,8 @@ export const createCollegeData = ({
   rating,
   reviewCount,
   collegeType, // 'STEM-heavy' or 'Liberal-arts'
-  stats
+  stats,
+  deadlines = {} // Add default empty deadlines object
 }) => {
   // Generate a placeholder image if none provided
   const image = imageUrl ||
@@ -31,6 +32,11 @@ export const createCollegeData = ({
       ap: stats.ap || { mean: 6, stdDev: 2 },
       ec: stats.ec || { mean: 8, stdDev: 3 },
       weights: stats.weights || getDefaultWeights(collegeType)
+    },
+    // Add default deadlines if not provided
+    deadlines: {
+      earlyDecision: deadlines.earlyDecision || "November 1",
+      regularDecision: deadlines.regularDecision || "January 1"
     }
   };
 };

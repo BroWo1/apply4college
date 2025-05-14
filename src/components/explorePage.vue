@@ -233,6 +233,26 @@
               
               <p class="text-body-2 mb-2">{{ college.description }}</p>
               
+              <!-- Add deadline information -->
+              <div class="d-flex flex-wrap mb-3">
+                <v-chip
+                  color="purple-lighten-1" 
+                  size="small"
+                  prepend-icon="mdi-calendar-clock"
+                  class="mr-2 my-1"
+                >
+                  ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
+                </v-chip>
+                <v-chip
+                  color="indigo-lighten-1"
+                  size="small"
+                  prepend-icon="mdi-calendar"
+                  class="my-1"
+                >
+                  RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                </v-chip>
+              </div>
+              
               <v-spacer class="my-2"></v-spacer>
               <v-divider class="my-2"></v-divider>
               

@@ -15,6 +15,10 @@ export const eliteColleges = [
     rating: 4.16,
     reviewCount: 881,
     collegeType: 'Liberal-arts',
+    deadlines: {
+      earlyDecision: "November 1",
+      regularDecision: "January 1"
+    },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.07 }, sat: { mean: 1540, stdDev: 50 }
       // Adjusted for average applicant:
@@ -43,13 +47,17 @@ export const eliteColleges = [
   createCollegeData({
     name: 'Stanford University',
     location: 'Stanford, CA',
-    description: 'A private research university with strengths across disciplines, particularly in technology and entrepreneurship.',
+    description: 'A private research university known for its academic strength, entrepreneurial character, and proximity to Silicon Valley.',
     acceptanceRate: 3.9,
-    tuition: 67731,
+    tuition: 60430,
     imageUrl: 'https://placehold.co/600x400/D32F2F/ffffff?text=Stanford',
-    rating: 4.12,
-    reviewCount: 1314,
+    rating: 4.05,
+    reviewCount: 1023,
     collegeType: 'STEM-heavy',
+    deadlines: {
+      earlyDecision: "November 1",
+      regularDecision: "January 5"
+    },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.08 }, sat: { mean: 1550, stdDev: 50 }
       // Adjusted for average applicant:
@@ -78,13 +86,17 @@ export const eliteColleges = [
   createCollegeData({
     name: 'MIT',
     location: 'Cambridge, MA',
-    description: 'A private research university focused on science, engineering, and technology education.',
-    acceptanceRate: 4.5,
-    tuition: 61990,
-    imageUrl: 'https://placehold.co/600x400/0288D1/ffffff?text=MIT',
+    description: 'A private research university with a focused curriculum on scientific and technological research.',
+    acceptanceRate: 4.1,
+    tuition: 57986,
+    imageUrl: 'https://placehold.co/600x400/2196F3/ffffff?text=MIT',
     rating: 4.18,
-    reviewCount: 675,
+    reviewCount: 742,
     collegeType: 'STEM-heavy',
+    deadlines: {
+      earlyDecision: "November 15",
+      regularDecision: "January 15"
+    },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.09 }, sat: { mean: 1555, stdDev: 45 }
       // Adjusted for average applicant:
