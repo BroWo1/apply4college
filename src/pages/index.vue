@@ -92,7 +92,7 @@
 
      <v-row justify="center" class="mb-10">
       <!-- Developer Card 1 -->
-      <v-col cols="12" md="5">
+      <v-col cols="12" md="4">
         <v-card class="feature-card pa-6" flat border rounded="lg">
           <div class="d-flex flex-column align-center mb-4">
             <v-avatar size="120" class="mb-3">
@@ -118,7 +118,7 @@
       </v-col>
 
       <!-- Developer Card 2 -->
-      <v-col cols="12" md="5">
+      <v-col cols="12" md="4">
         <v-card class="feature-card pa-6" flat border rounded="lg">
           <div class="d-flex flex-column align-center mb-4">
             <v-avatar size="120" class="mb-3">
@@ -137,6 +137,32 @@
           </v-list>
           <v-card-actions class="mt-4">
             <v-btn color="primary" variant="outlined" href="https://github.com/humanoid-a" target="_blank" block>
+              <v-icon start>mdi-github</v-icon> {{ $t('indexPage.githubProfile') }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      
+      <!-- Developer Card 3 -->
+      <v-col cols="12" md="4">
+        <v-card class="feature-card pa-6" flat border rounded="lg">
+          <div class="d-flex flex-column align-center mb-4">
+            <v-avatar size="120" class="mb-3">
+              <v-img src="@/assets/jcz.jpg" alt="Frontend Engineer"></v-img>
+            </v-avatar>
+            <v-card-title class="text-h5 font-weight-medium text-center pa-0">Jiace Zhao</v-card-title>
+            <span class="text-subtitle-2 text-grey-darken-1">{{ $t('indexPage.fullstackDev') }}</span>
+          </div>
+          <v-list density="compact" bg-color="transparent">
+            <v-list-item prepend-icon="mdi-school" class="mb-2">
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.school3') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-briefcase" class="mb-2">
+              <v-list-item-title class="font-weight-regular">{{ $t('indexPage.krypotoClub') }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+          <v-card-actions class="mt-4">
+            <v-btn color="primary" variant="outlined" href="https://github.com/chrisdsasa" target="_blank" block>
               <v-icon start>mdi-github</v-icon> {{ $t('indexPage.githubProfile') }}
             </v-btn>
           </v-card-actions>

@@ -63,8 +63,11 @@
     "teamSubtitle": "The high school developers behind Apply 4 College",
     "frontendDev": "Frontend Developer",
     "backendDev": "Backend Developer",
+    "fullstackDev": "AI Developer",
     "school": "Tsinghua International School",
+    "school3": "HKWA",
     "gpeClub": "GPE Club",
+    "krypotoClub": "Krypoto",
     "githubProfile": "GitHub Profile",
     "madeBy": "Made By GPE Club",
     "visitGpe": "Visit GPE Club Website"

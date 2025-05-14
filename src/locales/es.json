@@ -63,8 +63,11 @@
     "teamSubtitle": "Los desarrolladores de secundaria detrás de Apply 4 College",
     "frontendDev": "Desarrollador Frontend",
     "backendDev": "Desarrollador Backend",
-    "school": "Tsinghua International School",
+    "fullstackDev": "Desarrollador AI",
+    "school": "Escuela Internacional Tsinghua",
+    "school3": "HKWA",
     "gpeClub": "Club GPE",
+    "krypotoClub": "Krypoto",
     "githubProfile": "Perfil de GitHub",
     "madeBy": "Hecho por GPE Club",
     "visitGpe": "Visitar sitio web de GPE Club"
