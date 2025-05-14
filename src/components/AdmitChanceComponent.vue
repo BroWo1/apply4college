@@ -45,6 +45,22 @@
                     @change="recalculateChance"
                   ></v-switch>
                 </div>
+                
+                <v-divider vertical class="mx-4"></v-divider>
+
+                <div class="d-flex align-center">
+                  <div class="me-3">
+                    <div class="text-subtitle-2">Demonstrated Interest</div>
+                    <div class="text-caption">Campus visits, info sessions</div>
+                  </div>
+                  <v-switch
+                    v-model="localHasDemonstratedInterest"
+                    color="success"
+                    hide-details
+                    density="compact"
+                    @change="recalculateChance"
+                  ></v-switch>
+                </div>
               </div>
             </v-card>
           </v-col>
@@ -125,6 +141,20 @@
                 <template v-slot:append>
                   <v-chip :color="getZScoreColor(collegeChance.zScores.ec)" size="small">
                     {{ formatZScore(collegeChance.zScores.ec) }}σ
+                  </v-chip>
+                </template>
+              </v-list-item>
+              
+              <v-list-item v-if="collegeChance.zScores.courseRigor">
+                <template v-slot:prepend>
+                  <v-icon :color="getZScoreColor(collegeChance.zScores.courseRigor)" class="mr-2">
+                    mdi-notebook
+                  </v-icon>
+                </template>
+                <v-list-item-title>Course Rigor</v-list-item-title>
+                <template v-slot:append>
+                  <v-chip :color="getZScoreColor(collegeChance.zScores.courseRigor)" size="small">
+                    {{ formatZScore(collegeChance.zScores.courseRigor) }}σ
                   </v-chip>
                 </template>
               </v-list-item>
@@ -262,8 +292,11 @@
                   <v-chip :color="localIsEarlyDecision ? 'success' : 'info'" size="small" class="me-2">
                     {{ localIsEarlyDecision ? 'Early Decision' : 'Regular Decision' }}
                   </v-chip>
-                  <v-chip :color="localIsLegacy ? 'purple' : 'grey'" size="small">
+                  <v-chip :color="localIsLegacy ? 'purple' : 'grey'" size="small" class="me-2">
                     {{ localIsLegacy ? 'Legacy Student' : 'Non-Legacy' }}
+                  </v-chip>
+                  <v-chip v-if="localHasDemonstratedInterest" color="success" size="small">
+                    Demonstrated Interest
                   </v-chip>
                 </div>
               </div>
@@ -275,6 +308,10 @@
                 <div class="d-flex justify-space-between" v-if="props.studentProfile.intendedMajor">
                   <span class="text-caption">Rate adjusted for {{ props.studentProfile.intendedMajor }}:</span>
                   <span class="text-caption font-weight-medium">{{ majorAdjustedRateForDisplay }}%</span>
+                </div>
+                <div class="d-flex justify-space-between" v-if="collegeChance.geographicImpact">
+                  <span class="text-caption">Geographic factor impact:</span>
+                  <span class="text-caption font-weight-medium">{{ collegeChance.geographicImpact }}</span>
                 </div>
                 <div class="d-flex justify-space-between">
                   <span class="text-caption">Final adjusted rate (Major, ED/RD, Legacy):</span>
@@ -295,6 +332,10 @@
                 <div class="text-caption mt-1" v-if="localIsLegacy">
                   <v-icon size="x-small" color="purple" class="mr-1">mdi-account-group</v-icon>
                   Legacy Status provides an additional boost (e.g., ~1.5x) to admission chances.
+                </div>
+                <div class="text-caption mt-1" v-if="localHasDemonstratedInterest">
+                  <v-icon size="x-small" color="success" class="mr-1">mdi-bookmark-check</v-icon>
+                  Demonstrated Interest (campus visits, interviews, etc.) can boost chances by ~15% at some schools.
                 </div>
                 <div class="text-caption mt-1">
                   The "Final adjusted rate" is used as the starting point ($p_0$) for the overall chance calculation.
@@ -340,6 +381,82 @@
               </div>
               <div v-else class="text-caption mt-2">
                 Select an intended major in your profile to see its specific impact on admission chances.
+              </div>
+            </v-card>
+
+            <v-card variant="outlined" class="pa-3 mb-3">
+              <div class="text-subtitle-2 mb-2">Additional Impact Factors</div>
+              
+              <div class="mb-3">
+                <div class="text-caption mb-1">Course Rigor (honors, weighted classes)</div>
+                <v-slider
+                  v-model="courseRigor"
+                  :min="1"
+                  :max="5"
+                  :step="1"
+                  thumb-label
+                  :thumb-size="20"
+                  color="primary"
+                  class="mb-0"
+                  @update:modelValue="updateAdditionalFactors"
+                >
+                  <template v-slot:thumb-label="{ modelValue }">
+                    {{ ['Basic', 'Standard', 'Good', 'Strong', 'Exceptional'][modelValue-1] }}
+                  </template>
+                </v-slider>
+              </div>
+              
+              <div class="mb-3">
+                <div class="text-caption mb-1">Essay Quality</div>
+                <v-slider
+                  v-model="essayScore"
+                  :min="1"
+                  :max="5"
+                  :step="1"
+                  thumb-label
+                  :thumb-size="20"
+                  color="primary"
+                  class="mb-0"
+                  @update:modelValue="updateAdditionalFactors"
+                >
+                  <template v-slot:thumb-label="{ modelValue }">
+                    {{ ['Basic', 'Decent', 'Good', 'Strong', 'Outstanding'][modelValue-1] }}
+                  </template>
+                </v-slider>
+              </div>
+              
+              <div class="mb-3">
+                <div class="text-caption mb-1">Interview Performance (if applicable)</div>
+                <v-slider
+                  v-model="interviewScore"
+                  :min="0"
+                  :max="5"
+                  :step="1"
+                  thumb-label
+                  :thumb-size="20"
+                  color="primary"
+                  class="mb-0"
+                  @update:modelValue="updateAdditionalFactors"
+                >
+                  <template v-slot:thumb-label="{ modelValue }">
+                    {{ modelValue === 0 ? 'N/A' : ['Poor', 'Average', 'Good', 'Great', 'Exceptional'][modelValue-1] }}
+                  </template>
+                </v-slider>
+              </div>
+              
+              <div class="d-flex align-center mt-3">
+                <div class="text-caption">Geographic Region:</div>
+                <v-spacer></v-spacer>
+                <v-select
+                  v-model="studentRegion"
+                  :items="regionOptions"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  class="ml-2"
+                  style="max-width: 150px"
+                  @update:modelValue="updateAdditionalFactors"
+                ></v-select>
               </div>
             </v-card>
 
@@ -483,15 +600,35 @@ const dialog = computed({
 
 const localIsLegacy = ref(false);
 const localIsEarlyDecision = ref(false);
+const localHasDemonstratedInterest = ref(false);
+const courseRigor = ref(3);
+const essayScore = ref(3);
+const interviewScore = ref(0);
+const studentRegion = ref('');
 
-// New ref for algorithm explanation dialog
+const regionOptions = [
+  { title: 'Not Specified', value: '' },
+  { title: 'Northeast', value: 'Northeast' },
+  { title: 'Midwest', value: 'Midwest' },
+  { title: 'South', value: 'South' },
+  { title: 'West', value: 'West' },
+  { title: 'International', value: 'International' }
+];
+
 const showAlgorithmExplanationDialog = ref(false);
 
 watch(() => dialog.value, (isOpen) => {
   if (isOpen) {
     localIsLegacy.value = false;
     localIsEarlyDecision.value = false;
-    showAlgorithmExplanationDialog.value = false; // Ensure explanation dialog is closed initially
+    localHasDemonstratedInterest.value = false;
+    showAlgorithmExplanationDialog.value = false;
+    
+    courseRigor.value = props.studentProfile.courseRigor || 3;
+    essayScore.value = props.studentProfile.essayScore || 3;
+    interviewScore.value = props.studentProfile.interviewScore || 0;
+    studentRegion.value = props.studentProfile.region || '';
+    
     if (props.college && props.studentProfile) {
       calculateChance();
     } else {
@@ -513,7 +650,12 @@ const calculateChance = () => {
   const studentData = prepareStudentData({
     ...props.studentProfile,
     isLegacy: localIsLegacy.value,
-    isEarlyDecision: localIsEarlyDecision.value
+    isEarlyDecision: localIsEarlyDecision.value,
+    hasDemonstratedInterest: localHasDemonstratedInterest.value,
+    courseRigor: courseRigor.value,
+    essayScore: essayScore.value,
+    interviewScore: interviewScore.value === 0 ? null : interviewScore.value,
+    region: studentRegion.value || null
   });
   collegeChance.value = calculateAdmissionChance(studentData, props.college); //
 };
@@ -522,8 +664,12 @@ const recalculateChance = () => {
   calculateChance();
 };
 
+const updateAdditionalFactors = () => {
+  calculateChance();
+};
+
 watch(
-  [() => props.college, () => props.studentProfile, localIsLegacy, localIsEarlyDecision],
+  [() => props.college, () => props.studentProfile, localIsLegacy, localIsEarlyDecision, localHasDemonstratedInterest],
   () => {
     calculateChance();
   },
@@ -586,7 +732,6 @@ watch(() => props.college?.id, (newCollegeId) => {
     }
   }
 }, { immediate: true });
-
 
 const toggleAiRecommendation = async () => {
   if (useAiRecommendation.value) {
@@ -666,28 +811,30 @@ const saveButtonColor = computed(() => {
   return (isInEarlyDecision.value || isInRegularDecision.value) ? 'error' : 'success';
 });
 
-const getZScoreColor = (zScore) => {
-  if (zScore === undefined || zScore === null) return 'grey';
-  if (zScore >= 1.5) return 'success';
-  if (zScore >= 0.5) return 'info';
-  if (zScore >= -0.5) return 'warning';
-  return 'error';
+const getZScoreColor = (score) => {
+  if (score === undefined || score === null) return 'grey';
+  if (score < -1) return 'error';
+  if (score < 0) return 'warning';
+  if (score < 1) return 'info';
+  if (score < 2) return 'success';
+  return 'success-darken-2';
 };
 
-const formatZScore = (zScore) => {
-  if (zScore === undefined || zScore === null) return 'N/A';
-  const sign = zScore >= 0 ? '+' : '';
-  return `${sign}${zScore.toFixed(1)}`;
+const formatZScore = (score) => {
+  if (score === undefined || score === null) return '0.0';
+  return score >= 0 ? '+' + score.toFixed(1) : score.toFixed(1);
 };
 
-const formatNumber = (num) => {
-  if (num === undefined || num === null) return 'N/A';
-  return num.toFixed(2);
+const formatNumber = (number) => {
+  if (number === undefined || number === null) return '0.0';
+  return number.toFixed(2);
 };
 
-const normalizeBlock = (blockValue) => {
-  if (blockValue === undefined || blockValue === null) return 0;
-  return Math.min(Math.max((blockValue + 2) * 25, 0), 100);
+const normalizeBlock = (value) => {
+  const min = -2;
+  const max = 2;
+  const normalized = ((value - min) / (max - min)) * 100;
+  return Math.min(Math.max(normalized, 0), 100);
 };
 
 const finalAdjustedRateForDisplay = computed(() => {
@@ -723,17 +870,25 @@ const isEasierMajor = computed(() => {
 });
 
 const getMajorMatchText = (intendedMajor, collegeType) => {
-  if (!intendedMajor || !collegeType) return 'Not Selected';
-  return getMajorMatchAssessment({ collegeType }, intendedMajor); //
+  if (!intendedMajor) return 'No Major Selected';
+  
+  if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') return 'Strong Match';
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') return 'Strong Match';
+  if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') return 'Diverse Candidate'; 
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') return 'Diverse Candidate';
+  
+  return 'Neutral';
 };
 
 const getMajorMatchColor = (intendedMajor, collegeType) => {
-  if (!intendedMajor || !collegeType) return 'grey';
-  const match = getMajorMatchText(intendedMajor, collegeType);
-  if (match === 'Excellent') return 'success';
-  if (match === 'Good') return 'info';
-  if (match === 'Fair') return 'warning';
-  return 'error';
+  if (!intendedMajor) return 'grey';
+  
+  if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') return 'success';
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') return 'success';
+  if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') return 'info'; 
+  if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') return 'info';
+  
+  return 'grey';
 };
 
 const emitSaveDecision = () => {

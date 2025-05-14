@@ -85,8 +85,95 @@
             color="primary"
             class="mb-3"
           ></v-slider>
+          
+          <div class="text-body-1 mb-2">Course Rigor</div>
+          <div class="d-flex justify-space-between mb-1">
+            <span class="text-caption">Overall difficulty of your high school classes</span>
+            <span class="text-caption">
+              {{ courseRigor }} - {{ getCourseRigorDescription(courseRigor) }}
+            </span>
+          </div>
+          <v-slider
+            v-model="courseRigor"
+            :min="1"
+            :max="5"
+            :step="1"
+            thumb-label
+            :thumb-size="20"
+            color="primary"
+            class="mb-3"
+          >
+            <template v-slot:thumb-label="{ modelValue }">
+              {{ getCourseRigorDescription(modelValue) }}
+            </template>
+          </v-slider>
+          <div class="text-caption mb-4">
+            Rate your overall course difficulty - whether you took standard, honors, or advanced courses beyond AP classes.
+          </div>
+          
+          <div class="text-body-1 mb-2">Essay Quality (Self-Assessed)</div>
+          <div class="d-flex justify-space-between mb-1">
+            <span class="text-caption">Estimated quality of your application essays</span>
+            <span class="text-caption">
+              {{ essayScore }} - {{ getEssayDescription(essayScore) }}
+            </span>
+          </div>
+          <v-slider
+            v-model="essayScore"
+            :min="1"
+            :max="5"
+            :step="1"
+            thumb-label
+            :thumb-size="20"
+            color="primary"
+            class="mb-3"
+          >
+            <template v-slot:thumb-label="{ modelValue }">
+              {{ getEssayDescription(modelValue) }}
+            </template>
+          </v-slider>
+          <div class="text-caption mb-4">
+            This is your self-assessment of your essays. Consider feedback from teachers/counselors.
+          </div>
+          
+          <div class="text-body-1 mb-2">Interview Performance (Optional)</div>
+          <div class="d-flex justify-space-between mb-1">
+            <span class="text-caption">Performance in college interviews</span>
+            <span class="text-caption">
+              {{ interviewScore === 0 ? 'N/A' : `${interviewScore} - ${getInterviewDescription(interviewScore)}` }}
+            </span>
+          </div>
+          <v-slider
+            v-model="interviewScore"
+            :min="0"
+            :max="5"
+            :step="1"
+            thumb-label
+            :thumb-size="20"
+            color="primary"
+            class="mb-3"
+          >
+            <template v-slot:thumb-label="{ modelValue }">
+              {{ modelValue === 0 ? 'N/A' : getInterviewDescription(modelValue) }}
+            </template>
+          </v-slider>
+          <div class="text-caption mb-4">
+            If you've had college interviews, rate your estimated performance. Leave at N/A if not applicable.
+          </div>
 
           <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.demographics') }}</div>
+          
+          <div class="text-body-1 mb-2">Geographic Region</div>
+          <v-select
+            v-model="region"
+            :items="regionOptions"
+            label="Select your geographic region"
+            hide-details
+            class="mb-3"
+          ></v-select>
+          <div class="text-caption mb-4">
+            Your geographic location can impact your admissions chances differently at various schools.
+          </div>
 
           <div class="text-body-1 mb-2">{{ $t('profilePage.nationality') }}</div>
           <v-select
@@ -98,6 +185,18 @@
           ></v-select>
           <div class="text-caption mb-4">
             {{ $t('profilePage.nationalityHelp') }}
+          </div>
+          
+          <div class="text-body-1 mb-2">Demonstrated Interest</div>
+          <v-switch
+            v-model="hasDemonstratedInterest"
+            label="I have demonstrated interest to my target colleges"
+            color="primary"
+            hide-details
+            class="mb-2"
+          ></v-switch>
+          <div class="text-caption mb-4">
+            Demonstrated interest includes campus visits, attending info sessions, early applications, specific supplemental essays, etc.
           </div>
 
           <div class="text-body-1 mb-2">{{ $t('profilePage.gender') }}</div>
@@ -405,18 +504,24 @@ const activityOptions = [
 ];
 
 // Student profile data
-const satReading = ref(500);
-const satMath = ref(500);
-const gpa = ref(3.0);
+const satReading = ref(600);
+const satMath = ref(620);
+const gpa = ref(3.8);
 const apClasses = ref([]);
 const extracurriculars = ref([]);
-const intendedMajor = ref("");
+const intendedMajor = ref('STEM');
 const recScore = ref(2);
 const isLegacy = ref(false);
-const nationality = ref('United States');
+const nationality = ref('Domestic');
 const gender = ref('Prefer not to say');
 const enableBitterByCoffee = ref(false);
 
+// New data points
+const courseRigor = ref(3);
+const essayScore = ref(3);
+const interviewScore = ref(0);
+const region = ref('');
+const hasDemonstratedInterest = ref(false);
 
 // Snackbar
 const snackbar = ref(false);
@@ -494,7 +599,12 @@ const studentProfile = computed(() => {
     nationality: nationality.value,
     gender: gender.value,
     demoScore: demoScore.value,
-    enableBitterByCoffee: enableBitterByCoffee.value
+    enableBitterByCoffee: enableBitterByCoffee.value,
+    courseRigor: courseRigor.value,
+    essayScore: essayScore.value,
+    interviewScore: interviewScore.value,
+    region: region.value,
+    hasDemonstratedInterest: hasDemonstratedInterest.value
   };
 });
 
@@ -523,6 +633,11 @@ const performSaveOperation = (isAutoSave = false) => {
     gender: gender.value,
     demoScore: demoScore.value,
     enableBitterByCoffee: enableBitterByCoffee.value,
+    courseRigor: courseRigor.value,
+    essayScore: essayScore.value,
+    interviewScore: interviewScore.value,
+    region: region.value,
+    hasDemonstratedInterest: hasDemonstratedInterest.value
   };
 
   localStorage.setItem('userProfileData', JSON.stringify(profileData));
@@ -705,26 +820,76 @@ const openActivityDialog = () => {
   activityDialog.value = true;
 };
 
+// New description methods
+const getCourseRigorDescription = (score) => {
+  switch (score) {
+    case 1: return 'Basic';
+    case 2: return 'Standard';
+    case 3: return 'Good';
+    case 4: return 'Strong';
+    case 5: return 'Exceptional';
+    default: return 'Not rated';
+  }
+};
+
+const getEssayDescription = (score) => {
+  switch (score) {
+    case 1: return 'Basic';
+    case 2: return 'Decent';
+    case 3: return 'Good';
+    case 4: return 'Strong';
+    case 5: return 'Outstanding';
+    default: return 'Not rated';
+  }
+};
+
+const getInterviewDescription = (score) => {
+  switch (score) {
+    case 0: return 'N/A';
+    case 1: return 'Poor';
+    case 2: return 'Average';
+    case 3: return 'Good';
+    case 4: return 'Great';
+    case 5: return 'Exceptional';
+    default: return 'Not rated';
+  }
+};
+
+// New geographic region options
+const regionOptions = [
+  { title: 'Not Specified', value: '' },
+  { title: 'Northeast', value: 'Northeast' },
+  { title: 'Midwest', value: 'Midwest' },
+  { title: 'South', value: 'South' },
+  { title: 'West', value: 'West' },
+  { title: 'International', value: 'International' }
+];
+
 onMounted(() => {
   const savedData = localStorage.getItem('userProfileData');
   if (savedData) {
     try {
       const profileData = JSON.parse(savedData);
-      satReading.value = profileData.satReading || 500;
-      satMath.value = profileData.satMath || 500;
-      gpa.value = profileData.gpa || 3.0;
+      satReading.value = profileData.satReading || 600;
+      satMath.value = profileData.satMath || 620;
+      gpa.value = profileData.gpa || 3.8;
       if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
         apClasses.value = profileData.apClasses;
       }
       if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
         extracurriculars.value = profileData.extracurriculars;
       }
-      intendedMajor.value = profileData.intendedMajor || "";
+      intendedMajor.value = profileData.intendedMajor || 'STEM';
       recScore.value = profileData.recScore || 2;
       isLegacy.value = profileData.isLegacy || false; // Ensure isLegacy is loaded
       if (profileData.nationality) nationality.value = profileData.nationality;
       if (profileData.gender) gender.value = profileData.gender;
       enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
+      courseRigor.value = profileData.courseRigor || 3;
+      essayScore.value = profileData.essayScore || 3;
+      interviewScore.value = profileData.interviewScore || 0;
+      region.value = profileData.region || '';
+      hasDemonstratedInterest.value = profileData.hasDemonstratedInterest || false;
       console.log('Profile data loaded successfully');
     } catch (e) {
       console.error('Error parsing saved profile data:', e);
