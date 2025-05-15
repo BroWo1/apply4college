@@ -12,6 +12,8 @@ export const targetColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
+    allowsEarlyDecision: false, // Example: UCs generally don't have ED
+    considersLegacy: false, // Example: UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.89, stdDev: 0.12 },
       sat: { mean: 1480, stdDev: 70 },
@@ -45,6 +47,8 @@ export const targetColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
+    allowsEarlyDecision: false, // Example: UCs generally don't have ED
+    considersLegacy: false, // Example: UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.85, stdDev: 0.15 },
       sat: { mean: 1460, stdDev: 75 },
@@ -78,6 +82,9 @@ export const targetColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
+    // Michigan has Early Action, not strictly ED, but for this example, let's say it allows a form of early application
+    allowsEarlyDecision: true,
+    considersLegacy: true, // Public universities vary, Michigan might
     stats: {
       gpa: { mean: 3.82, stdDev: 0.15 },
       sat: { mean: 1435, stdDev: 80 },
@@ -110,9 +117,11 @@ export const targetColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
+    allowsEarlyDecision: true,
+    considersLegacy: true,
     stats: {
       gpa: { mean: 3.85, stdDev: 0.14 },
-      sat: { mean: 1510, stdDev: 65 },
+      sat: { mean: 1500, stdDev: 65 },
       ap: { mean: 8, stdDev: 2 },
       ec: { mean: 10, stdDev: 3 },
       weights: {

@@ -11,7 +11,7 @@
           <v-row>
             <v-col cols="12">
               <div class="d-flex align-center justify-space-around">
-                <div class="d-flex align-center">
+                <div class="d-flex align-center" v-if="college.allowsEarlyDecision">
                   <div class="me-3">
                     <div class="text-subtitle-1 font-weight-medium">Early Decision</div>
                     <div class="text-caption">Increases chances</div>
@@ -22,12 +22,26 @@
                     color="primary"
                     hide-details
                     density="compact"
+                    :disabled="!college.allowsEarlyDecision"
+                  ></v-switch>
+                </div>
+                <div v-else class="d-flex align-center">
+                  <div class="me-3">
+                    <div class="text-subtitle-1 font-weight-medium">Early Decision</div>
+                    <div class="text-caption text-disabled">Not offered</div>
+                  </div>
+                   <v-switch
+                    :model-value="false"
+                    color="primary"
+                    hide-details
+                    density="compact"
+                    disabled
                   ></v-switch>
                 </div>
 
                 <v-divider vertical class="mx-4"></v-divider>
 
-                <div class="d-flex align-center">
+                <div class="d-flex align-center" v-if="college.considersLegacy">
                   <div class="me-3">
                     <div class="text-subtitle-1 font-weight-medium">Legacy Status</div>
                     <div class="text-caption">Family attended</div>
@@ -38,6 +52,20 @@
                     color="primary"
                     hide-details
                     density="compact"
+                    :disabled="!college.considersLegacy"
+                  ></v-switch>
+                </div>
+                 <div v-else class="d-flex align-center">
+                  <div class="me-3">
+                    <div class="text-subtitle-1 font-weight-medium">Legacy Status</div>
+                    <div class="text-caption text-disabled">Not considered</div>
+                  </div>
+                   <v-switch
+                    :model-value="false"
+                    color="primary"
+                    hide-details
+                    density="compact"
+                    disabled
                   ></v-switch>
                 </div>
               </div>
@@ -150,7 +178,7 @@
           </div>
 
           <v-alert
-            v-if="showNoApiKeyMessage && useAiRecommendation" 
+            v-if="showNoApiKeyMessage && useAiRecommendation"
             type="info"
             density="compact"
             variant="tonal"
@@ -274,7 +302,7 @@
                 </div>
               </v-card>
             </v-col>
-          
+
           </v-row>
           <v-row sm="6">
             <v-col cols="12" >
@@ -343,7 +371,7 @@
           </v-list>
         </v-card>
 
-        
+
 
       </div>
     </v-col>
@@ -352,24 +380,42 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getAdmissionChanceColor, getAdmissionChanceDescription } from '../../../utils/admitChanceCalculator'; // Corrected path
+// Updated imports to include all necessary functions
+import {
+  getAdmissionChanceColor,
+  getAdmissionChanceDescription,
+  getMajorMatchAssessment,
+  adjustAcceptanceRateByMajor,
+  adjustAcceptanceRateByStrategicFactors
+} from '../../../utils/admitChanceCalculator';
 
 const props = defineProps({
   college: { type: Object, required: true },
-  studentProfile: { type: Object, required: true },
-  detailedCollegeChance: { type: Object, required: true },
-  isEarlyDecision: { type: Boolean, required: true },
-  isLegacy: { type: Boolean, required: true },
-  majorMatch: { type: String, required: true },
-  aiRecommendation: { type: String, default: null },
-  aiError: { type: String, default: null },
-  showNoApiKeyMessage: { type: Boolean, default: false },
-  loadingAiRec: { type: Boolean, default: false },
+  isEarlyDecision: { type: Boolean, default: false },
+  isLegacy: { type: Boolean, default: false },
+  // Added missing props with safe defaults
+  detailedCollegeChance: {
+    type: Object,
+    default: () => ({
+      probabilityPercentage: 0,
+      timesAverageApplicant: '0.0',
+      zScores: {},
+      strengthBlock: 0,
+      alignmentBlock: 0,
+      probability: 0
+    })
+  },
+  studentProfile: {
+    type: Object,
+    default: () => ({
+      intendedMajor: ''
+    })
+  },
   useAiRecommendation: { type: Boolean, default: false },
-  majorAdjustedRateForDisplay: {type: String, required: true},
-  finalAdjustedRateForDisplay: {type: String, required: true},
-  isHarderMajor: {type: Boolean, required: true},
-  isEasierMajor: {type: Boolean, required: true},
+  loadingAiRec: { type: Boolean, default: false },
+  showNoApiKeyMessage: { type: Boolean, default: false },
+  aiError: { type: String, default: '' },
+  aiRecommendation: { type: String, default: '' },
 });
 
 defineEmits([
@@ -382,19 +428,19 @@ defineEmits([
 ]);
 
 const detailedChanceColor = computed(() => {
-  if (!props.detailedCollegeChance) return 'grey';
-  return getAdmissionChanceColor(props.detailedCollegeChance.probability || 0.27);
+  // Ensure props.detailedCollegeChance and its properties are accessed safely
+  return getAdmissionChanceColor(props.detailedCollegeChance?.probability || 0);
 });
 
 const detailedChanceDescription = computed(() => {
-  if (!props.detailedCollegeChance) return 'Calculating...';
-  return getAdmissionChanceDescription(props.detailedCollegeChance.probability || 0.27);
+  // Ensure props.detailedCollegeChance and its properties are accessed safely
+  return getAdmissionChanceDescription(props.detailedCollegeChance?.probability || 0);
 });
 
 const detailedRecommendation = computed(() => {
   if (!props.detailedCollegeChance || !props.college) return 'Calculating recommendation...';
 
-  const prob = props.detailedCollegeChance.probability || 0.27;
+  const prob = props.detailedCollegeChance.probability || 0; // Safe access
   const collegeType = props.college.collegeType || 'this';
   const edStatus = props.isEarlyDecision ? 'Early Decision' : 'Regular Decision';
 
@@ -410,6 +456,74 @@ const detailedRecommendation = computed(() => {
     return `This is a likely school for you. With your ${props.isEarlyDecision ? 'Early Decision application and ' : ''}strong profile, you have an excellent chance of admission.`;
   }
 });
+
+const majorMatch = computed(() => {
+  if (!props.studentProfile || !props.studentProfile.intendedMajor || !props.college) {
+    return 'neutral'; // Default if essential data is missing
+  }
+  const assessment = getMajorMatchAssessment(props.college, props.studentProfile.intendedMajor);
+  if (assessment === 'Excellent' || assessment === 'Good') {
+    return 'good';
+  } else if (assessment === 'Fair') {
+    return 'neutral';
+  } else if (assessment === 'Poor') {
+    return 'challenging';
+  }
+  return 'neutral'; // Fallback
+});
+
+// Added computed properties for display rates and major competitiveness
+const majorAdjustedRateForDisplay = computed(() => {
+  if (!props.college || !props.studentProfile) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
+  const rate = adjustAcceptanceRateByMajor(
+    parseFloat(props.college.acceptanceRate),
+    props.studentProfile.intendedMajor,
+    props.college.collegeType
+  );
+  return rate.toFixed(1);
+});
+
+const finalAdjustedRateForDisplay = computed(() => {
+  if (!props.college || !props.studentProfile || !props.detailedCollegeChance) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
+  // The finalAdjustedAcceptanceRateForP0 is already calculated in detailedCollegeChance if the structure is consistent
+  // Otherwise, recalculate if necessary:
+  let rate = adjustAcceptanceRateByMajor(
+    parseFloat(props.college.acceptanceRate),
+    props.studentProfile.intendedMajor,
+    props.college.collegeType
+  );
+  rate = adjustAcceptanceRateByStrategicFactors(
+    rate,
+    props.isEarlyDecision,
+    props.isLegacy,
+    props.college.allowsEarlyDecision,
+    props.college.considersLegacy
+  );
+  return rate.toFixed(1);
+});
+
+const isHarderMajor = computed(() => {
+  if (!props.college || !props.studentProfile || !props.studentProfile.intendedMajor) return false;
+  const baseRate = parseFloat(props.college.acceptanceRate);
+  const majorAdjusted = adjustAcceptanceRateByMajor(
+    baseRate,
+    props.studentProfile.intendedMajor,
+    props.college.collegeType
+  );
+  return majorAdjusted < baseRate * 0.9;
+});
+
+const isEasierMajor = computed(() => {
+  if (!props.college || !props.studentProfile || !props.studentProfile.intendedMajor) return false;
+  const baseRate = parseFloat(props.college.acceptanceRate);
+  const majorAdjusted = adjustAcceptanceRateByMajor(
+    baseRate,
+    props.studentProfile.intendedMajor,
+    props.college.collegeType
+  );
+  return majorAdjusted > baseRate * 1.1;
+});
+
 
 const formatZScore = (score) => {
   if (score === undefined || score === null) return '0.00';
@@ -446,6 +560,9 @@ const formatRecommendation = (text) => {
 </script>
 
 <style scoped>
+.text-disabled {
+  color: rgba(0, 0, 0, 0.38);
+}
 
 .sticky-top-side::-webkit-scrollbar {
   width: 6px;
@@ -457,4 +574,4 @@ const formatRecommendation = (text) => {
 .sticky-top-side::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
-</style> 
+</style>

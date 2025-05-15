@@ -10,7 +10,9 @@ export const createCollegeData = ({
   reviewCount,
   collegeType, // 'STEM-heavy' or 'Liberal-arts'
   stats,
-  deadlines = {} // Add default empty deadlines object
+  deadlines = {}, // Add default empty deadlines object
+  allowsEarlyDecision = true, // New flag
+  considersLegacy = true // New flag
 }) => {
   // Generate a placeholder image if none provided
   const image = imageUrl ||
@@ -37,7 +39,9 @@ export const createCollegeData = ({
     deadlines: {
       earlyDecision: deadlines.earlyDecision || "November 1",
       regularDecision: deadlines.regularDecision || "January 1"
-    }
+    },
+    allowsEarlyDecision, // Add to returned object
+    considersLegacy      // Add to returned object
   };
 };
 

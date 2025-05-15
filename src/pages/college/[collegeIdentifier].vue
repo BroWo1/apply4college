@@ -23,13 +23,13 @@
       <v-card flat class="mb-6">
         <v-img :src="college.image" height="300px" cover class="rounded-t-lg"></v-img>
       </v-card>
-      
+
       <!-- College Title and Location -->
       <div class="mb-6">
         <h1 class="text-h3 font-weight-bold mb-2">{{ college.name }}</h1>
         <div class="text-subtitle-1 mb-2">{{ college.location }} • {{ college.collegeType }}</div>
       </div>
-      
+
       <!-- Navigation Tabs -->
       <v-tabs v-model="activeTab" slider-color="primary" class="mb-6">
         <v-tab value="overview">Overview</v-tab>
@@ -37,9 +37,9 @@
         <v-tab value="cost">Cost & scholarships</v-tab>
         <v-tab value="majors">Majors</v-tab>
       </v-tabs>
-      
+
       <v-divider class="mb-6"></v-divider>
-      
+
       <!-- Main Content Area -->
       <v-window v-model="activeTab" class="mb-6">
         <!-- Overview Tab -->
@@ -56,7 +56,7 @@
             @saveToRegular="handleSaveToRegular"
           />
         </v-window-item>
-        
+
         <!-- Chancing Tab - We'll implement full content later -->
         <v-window-item value="chancing">
           <ChancingTab
@@ -65,34 +65,47 @@
             :detailedCollegeChance="detailedCollegeChance"
             v-model:isEarlyDecision="isEarlyDecision"
             v-model:isLegacy="isLegacy"
-            :majorMatch="majorMatch"
             :aiRecommendation="aiRecommendation"
             :aiError="aiError"
             :showNoApiKeyMessage="showNoApiKeyMessage"
             :loadingAiRec="loadingAiRec"
             :useAiRecommendation="useAiRecommendation"
-            :majorAdjustedRateForDisplay="majorAdjustedRateForDisplay"
-            :finalAdjustedRateForDisplay="finalAdjustedRateForDisplay"
-            :isHarderMajor="isHarderMajor"
-            :isEasierMajor="isEasierMajor"
             @calculateDetailedChance="calculateDetailedChance"
             @saveToEarly="handleSaveToEarly"
             @saveToRegular="handleSaveToRegular"
             @toggleAiRecommendation="toggleAiRecommendation"
           />
         </v-window-item>
-        
+
         <!-- Cost & Scholarships Tab - We'll implement full content later -->
         <v-window-item value="cost">
           <CostTab />
         </v-window-item>
-        
+
         <!-- Majors Tab - We'll implement full content later -->
         <v-window-item value="majors">
           <MajorsTab :collegeName="college ? college.name : 'this school'" />
         </v-window-item>
       </v-window>
     </div>
+
+    <!-- Add snackbar component -->
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+      location="top"
+    >
+      {{ snackbarText }}
+      <template v-slot:actions>
+        <v-btn
+          variant="text"
+          icon="mdi-close"
+          @click="snackbar = false"
+        ></v-btn>
+      </template>
+    </v-snackbar>
+
   </v-container>
 </template>
 
@@ -110,6 +123,11 @@ import { getCollegeMatchAnalysis, getApiKey } from '../../utils/profileRecommend
 
 const route = useRoute();
 const router = useRouter();
+
+// Snackbar state
+const snackbar = ref(false);
+const snackbarText = ref('');
+const snackbarColor = ref('success');
 
 const college = ref(null);
 const loading = ref(true);
@@ -162,12 +180,12 @@ const loadCollegeData = () => {
     const decodedIdentifier = decodeURIComponent(collegeIdentifier);
     const foundCollege = allColleges.find(c => c.name.toLowerCase() === decodedIdentifier.toLowerCase());
     college.value = foundCollege || null;
-    
+
     if (foundCollege) {
       // Generate similar schools based on type, location or acceptance rate
       similarSchools.value = allColleges
-        .filter(c => c.name !== foundCollege.name && 
-                   (c.collegeType === foundCollege.collegeType || 
+        .filter(c => c.name !== foundCollege.name &&
+                   (c.collegeType === foundCollege.collegeType ||
                     Math.abs(c.acceptanceRate - foundCollege.acceptanceRate) < 10))
         .slice(0, 3);
     }
@@ -194,13 +212,13 @@ const calculateChance = () => {
     collegeChance.value = { probabilityPercentage: 27, probability: 0.27 };
     return;
   }
-  
+
   const studentData = prepareStudentData({
     ...studentProfile.value,
     isLegacy: isLegacy.value,
     isEarlyDecision: false
   });
-  
+
   try {
     collegeChance.value = calculateAdmissionChance(studentData, college.value);
   } catch (error) {
@@ -247,7 +265,7 @@ onMounted(() => {
   loadProfileAndSavedColleges();
   calculateChance();
   calculateDetailedChance();
-  
+
   // Check for major match when component mounts
   if (college.value && intendedMajor.value) {
     majorMatch.value = getMajorMatchAssessment(intendedMajor.value, college.value.collegeType || 'Liberal Arts');
@@ -258,7 +276,7 @@ watch(() => route.params.collegeIdentifier, () => {
   loadCollegeData();
   calculateChance();
   calculateDetailedChance();
-  
+
   // Update major match when college changes
   if (college.value && intendedMajor.value) {
     majorMatch.value = getMajorMatchAssessment(intendedMajor.value, college.value.collegeType || 'Liberal Arts');
@@ -298,9 +316,23 @@ const handleSaveToEarly = ({ college: targetCollege, action, index }) => {
   if (action === 'add') {
     if (!savedColleges.value.some(c => c.name === targetCollege.name)) {
       savedColleges.value.push(targetCollege);
+      // Show success notification
+      snackbarColor.value = 'success';
+      snackbarText.value = `${targetCollege.name} added to Early Decision list`;
+      snackbar.value = true;
+    } else {
+      // College already in list - show info notification
+      snackbarColor.value = 'info';
+      snackbarText.value = `${targetCollege.name} is already in your Early Decision list`;
+      snackbar.value = true;
     }
   } else if (action === 'remove' && index !== undefined) {
+    const collegeName = savedColleges.value[index].name;
     savedColleges.value.splice(index, 1);
+    // Show notification on removal
+    snackbarColor.value = 'error';
+    snackbarText.value = `${collegeName} removed from Early Decision list`;
+    snackbar.value = true;
   }
 };
 
@@ -308,9 +340,23 @@ const handleSaveToRegular = ({ college: targetCollege, action, index }) => {
   if (action === 'add') {
     if (!recentlyViewed.value.some(c => c.name === targetCollege.name)) {
       recentlyViewed.value.push(targetCollege);
+      // Show success notification
+      snackbarColor.value = 'success';
+      snackbarText.value = `${targetCollege.name} added to Regular Decision list`;
+      snackbar.value = true;
+    } else {
+      // College already in list - show info notification
+      snackbarColor.value = 'info';
+      snackbarText.value = `${targetCollege.name} is already in your Regular Decision list`;
+      snackbar.value = true;
     }
   } else if (action === 'remove' && index !== undefined) {
+    const collegeName = recentlyViewed.value[index].name;
     recentlyViewed.value.splice(index, 1);
+    // Show notification on removal
+    snackbarColor.value = 'error';
+    snackbarText.value = `${collegeName} removed from Regular Decision list`;
+    snackbar.value = true;
   }
 };
 
@@ -338,20 +384,20 @@ const calculateDetailedChance = () => {
     };
     return;
   }
-  
+
   const studentData = prepareStudentData({
     ...studentProfile.value,
     isLegacy: isLegacy.value,
     isEarlyDecision: isEarlyDecision.value
   });
-  
+
   try {
     detailedCollegeChance.value = calculateAdmissionChance(studentData, college.value);
-    
+
     // Calculate acceptance rate adjustments for display
     if (college.value) {
       const baseRate = parseFloat(college.value.acceptanceRate);
-      
+
       // Major adjusted rate calculation
       const majorAdjusted = adjustAcceptanceRateByMajor(
         baseRate,
@@ -359,11 +405,11 @@ const calculateDetailedChance = () => {
         college.value.collegeType || 'Liberal Arts'
       );
       majorAdjustedRateForDisplay.value = majorAdjusted.toFixed(1);
-      
+
       // Check if major makes it harder or easier
       isHarderMajor.value = majorAdjusted < baseRate * 0.9;
       isEasierMajor.value = majorAdjusted > baseRate * 1.1;
-      
+
       // Final adjusted rate with strategic factors
       const finalAdjusted = adjustAcceptanceRateByStrategicFactors(
         majorAdjusted,
@@ -396,7 +442,7 @@ const toggleAiRecommendation = async () => {
     useAiRecommendation.value = false;
     return;
   }
-  
+
   try {
     const key = await getApiKey();
     if (!key) {
@@ -404,23 +450,23 @@ const toggleAiRecommendation = async () => {
       useAiRecommendation.value = false;
       return;
     }
-    
+
     showNoApiKeyMessage.value = false;
     useAiRecommendation.value = true;
-    
+
     if (!aiRecommendation.value) {
       loadingAiRec.value = true;
       aiError.value = '';
-      
+
       const result = await getCollegeMatchAnalysis(studentProfile.value, college.value);
-      
+
       if (result.success) {
         aiRecommendation.value = result.analysis;
       } else {
         aiError.value = result.error || 'Failed to get AI recommendation.';
         useAiRecommendation.value = false;
       }
-      
+
       loadingAiRec.value = false;
     }
   } catch (error) {
@@ -467,4 +513,4 @@ watch([isEarlyDecision, isLegacy], () => {
 .sticky-top-side::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
-</style> 
+</style>

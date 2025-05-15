@@ -13,7 +13,7 @@ export const safetyColleges = [
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.72, stdDev: 0.18 },
-      sat: { mean: 1360, stdDev: 85 },
+      sat: { mean: 1400, stdDev: 85 },
       ap: { mean: 5, stdDev: 2 },
       ec: { mean: 7, stdDev: 3 },
       weights: {
@@ -35,38 +35,6 @@ export const safetyColleges = [
   }),
 
   createCollegeData({
-    name: 'Boston College',
-    location: 'Chestnut Hill, MA',
-    description: 'A private Jesuit research university with a strong liberal arts tradition.',
-    acceptanceRate: 27,
-    tuition: 60950,
-    rating: 0,
-    reviewCount: 0,
-    collegeType: 'Liberal-arts',
-    stats: {
-      gpa: { mean: 3.7, stdDev: 0.2 },
-      sat: { mean: 1420, stdDev: 80 },
-      ap: { mean: 5, stdDev: 2 },
-      ec: { mean: 7, stdDev: 3 },
-      weights: {
-        strength: {
-          gpa: 0.30,
-          sat: 0.25,
-          ap: 0.15,
-          ec: 0.30
-        },
-        alignment: {
-          apFit: 0.23,
-          ecFit: 0.27,
-          rec: 0.20,
-          legacy: 0.15,
-          demo: 0.15
-        }
-      }
-    }
-  }),
-
-  createCollegeData({
     name: 'UNC Chapel Hill',
     location: 'Chapel Hill, NC',
     description: 'A public research university known for its strong programs in business, law, and public health.',
@@ -77,7 +45,7 @@ export const safetyColleges = [
     collegeType: 'Liberal-arts',
     stats: {
       gpa: { mean: 3.6, stdDev: 0.25 },
-      sat: { mean: 1350, stdDev: 90 },
+      sat: { mean: 1380, stdDev: 90 },
       ap: { mean: 4, stdDev: 2 },
       ec: { mean: 6, stdDev: 3 },
       weights: {
@@ -109,7 +77,7 @@ export const safetyColleges = [
     collegeType: 'STEM-heavy',
     stats: {
       gpa: { mean: 3.62, stdDev: 0.22 },
-      sat: { mean: 1315, stdDev: 95 },
+      sat: { mean: 1400, stdDev: 95 },
       ap: { mean: 4, stdDev: 2 },
       ec: { mean: 5, stdDev: 3 },
       weights: {
