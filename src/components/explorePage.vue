@@ -105,23 +105,15 @@
                          @click.stop="removeSavedCollege(i)"
                   ></v-btn>
                 </template>
-                <!-- Add deadline information -->
+                <!-- Display only ED deadline in Early Decision section -->
                 <div class="d-flex flex-wrap mt-2">
                   <v-chip
                     color="purple-lighten-1"
                     size="x-small"
                     prepend-icon="mdi-calendar-clock"
-                    class="mr-1 my-1"
-                  >
-                    ED: {{ college.deadlines?.earlyDecision}}
-                  </v-chip>
-                  <v-chip
-                    color="indigo-lighten-1"
-                    size="x-small"
-                    prepend-icon="mdi-calendar"
                     class="my-1"
                   >
-                    RD: {{ college.deadlines?.regularDecision}}
+                    Deadline: {{ college.deadlines?.earlyDecision}}
                   </v-chip>
                 </div>
               </v-list-item>
@@ -153,23 +145,15 @@
                          @click.stop="removeRecentlyViewedCollege(i)"
                   ></v-btn>
                 </template>
-                <!-- Add deadline information -->
+                <!-- Display only RD deadline in Regular Decision section -->
                 <div class="d-flex flex-wrap mt-2">
-                  <v-chip
-                    color="purple-lighten-1"
-                    size="x-small"
-                    prepend-icon="mdi-calendar-clock"
-                    class="mr-1 my-1"
-                  >
-                    ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                  </v-chip>
                   <v-chip
                     color="indigo-lighten-1"
                     size="x-small"
                     prepend-icon="mdi-calendar"
                     class="my-1"
                   >
-                    RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                    Deadline: {{ college.deadlines?.regularDecision}}
                   </v-chip>
                 </div>
               </v-list-item>
@@ -391,23 +375,15 @@
                        @click.stop="removeSavedCollege(i)"
                 ></v-btn>
               </template>
-              <!-- Add deadline information -->
+              <!-- Display only ED deadline in Early Decision section -->
               <div class="d-flex flex-wrap mt-2">
                 <v-chip
                   color="purple-lighten-1"
                   size="x-small"
                   prepend-icon="mdi-calendar-clock"
-                  class="mr-1 my-1"
-                >
-                  ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                </v-chip>
-                <v-chip
-                  color="indigo-lighten-1"
-                  size="x-small"
-                  prepend-icon="mdi-calendar"
                   class="my-1"
                 >
-                  RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                  Deadline: {{ college.deadlines?.earlyDecision || "Nov 1" }}
                 </v-chip>
               </div>
             </v-list-item>
@@ -439,23 +415,15 @@
                        @click.stop="removeRecentlyViewedCollege(i)"
                 ></v-btn>
               </template>
-              <!-- Add deadline information -->
+              <!-- Display only RD deadline in Regular Decision section -->
               <div class="d-flex flex-wrap mt-2">
-                <v-chip
-                  color="purple-lighten-1"
-                  size="x-small"
-                  prepend-icon="mdi-calendar-clock"
-                  class="mr-1 my-1"
-                >
-                  ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                </v-chip>
                 <v-chip
                   color="indigo-lighten-1"
                   size="x-small"
                   prepend-icon="mdi-calendar"
                   class="my-1"
                 >
-                  RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                  Deadline: {{ college.deadlines?.regularDecision || "Jan 1" }}
                 </v-chip>
               </div>
             </v-list-item>

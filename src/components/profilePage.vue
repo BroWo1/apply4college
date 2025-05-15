@@ -2,9 +2,9 @@
   <v-container fluid style="max-width: 1500px">
     <v-row class="text-center py-6">
       <v-col cols="12">
-        <h1 class="text-h2 font-weight-bold mb-6 pt-5">{{ $t('profilePage.title') }}</h1>
+        <h1 class="text-h2 font-weight-bold mb-6 pt-5">Your Profile</h1>
         <p class="text-body-1 mb-6">
-          {{ $t('profilePage.subtitle') }}
+          Complete your profile to get personalized college recommendations and accurate admission chances.
         </p>
       </v-col>
     </v-row>
@@ -14,17 +14,17 @@
         <v-card class="pa-4 mb-4" rounded="lg">
           <v-card-title class="text-h5">
             <v-icon icon="mdi-account" class="mr-2"></v-icon>
-            {{ $t('profilePage.basicInfo') }}
+            Basic Information
           </v-card-title>
           <v-divider class="my-3"></v-divider>
 
-          <div class="text-h6 mb-3">{{ $t('profilePage.standardizedScores') }}</div>
+          <div class="text-h6 mb-3">Standardized Scores</div>
 
           <div class="text-body-1 pb-2">
             SAT ({{satReading + satMath}})
           </div>
           <div class="text-body-2">
-            {{ $t('profilePage.satReading') }} ({{satReading}})
+            Reading ({{satReading}})
           </div>
           <v-slider
             v-model="satReading"
@@ -34,7 +34,7 @@
             thumb-label
           ></v-slider>
           <div class="text-body-2">
-            {{ $t('profilePage.satMath') }} ({{satMath}})
+            Math ({{satMath}})
           </div>
           <v-slider
             v-model="satMath"
@@ -44,7 +44,7 @@
             thumb-label
           ></v-slider>
           <div class="text-body-1 pt-2 pb-1">
-            {{ $t('profilePage.gpa') }} ({{gpa}})
+            GPA ({{gpa}})
           </div>
           <v-slider
             v-model="gpa"
@@ -54,23 +54,24 @@
             thumb-label
           ></v-slider>
 
-          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.intendedMajor') }}</div>
+          <div class="text-h6 mt-6 mb-3">Intended Major</div>
           <v-radio-group
             v-model="intendedMajor"
-            :label="$t('profilePage.selectMajor')"
+            label="Select your major category"
           >
-            <v-radio value="STEM" :label="$t('profilePage.stem')"></v-radio>
-            <v-radio value="Liberal Arts" :label="$t('profilePage.liberalArts')"></v-radio>
+            <v-radio value="STEM" label="STEM (Science, Technology, Engineering, Math)"></v-radio>
+            <v-radio value="Liberal Arts" label="Liberal Arts & Humanities"></v-radio>
           </v-radio-group>
           <div v-if="intendedMajor" class="mt-2 text-caption">
-            {{ intendedMajor === 'STEM' ? $t('profilePage.stemFocus') : $t('profilePage.artsHumanitiesFocus') }}
+            {{ intendedMajor === 'STEM' ? 'STEM' : 'Liberal Arts' }} focus will help us calculate how well your AP courses and
+            extracurricular activities align with your academic goals, which impacts admission chances.
           </div>
 
-          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.additionalFactors') }}</div>
+          <div class="text-h6 mt-6 mb-3">Additional Factors</div>
 
-          <div class="text-body-1 mb-2">{{ $t('profilePage.recommendationLetters') }}</div>
+          <div class="text-body-1 mb-2">Extra Materials (e.g. Recommendation Letter, Essay)</div>
           <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">{{ $t('profilePage.recStrength') }}</span>
+            <span class="text-caption">Expected strength (1-5)</span>
             <span class="text-caption">
               {{ recScore }} - {{ getRecDescription(recScore) }}
             </span>
@@ -78,140 +79,41 @@
           <v-slider
             v-model="recScore"
             :min="1"
-            :max="3"
+            :max="5"
             :step="1"
             thumb-label
             :thumb-size="20"
             color="primary"
             class="mb-3"
           ></v-slider>
-          
-          <div class="text-body-1 mb-2">Course Rigor</div>
-          <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">Overall difficulty of your high school classes</span>
-            <span class="text-caption">
-              {{ courseRigor }} - {{ getCourseRigorDescription(courseRigor) }}
-            </span>
-          </div>
-          <v-slider
-            v-model="courseRigor"
-            :min="1"
-            :max="5"
-            :step="1"
-            thumb-label
-            :thumb-size="20"
-            color="primary"
-            class="mb-3"
-          >
-            <template v-slot:thumb-label="{ modelValue }">
-              {{ getCourseRigorDescription(modelValue) }}
-            </template>
-          </v-slider>
-          <div class="text-caption mb-4">
-            Rate your overall course difficulty - whether you took standard, honors, or advanced courses beyond AP classes.
-          </div>
-          
-          <div class="text-body-1 mb-2">Essay Quality (Self-Assessed)</div>
-          <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">Estimated quality of your application essays</span>
-            <span class="text-caption">
-              {{ essayScore }} - {{ getEssayDescription(essayScore) }}
-            </span>
-          </div>
-          <v-slider
-            v-model="essayScore"
-            :min="1"
-            :max="5"
-            :step="1"
-            thumb-label
-            :thumb-size="20"
-            color="primary"
-            class="mb-3"
-          >
-            <template v-slot:thumb-label="{ modelValue }">
-              {{ getEssayDescription(modelValue) }}
-            </template>
-          </v-slider>
-          <div class="text-caption mb-4">
-            This is your self-assessment of your essays. Consider feedback from teachers/counselors.
-          </div>
-          
-          <div class="text-body-1 mb-2">Interview Performance (Optional)</div>
-          <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">Performance in college interviews</span>
-            <span class="text-caption">
-              {{ interviewScore === 0 ? 'N/A' : `${interviewScore} - ${getInterviewDescription(interviewScore)}` }}
-            </span>
-          </div>
-          <v-slider
-            v-model="interviewScore"
-            :min="0"
-            :max="5"
-            :step="1"
-            thumb-label
-            :thumb-size="20"
-            color="primary"
-            class="mb-3"
-          >
-            <template v-slot:thumb-label="{ modelValue }">
-              {{ modelValue === 0 ? 'N/A' : getInterviewDescription(modelValue) }}
-            </template>
-          </v-slider>
-          <div class="text-caption mb-4">
-            If you've had college interviews, rate your estimated performance. Leave at N/A if not applicable.
-          </div>
 
-          <div class="text-h6 mt-6 mb-3">{{ $t('profilePage.demographics') }}</div>
-          
-          <div class="text-body-1 mb-2">Geographic Region</div>
-          <v-select
-            v-model="region"
-            :items="regionOptions"
-            label="Select your geographic region"
-            hide-details
-            class="mb-3"
-          ></v-select>
-          <div class="text-caption mb-4">
-            Your geographic location can impact your admissions chances differently at various schools.
-          </div>
+          <div class="text-h6 mt-6 mb-3">Demographics</div>
 
-          <div class="text-body-1 mb-2">{{ $t('profilePage.nationality') }}</div>
+          <div class="text-body-1 mb-2">Nationality</div>
           <v-select
             v-model="nationality"
             :items="nationalityOptions"
-            :label="$t('profilePage.nationality')"
+            label="Select your nationality"
             hide-details
             class="mb-3"
           ></v-select>
           <div class="text-caption mb-4">
-            {{ $t('profilePage.nationalityHelp') }}
-          </div>
-          
-          <div class="text-body-1 mb-2">Demonstrated Interest</div>
-          <v-switch
-            v-model="hasDemonstratedInterest"
-            label="I have demonstrated interest to my target colleges"
-            color="primary"
-            hide-details
-            class="mb-2"
-          ></v-switch>
-          <div class="text-caption mb-4">
-            Demonstrated interest includes campus visits, attending info sessions, early applications, specific supplemental essays, etc.
+            Some institutions have specific programs or considerations for international students.
           </div>
 
-          <div class="text-body-1 mb-2">{{ $t('profilePage.gender') }}</div>
+          <div class="text-body-1 mb-2">Gender</div>
           <v-radio-group
             v-model="gender"
             class="mt-1 mb-2"
             hide-details
           >
-            <v-radio value="Male" :label="$t('profilePage.male')"></v-radio>
-            <v-radio value="Female" :label="$t('profilePage.female')"></v-radio>
-            <v-radio value="Non-binary" :label="$t('profilePage.nonBinary')"></v-radio>
-            <v-radio value="Prefer not to say" :label="$t('profilePage.preferNotToSay')"></v-radio>
+            <v-radio value="Male" label="Male"></v-radio>
+            <v-radio value="Female" label="Female"></v-radio>
+            <v-radio value="Non-binary" label="Non-binary"></v-radio>
+            <v-radio value="Prefer not to say" label="Prefer not to say"></v-radio>
           </v-radio-group>
           <div class="text-caption mb-3">
-            {{ $t('profilePage.genderHelp') }}
+            Some programs may consider gender balance in their admissions processes.
           </div>
 
           <v-sheet class="pa-3 mb-6 rounded bg-surface-variant">
@@ -476,16 +378,10 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import AuthModal from '@/components/AuthModal.vue';
-import api from '@/api';
-import { useI18n } from 'vue-i18n';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
 import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
 
 const router = useRouter();
-const userStore = useUserStore();
-const { t } = useI18n();
 
 // AP Classes data
 const apOptions = [
@@ -504,24 +400,18 @@ const activityOptions = [
 ];
 
 // Student profile data
-const satReading = ref(600);
-const satMath = ref(620);
-const gpa = ref(3.8);
+const satReading = ref(500);
+const satMath = ref(500);
+const gpa = ref(3.0);
 const apClasses = ref([]);
 const extracurriculars = ref([]);
-const intendedMajor = ref('STEM');
+const intendedMajor = ref("");
 const recScore = ref(2);
 const isLegacy = ref(false);
-const nationality = ref('Domestic');
+const nationality = ref('United States');
 const gender = ref('Prefer not to say');
 const enableBitterByCoffee = ref(false);
 
-// New data points
-const courseRigor = ref(3);
-const essayScore = ref(3);
-const interviewScore = ref(0);
-const region = ref('');
-const hasDemonstratedInterest = ref(false);
 
 // Snackbar
 const snackbar = ref(false);
@@ -545,8 +435,7 @@ const demoScore = computed(() => {
 });
 
 const nationalityOptions = [
-  'United States', 'China', 'Canada', 'United Kingdom', 'India', 'South Korea',
-  'Japan', 'Germany', 'France', 'Australia', 'Brazil', 'Other'
+  'United States', 'China', 'Canada', 'Hong Kong','Australia','Other'
 ];
 
 // AP Classes functionality
@@ -599,12 +488,7 @@ const studentProfile = computed(() => {
     nationality: nationality.value,
     gender: gender.value,
     demoScore: demoScore.value,
-    enableBitterByCoffee: enableBitterByCoffee.value,
-    courseRigor: courseRigor.value,
-    essayScore: essayScore.value,
-    interviewScore: interviewScore.value,
-    region: region.value,
-    hasDemonstratedInterest: hasDemonstratedInterest.value
+    enableBitterByCoffee: enableBitterByCoffee.value
   };
 });
 
@@ -633,11 +517,6 @@ const performSaveOperation = (isAutoSave = false) => {
     gender: gender.value,
     demoScore: demoScore.value,
     enableBitterByCoffee: enableBitterByCoffee.value,
-    courseRigor: courseRigor.value,
-    essayScore: essayScore.value,
-    interviewScore: interviewScore.value,
-    region: region.value,
-    hasDemonstratedInterest: hasDemonstratedInterest.value
   };
 
   localStorage.setItem('userProfileData', JSON.stringify(profileData));
@@ -804,92 +683,40 @@ const getLevelDescription = (level) => {
 };
 
 const getRecDescription = (score) => {
-  switch (score) {
-    case 1:
-      return t('profilePage.recAverage');
-    case 2:
-      return t('profilePage.recGood');
-    case 3:
-      return t('profilePage.recExcellent');
-    default:
-      return '';
-  }
+  const descriptions = { 
+    1: 'Basic', 
+    2: 'Decent', 
+    3: 'Strong', 
+    4: 'Very Strong', 
+    5: 'Outstanding' 
+  };
+  return descriptions[score] || '';
 };
 
 const openActivityDialog = () => {
   activityDialog.value = true;
 };
 
-// New description methods
-const getCourseRigorDescription = (score) => {
-  switch (score) {
-    case 1: return 'Basic';
-    case 2: return 'Standard';
-    case 3: return 'Good';
-    case 4: return 'Strong';
-    case 5: return 'Exceptional';
-    default: return 'Not rated';
-  }
-};
-
-const getEssayDescription = (score) => {
-  switch (score) {
-    case 1: return 'Basic';
-    case 2: return 'Decent';
-    case 3: return 'Good';
-    case 4: return 'Strong';
-    case 5: return 'Outstanding';
-    default: return 'Not rated';
-  }
-};
-
-const getInterviewDescription = (score) => {
-  switch (score) {
-    case 0: return 'N/A';
-    case 1: return 'Poor';
-    case 2: return 'Average';
-    case 3: return 'Good';
-    case 4: return 'Great';
-    case 5: return 'Exceptional';
-    default: return 'Not rated';
-  }
-};
-
-// New geographic region options
-const regionOptions = [
-  { title: 'Not Specified', value: '' },
-  { title: 'Northeast', value: 'Northeast' },
-  { title: 'Midwest', value: 'Midwest' },
-  { title: 'South', value: 'South' },
-  { title: 'West', value: 'West' },
-  { title: 'International', value: 'International' }
-];
-
 onMounted(() => {
   const savedData = localStorage.getItem('userProfileData');
   if (savedData) {
     try {
       const profileData = JSON.parse(savedData);
-      satReading.value = profileData.satReading || 600;
-      satMath.value = profileData.satMath || 620;
-      gpa.value = profileData.gpa || 3.8;
+      satReading.value = profileData.satReading || 500;
+      satMath.value = profileData.satMath || 500;
+      gpa.value = profileData.gpa || 3.0;
       if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
         apClasses.value = profileData.apClasses;
       }
       if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
         extracurriculars.value = profileData.extracurriculars;
       }
-      intendedMajor.value = profileData.intendedMajor || 'STEM';
+      intendedMajor.value = profileData.intendedMajor || "";
       recScore.value = profileData.recScore || 2;
       isLegacy.value = profileData.isLegacy || false; // Ensure isLegacy is loaded
       if (profileData.nationality) nationality.value = profileData.nationality;
       if (profileData.gender) gender.value = profileData.gender;
       enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
-      courseRigor.value = profileData.courseRigor || 3;
-      essayScore.value = profileData.essayScore || 3;
-      interviewScore.value = profileData.interviewScore || 0;
-      region.value = profileData.region || '';
-      hasDemonstratedInterest.value = profileData.hasDemonstratedInterest || false;
       console.log('Profile data loaded successfully');
     } catch (e) {
       console.error('Error parsing saved profile data:', e);
