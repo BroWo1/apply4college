@@ -22,6 +22,51 @@
           </v-row>
         </v-card>
 
+        <!-- A4C Ratings Overview -->
+        <v-card v-if="college.a4cRatings && college.a4cRatings.overall !== 'N/A'" class="mb-6 pa-4">
+          <v-row align="center">
+            <v-col cols="12" md="5" class="text-center text-md-left mb-4 mb-md-0">
+              <h3 class="text-h6 font-weight-bold mb-2">A4C Grade</h3>
+              <v-progress-circular
+                :model-value="overallScorePercentage"
+                :size="100" 
+                :width="10" 
+                :color="overallGradeColor"
+                class="mx-auto mx-md-0"
+              >
+                <span class="text-h5 font-weight-bold">{{ college.a4cRatings.overall }}</span>
+              </v-progress-circular>
+            </v-col>
+            <v-col cols="12" md="7">
+              <h4 class="text-subtitle-1 font-weight-medium mb-2">Key Categories:</h4>
+              <v-row dense>
+                <v-col
+                  v-for="category in college.a4cRatings.categories?.slice(0, 2)" 
+                  :key="category.name"
+                  cols="12" sm="6"
+                  class="mb-1 px-1"
+                >
+                  <v-card outlined class="fill-height d-flex flex-column pa-2" elevation="0">
+                    <v-row align="center" no-gutters>
+                      <v-col cols="auto" class="mr-2">
+                        <v-avatar :color="getGradeColor(category.rating)" size="30">
+                          <span class="white--text text-caption font-weight-bold">{{ category.rating }}</span>
+                        </v-avatar>
+                      </v-col>
+                      <v-col>
+                        <div class="text-caption font-weight-medium">{{ category.name }}</div>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+          <v-btn color="primary" variant="text" @click="$emit('navigateToA4CRating')" class="mt-4 d-block mx-auto mx-md-0">
+            View Full Rating Details
+          </v-btn>
+        </v-card>
+
         <!-- College Type and Details -->
         <v-card class="mb-6 pa-4">
           <div class="text-body-1 mb-4">
@@ -145,7 +190,19 @@ const props = defineProps({
   },
 });
 
-defineEmits(['navigateToChancing', 'saveToEarly', 'saveToRegular']);
+defineEmits(['navigateToChancing', 'saveToEarly', 'saveToRegular', 'navigateToA4CRating']);
+
+const overallScorePercentage = computed(() => {
+  if (props.college && props.college.a4cRatings)
+    return gradeToScore(props.college.a4cRatings.overall);
+  return 0;
+});
+
+const overallGradeColor = computed(() => {
+  if (props.college && props.college.a4cRatings)
+    return getGradeColor(props.college.a4cRatings.overall);
+  return 'grey'; // Default color
+});
 
 const chanceColor = computed(() => {
   if (!props.collegeChance) return 'grey';
@@ -156,9 +213,45 @@ const chanceDescription = computed(() => {
   if (!props.collegeChance) return 'Calculating...';
   return getAdmissionChanceDescription(props.collegeChance.probability || 0.27);
 });
+
+// Helper function to convert grade to a numerical score
+const gradeToScore = (grade) => {
+  const mapping = {
+    'A+': 97, 'A': 93, 'A-': 90,
+    'B+': 87, 'B': 83, 'B-': 80,
+    'C+': 77, 'C': 73, 'C-': 70,
+    'D+': 67, 'D': 63, 'D-': 60,
+    'F': 50
+  };
+  return mapping[grade] || 0;
+};
+
+// Helper function to get color for A4C rating chips (similar to A4CRatingTab)
+const getGradeColor = (grade) => {
+  const colors = {
+    'A+': 'green',
+    'A': 'green',
+    'A-': 'green',
+    'B+': 'lightgreen',
+    'B': 'lightgreen',
+    'B-': 'yellow',
+    'C+': 'yellow',
+    'C': 'orange',
+    'C-': 'red',
+    'D+': 'red',
+    'D': 'red',
+    'D-': 'darkred',
+    'F': 'darkred'
+  };
+  return colors[grade] || 'grey';
+};
+
 </script>
 
 <style scoped>
+.white--text {
+  color: white !important;
+}
 
 /* Custom scrollbar for sticky component if needed */
 .sticky-top-side::-webkit-scrollbar {
@@ -171,4 +264,4 @@ const chanceDescription = computed(() => {
 .sticky-top-side::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
-</style> 
+</style>

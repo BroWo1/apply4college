@@ -34,8 +34,7 @@
       <v-tabs v-model="activeTab" slider-color="primary" class="mb-6">
         <v-tab value="overview">Overview</v-tab>
         <v-tab value="chancing">Chancing</v-tab>
-        <v-tab value="cost">Cost & scholarships</v-tab>
-        <v-tab value="majors">Majors</v-tab>
+        <v-tab value="a4c-rating">Rating</v-tab>
       </v-tabs>
 
       <v-divider class="mb-6"></v-divider>
@@ -52,6 +51,7 @@
             :recentlyViewed="recentlyViewed"
             :similarSchools="similarSchools"
             @navigateToChancing="handleNavigateToChancing"
+            @navigateToA4CRating="handleNavigateToA4CRating"
             @saveToEarly="handleSaveToEarly"
             @saveToRegular="handleSaveToRegular"
           />
@@ -78,8 +78,8 @@
         </v-window-item>
 
         <!-- Cost & Scholarships Tab - We'll implement full content later -->
-        <v-window-item value="cost">
-          <CostTab />
+        <v-window-item value="a4c-rating">
+          <A4CRatingTab :college="college" />
         </v-window-item>
 
         <!-- Majors Tab - We'll implement full content later -->
@@ -115,7 +115,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AdmitChanceComponent from '../../components/AdmitChanceComponent.vue';
 import OverviewTab from '../../components/college/tabs/OverviewTab.vue';
 import ChancingTab from '../../components/college/tabs/ChancingTab.vue';
-import CostTab from '../../components/college/tabs/CostTab.vue';
+import A4CRatingTab from '../../components/college/tabs/A4CRatingTab.vue';
 import MajorsTab from '../../components/college/tabs/MajorsTab.vue';
 import { colleges as allColleges } from '../../data/colleges.js';
 import { getAdmissionChanceColor, getAdmissionChanceDescription, calculateAdmissionChance, prepareStudentData, getMajorMatchAssessment, adjustAcceptanceRateByMajor, adjustAcceptanceRateByStrategicFactors } from '../../utils/admitChanceCalculator';
@@ -364,11 +364,20 @@ const handleNavigateToChancing = () => {
   activeTab.value = 'chancing';
 };
 
+const handleNavigateToA4CRating = () => {
+  activeTab.value = 'a4c-rating';
+};
+
 watch(activeTab, async (newTab, oldTab) => {
-  if (oldTab === 'overview' && newTab === 'chancing') {
+  // Preserve scroll position when navigating from Overview to Chancing/A4C-Rating
+  // or from Chancing to A4C-Rating
+  if (
+    (oldTab === 'overview' && (newTab === 'chancing' || newTab === 'a4c-rating')) ||
+    (oldTab === 'chancing' && newTab === 'a4c-rating')
+  ) {
     const scrollYToRestore = window.scrollY;
-    await nextTick();
-    window.scrollTo(0, scrollYToRestore);
+    await nextTick(); // Wait for the DOM to update with the new tab's content
+    window.scrollTo(0, scrollYToRestore); // Restore the scroll position
   }
 });
 

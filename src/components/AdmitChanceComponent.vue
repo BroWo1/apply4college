@@ -16,7 +16,7 @@
           <v-col cols="12">
             <v-card variant="outlined" class="pa-3">
               <div class="d-flex align-center justify-space-around">
-                <div class="d-flex align-center">
+                <div class="d-flex align-center" v-if="props.college.allowsEarlyDecision">
                   <div class="me-3">
                     <div class="text-subtitle-2">Early Decision</div>
                     <div class="text-caption">Increases chances</div>
@@ -27,12 +27,26 @@
                     hide-details
                     density="compact"
                     @change="recalculateChance"
+                    :disabled="!props.college.allowsEarlyDecision"
+                  ></v-switch>
+                </div>
+                <div v-else class="d-flex align-center">
+                  <div class="me-3">
+                    <div class="text-subtitle-2">Early Decision</div>
+                    <div class="text-caption text-disabled">Not offered</div>
+                  </div>
+                  <v-switch
+                    :model-value="false"
+                    color="primary"
+                    hide-details
+                    density="compact"
+                    disabled
                   ></v-switch>
                 </div>
 
                 <v-divider vertical class="mx-4"></v-divider>
 
-                <div class="d-flex align-center">
+                <div class="d-flex align-center" v-if="props.college.considersLegacy">
                   <div class="me-3">
                     <div class="text-subtitle-2">Legacy Status</div>
                     <div class="text-caption">Family attended</div>
@@ -43,6 +57,20 @@
                     hide-details
                     density="compact"
                     @change="recalculateChance"
+                    :disabled="!props.college.considersLegacy"
+                  ></v-switch>
+                </div>
+                <div v-else class="d-flex align-center">
+                  <div class="me-3">
+                    <div class="text-subtitle-2">Legacy Status</div>
+                    <div class="text-caption text-disabled">Not considered</div>
+                  </div>
+                  <v-switch
+                    :model-value="false"
+                    color="primary"
+                    hide-details
+                    density="compact"
+                    disabled
                   ></v-switch>
                 </div>
               </div>
@@ -489,11 +517,13 @@ const showAlgorithmExplanationDialog = ref(false);
 
 watch(() => dialog.value, (isOpen) => {
   if (isOpen) {
-    localIsLegacy.value = false;
-    localIsEarlyDecision.value = false;
+    // Reset local ED/Legacy based on college properties
+    localIsEarlyDecision.value = props.college.allowsEarlyDecision ? false : false;
+    localIsLegacy.value = props.college.considersLegacy ? false : false;
+
     showAlgorithmExplanationDialog.value = false; // Ensure explanation dialog is closed initially
     if (props.college && props.studentProfile) {
-      calculateChance();
+      calculateChance(); // This will now use the potentially reset localIsEarlyDecision/Legacy
     } else {
       collegeChance.value = null;
     }
@@ -510,12 +540,17 @@ const calculateChance = () => {
     collegeChance.value = null;
     return;
   }
+  
+  // Ensure local ED/Legacy are false if not allowed by the college
+  const actualIsEarlyDecision = props.college.allowsEarlyDecision ? localIsEarlyDecision.value : false;
+  const actualIsLegacy = props.college.considersLegacy ? localIsLegacy.value : false;
+  
   const studentData = prepareStudentData({
     ...props.studentProfile,
-    isLegacy: localIsLegacy.value,
-    isEarlyDecision: localIsEarlyDecision.value
+    isLegacy: actualIsLegacy,
+    isEarlyDecision: actualIsEarlyDecision
   });
-  collegeChance.value = calculateAdmissionChance(studentData, props.college); //
+  collegeChance.value = calculateAdmissionChance(studentData, props.college);
 };
 
 const recalculateChance = () => {
@@ -693,8 +728,13 @@ const normalizeBlock = (blockValue) => {
 const finalAdjustedRateForDisplay = computed(() => {
   if (!props.college || !props.studentProfile || !props.college.stats) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
   let rate = parseFloat(props.college.acceptanceRate);
-  rate = adjustAcceptanceRateByMajor(rate, props.studentProfile.intendedMajor, props.college.collegeType); //
-  rate = adjustAcceptanceRateByStrategicFactors(rate, localIsEarlyDecision.value, localIsLegacy.value); //
+  rate = adjustAcceptanceRateByMajor(rate, props.studentProfile.intendedMajor, props.college.collegeType);
+  
+  // Use actual ED/Legacy values respecting college's allowance
+  const actualIsEarlyDecision = props.college.allowsEarlyDecision ? localIsEarlyDecision.value : false;
+  const actualIsLegacy = props.college.considersLegacy ? localIsLegacy.value : false;
+  
+  rate = adjustAcceptanceRateByStrategicFactors(rate, actualIsEarlyDecision, actualIsLegacy, props.college.allowsEarlyDecision, props.college.considersLegacy);
   return rate.toFixed(1);
 });
 
@@ -764,5 +804,8 @@ const emitSaveDecision = () => {
 }
 ul {
   padding-left: 20px; /* Ensure bullets are visible */
+}
+.text-disabled {
+  color: rgba(0, 0, 0, 0.38);
 }
 </style>

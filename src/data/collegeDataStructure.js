@@ -12,7 +12,8 @@ export const createCollegeData = ({
   stats,
   deadlines = {}, // Add default empty deadlines object
   allowsEarlyDecision = true, // New flag
-  considersLegacy = true // New flag
+  considersLegacy = true, // New flag
+  a4cRatings = {} // New field for A4C ratings
 }) => {
   // Generate a placeholder image if none provided
   const image = imageUrl ||
@@ -41,7 +42,11 @@ export const createCollegeData = ({
       regularDecision: deadlines.regularDecision || "January 1"
     },
     allowsEarlyDecision, // Add to returned object
-    considersLegacy      // Add to returned object
+    considersLegacy,      // Add to returned object
+    a4cRatings: {
+      overall: a4cRatings.overall || 'N/A', // Default overall rating
+      categories: a4cRatings.categories || [] // Default empty array for sub-categories
+    }
   };
 };
 

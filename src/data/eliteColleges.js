@@ -8,7 +8,6 @@ export const eliteColleges = [
   createCollegeData({
     name: 'Harvard University',
     location: 'Cambridge, MA',
-    description: "One of the world's most prestigious universities with excellence across disciplines.",
     acceptanceRate: 3.5,
     tuition: 60000,
     imageUrl: 'https://placehold.co/600x400/C2185B/ffffff?text=Harvard',
@@ -41,13 +40,23 @@ export const eliteColleges = [
           demo: 0.15
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'B' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   }),
 
   createCollegeData({
     name: 'Stanford University',
     location: 'Stanford, CA',
-    description: 'A private research university known for its academic strength, entrepreneurial character, and proximity to Silicon Valley.',
     acceptanceRate: 3.9,
     tuition: 60430,
     imageUrl: 'https://placehold.co/600x400/D32F2F/ffffff?text=Stanford',
@@ -80,13 +89,23 @@ export const eliteColleges = [
           demo: 0.20
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'B' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   }),
 
   createCollegeData({
     name: 'MIT',
     location: 'Cambridge, MA',
-    description: 'A private research university with a focused curriculum on scientific and technological research.',
     acceptanceRate: 4.1,
     tuition: 57986,
     imageUrl: 'https://placehold.co/600x400/2196F3/ffffff?text=MIT',
@@ -119,13 +138,23 @@ export const eliteColleges = [
           demo: 0.20
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'B' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   }),
 
   createCollegeData({
     name: 'Duke University',
     location: 'Durham, NC',
-    description: 'A private research university known for its strong academic programs and vibrant campus life.',
     acceptanceRate: 6.8,
     tuition: 66327,
     imageUrl: 'https://placehold.co/600x400/1976D2/ffffff?text=Duke',
@@ -154,13 +183,23 @@ export const eliteColleges = [
           demo: 0.12
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'B' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   }),
 
   createCollegeData({
     name: 'University of Chicago',
     location: 'Chicago, IL',
-    description: 'A private research university known for its rigorous academics and diverse student body.',
     acceptanceRate: 5.0,
     tuition: 67446,
     imageUrl: 'https://placehold.co/600x400/FB8C00/ffffff?text=UChicago',
@@ -189,6 +228,17 @@ export const eliteColleges = [
           demo: 0.15
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'B' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   })
 ];

@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    A4CRatingTab: typeof import('./src/components/college/tabs/A4CRatingTab.vue')['default']
     AdmitChanceComponent: typeof import('./src/components/AdmitChanceComponent.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppMenu: typeof import('./src/components/AppMenu.vue')['default']
