@@ -71,7 +71,7 @@
 
           <div class="text-body-1 mb-2">Extra Materials (e.g. Recommendation Letter, Essay)</div>
           <div class="d-flex justify-space-between mb-1">
-            <span class="text-caption">Expected strength (1-5)</span>
+            <span class="text-caption">Expected strength (1-4)</span>
             <span class="text-caption">
               {{ recScore }} - {{ getRecDescription(recScore) }}
             </span>
@@ -79,7 +79,7 @@
           <v-slider
             v-model="recScore"
             :min="1"
-            :max="5"
+            :max="4"
             :step="1"
             thumb-label
             :thumb-size="20"
@@ -378,10 +378,13 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import api from '@/api';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
 import { getMajorMatchAssessment } from '../utils/admitChanceCalculator';
+import { useUserStore } from '@/stores/user'; // Import user store
 
 const router = useRouter();
+const userStore = useUserStore(); // Initialize user store
 
 // AP Classes data
 const apOptions = [
@@ -417,7 +420,10 @@ const enableBitterByCoffee = ref(false);
 const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref('success'); // Default color
-const loading = ref(false); // For the manual save button's loading state
+const loading = ref(false); // For loading states (initial fetch and manual save)
+const GUEST_PROFILE_KEY = 'guestProfileData';
+const USER_PROFILE_KEY = 'userProfileData';
+const PERSISTENT_PROFILE_KEY = 'persistentProfileData'; // New key for specific persistent data
 
 // Computed demographic score
 const demoScore = computed(() => {
@@ -495,63 +501,207 @@ const studentProfile = computed(() => {
 // --- AUTO-SAVE LOGIC ---
 const initialLoadComplete = ref(false);
 
+// Definition for the debounce function
 function debounce(func, delay) {
-  let timeoutId;
+  let timeout;
   return (...args) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
   };
 }
 
-const performSaveOperation = (isAutoSave = false) => {
-  const profileData = {
-    satReading: satReading.value,
-    satMath: satMath.value,
-    gpa: gpa.value,
-    apClasses: apClasses.value,
-    extracurriculars: extracurriculars.value,
-    intendedMajor: intendedMajor.value,
-    recScore: recScore.value,
-    isLegacy: isLegacy.value,
-    nationality: nationality.value,
-    gender: gender.value,
-    demoScore: demoScore.value,
-    enableBitterByCoffee: enableBitterByCoffee.value,
-  };
+async function fetchUserProfileFromAPI() {
+  if (!userStore.isAuthenticated) {
+    // Should not be called if not authenticated, handled by loadProfile
+    console.warn('fetchUserProfileFromAPI called while not authenticated');
+    return false;
+  }
+  loading.value = true;
+  try {
+    const { data } = await api.get('profile/');
+    satReading.value = data.sat_reading || 500;
+    satMath.value = data.sat_math || 500;
+    gpa.value = data.gpa || 3.0;
+    // Ensure apClasses and extracurriculars are arrays even if API returns null/undefined
+    apClasses.value = (data.ap_classes && Array.isArray(data.ap_classes)) ? data.ap_classes : [];
+    extracurriculars.value = (data.extracurriculars && Array.isArray(data.extracurriculars)) ? data.extracurriculars : [];
+    // intendedMajor.value = data.intended_major || ""; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
+    recScore.value = data.recommendation_strength || 2;
+    isLegacy.value = data.is_legacy || false;
+    // nationality.value = data.nationality || 'United States'; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
+    // gender.value = data.gender || 'Prefer not to say'; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
+    enableBitterByCoffee.value = data.enable_bitter_by_coffee || false; // Keep this as it's part of randomization, not demographics/major
+    
+    console.log('Profile data loaded successfully from API (excluding major/demographics managed locally)');
+    // Update localStorage with the fetched data (for authenticated user) - this will not include the locally managed fields
+    // However, studentProfile.value will still have them from persistent load, so USER_PROFILE_KEY will store them.
+    // This is acceptable as USER_PROFILE_KEY acts as a full snapshot for authenticated users if API fails later.
+    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(studentProfile.value));
+    return true;
+  } catch (e) {
+    console.error('Error fetching profile data from API:', e);
+    snackbarText.value = e.response?.data?.detail || 'Failed to load profile from server. Using local data if available.';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+    // Fallback to user-specific local storage if API fails for an authenticated user
+    const localData = localStorage.getItem(USER_PROFILE_KEY);
+    if (localData) {
+      try {
+        const profileData = JSON.parse(localData);
+        applyProfileData(profileData); // Apply the full profile data
+        console.log('Profile data loaded from USER_PROFILE_KEY as API fallback.');
+        return true; // Indicate that data was loaded (from local fallback)
+      } catch (parseError) {
+        console.error('Error parsing local user profile data:', parseError);
+        // If parsing USER_PROFILE_KEY fails, defaults will be set later or persistent data might cover some fields
+      }
+    }
+    // If API failed and USER_PROFILE_KEY also failed or was empty, return false
+    return false;
+  } finally {
+    loading.value = false;
+  }
+}
 
-  localStorage.setItem('userProfileData', JSON.stringify(profileData));
-  console.log(isAutoSave ? 'Profile auto-saved:' : 'Profile saved manually:', profileData);
+function loadGuestProfileFromLocalStorage() {
+  loading.value = true;
+  const savedData = localStorage.getItem(GUEST_PROFILE_KEY);
+  if (savedData) {
+    try {
+      const profileData = JSON.parse(savedData);
+      applyProfileData(profileData);
+      console.log('Guest profile data loaded successfully from localStorage');
+      // Snackbar for guest load can be shown here or suppressed if persistent load also shows one
+      // snackbarText.value = 'Profile loaded locally (guest)';
+      // snackbarColor.value = 'info';
+      // snackbar.value = true;
+    } catch (e) {
+      console.error('Error parsing saved guest profile data from localStorage:', e);
+      setDefaultProfileData(); // Reset to defaults if parsing fails
+      snackbarText.value = 'Could not load local guest data. Using default profile.';
+      snackbarColor.value = 'warning';
+      snackbar.value = true;
+    }
+  } else {
+    setDefaultProfileData(); // Set defaults if no guest data found
+    console.log('No guest profile data found in localStorage. Using defaults.');
+  }
+  loading.value = false;
+  // initialLoadComplete will be set in onMounted after persistent data is also processed
+}
 
-  snackbarText.value = isAutoSave ? 'Profile auto-saved!' : 'Profile saved!';
-  snackbarColor.value = 'success'; // Green for successful save
-  snackbar.value = true;
+function applyProfileData(profileData) {
+  satReading.value = profileData.satReading || 500;
+  satMath.value = profileData.satMath || 500;
+  gpa.value = profileData.gpa || 3.0;
+  apClasses.value = (profileData.apClasses && Array.isArray(profileData.apClasses)) ? profileData.apClasses : [];
+  extracurriculars.value = (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) ? profileData.extracurriculars : [];
+  intendedMajor.value = profileData.intendedMajor || "";
+  recScore.value = profileData.recScore || 2;
+  isLegacy.value = profileData.isLegacy || false;
+  nationality.value = profileData.nationality || 'United States';
+  gender.value = profileData.gender || 'Prefer not to say';
+  enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
+  // demoScore is computed, no need to set it here
+}
+
+function setDefaultProfileData() {
+  satReading.value = 500;
+  satMath.value = 500;
+  gpa.value = 3.0;
+  apClasses.value = [];
+  extracurriculars.value = [];
+  intendedMajor.value = "";
+  recScore.value = 2;
+  isLegacy.value = false;
+  nationality.value = 'United States';
+  gender.value = 'Prefer not to say';
+  enableBitterByCoffee.value = false;
+}
+
+const performSaveOperation = async (isAutoSave = false) => {
+  loading.value = true;
+  try {
+    // 1. Prepare the specific data to be always saved locally
+    const persistentData = {
+      apClasses: apClasses.value,
+      extracurriculars: extracurriculars.value,
+      intendedMajor: intendedMajor.value,
+      nationality: nationality.value,
+      gender: gender.value,
+      enableBitterByCoffee: enableBitterByCoffee.value
+    };
+    // 2. Always save this persistent subset to its own local storage key
+    localStorage.setItem(PERSISTENT_PROFILE_KEY, JSON.stringify(persistentData));
+    console.log('Persisted specific profile data locally:', persistentData);
+
+    // 3. Proceed with existing logic for API/Guest save for the *full* profile
+    if (userStore.isAuthenticated) {
+      await api.put('profile/', {
+        sat_reading: studentProfile.value.satReading,
+        sat_math: studentProfile.value.satMath,
+        gpa: studentProfile.value.gpa,
+        ap_classes: studentProfile.value.apClasses, // Keep sending these as they are not exclusively local
+        extracurriculars: studentProfile.value.extracurriculars, // Keep sending these
+        // intended_major: studentProfile.value.intendedMajor, // Removed: Not sent to API
+        recommendation_strength: studentProfile.value.recScore,
+        is_legacy: studentProfile.value.isLegacy,
+        // nationality: studentProfile.value.nationality, // Removed: Not sent to API
+        // gender: studentProfile.value.gender, // Removed: Not sent to API
+        enable_bitter_by_coffee: studentProfile.value.enableBitterByCoffee // Keep this as it's part of randomization
+      });
+
+      // USER_PROFILE_KEY will store the complete profile including locally managed fields.
+      // This is for local fallback consistency for authenticated users.
+      localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(studentProfile.value));
+      snackbarText.value = isAutoSave ? 'Profile auto-saved to server (core data).' : 'Profile saved successfully to server (core data).';
+      snackbarColor.value = 'success';
+    } else {
+      localStorage.setItem(GUEST_PROFILE_KEY, JSON.stringify(studentProfile.value));
+      snackbarText.value = isAutoSave ? 'Profile auto-saved locally.' : 'Profile saved locally (guest).';
+      snackbarColor.value = 'success';
+    }
+    snackbar.value = true;
+
+  } catch (e) {
+    console.error('Error during save operation:', e);
+    // The persistentData was already saved successfully before this catch block.
+    if (userStore.isAuthenticated) { // This error is from the API call or USER_PROFILE_KEY save
+      snackbarText.value = 'Failed to save full profile to server. Key settings are backed up locally.';
+    } else { // This error is from GUEST_PROFILE_KEY save (should be rare if not API related)
+      snackbarText.value = 'Failed to save full profile locally. Key settings may still be backed up.';
+    }
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    loading.value = false;
+  }
 };
 
 const debouncedAutoSave = debounce(() => {
-  performSaveOperation(true);
+  if (initialLoadComplete.value) { // Ensure auto-save only runs after initial load
+    console.log('Auto-saving profile data...');
+    performSaveOperation(true);
+  }
 }, 2000); // Auto-save after 2 seconds of inactivity
 
-watch(
-  studentProfile,
-  (newValue, oldValue) => {
-    if (initialLoadComplete.value) {
-      // If the watcher fires after initial load, assume a relevant change.
-      // Vue's deep watcher should ensure it fires on actual data changes within studentProfile.
-      // The previous JSON.stringify comparison might have been too restrictive for array mutations.
-      console.log('Profile data changed (watcher fired), queuing auto-save...');
-      debouncedAutoSave();
-    }
-  },
-  { deep: true }
-);
+watch(studentProfile, (newValue, oldValue) => {
+  // Skip watch handler if loading to prevent unnecessary saves
+  if (loading.value) return;
 
-const manualSaveUserProfile = () => {
-  loading.value = true;
-  performSaveOperation(false);
-  setTimeout(() => {
-    loading.value = false;
-  }, 500);
+  // For development: log when the profile changes
+  console.log('Profile data changed:', newValue);
+
+  // Trigger the debounced auto-save
+  debouncedAutoSave();
+}, { deep: true });
+
+// Manual save function
+const manualSaveUserProfile = async () => {
+  // Directly call the save operation without debounce
+  await performSaveOperation(false);
 };
+
 // --- END AUTO-SAVE LOGIC ---
 
 const getApScoreColor = (score) => {
@@ -697,34 +847,74 @@ const openActivityDialog = () => {
   activityDialog.value = true;
 };
 
-onMounted(() => {
-  const savedData = localStorage.getItem('userProfileData');
-  if (savedData) {
+onMounted(async () => {
+  let mainProfileSourceLoaded = false;
+
+  // Step 1: Load the main profile (full data)
+  if (userStore.isAuthenticated) {
+    const loadedSuccessfully = await fetchUserProfileFromAPI();
+    if (loadedSuccessfully) {
+      mainProfileSourceLoaded = true;
+    } else {
+      // fetchUserProfileFromAPI already tries USER_PROFILE_KEY. If it returned false,
+      // it means API failed AND USER_PROFILE_KEY was not found or failed to parse.
+      // In this scenario, applyProfileData wasn't called with valid data from these primary sources.
+      // We will set defaults, then persistent data will override specific fields.
+      console.log('Authenticated user: API and USER_PROFILE_KEY failed. Setting defaults before persistent load.');
+      setDefaultProfileData();
+    }
+  } else {
+    // For guest users, loadGuestProfileFromLocalStorage handles GUEST_PROFILE_KEY or sets defaults.
+    loadGuestProfileFromLocalStorage();
+    mainProfileSourceLoaded = true; // loadGuestProfileFromLocalStorage always sets some state (loaded or default)
+  }
+
+  // Step 2: Load and apply data from PERSISTENT_PROFILE_KEY for specified fields,
+  // overriding values for these specific fields that might have been loaded from the main profile sources or defaults.
+  const persistentDataString = localStorage.getItem(PERSISTENT_PROFILE_KEY);
+  if (persistentDataString) {
     try {
-      const profileData = JSON.parse(savedData);
-      satReading.value = profileData.satReading || 500;
-      satMath.value = profileData.satMath || 500;
-      gpa.value = profileData.gpa || 3.0;
-      if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
-        apClasses.value = profileData.apClasses;
+      const persistentProfileData = JSON.parse(persistentDataString);
+      console.log('Applying persistent local data over current state:', persistentProfileData);
+      
+      if (persistentProfileData.hasOwnProperty('apClasses') && Array.isArray(persistentProfileData.apClasses)) {
+        apClasses.value = persistentProfileData.apClasses;
       }
-      if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
-        extracurriculars.value = profileData.extracurriculars;
+      if (persistentProfileData.hasOwnProperty('extracurriculars') && Array.isArray(persistentProfileData.extracurriculars)) {
+        extracurriculars.value = persistentProfileData.extracurriculars;
       }
-      intendedMajor.value = profileData.intendedMajor || "";
-      recScore.value = profileData.recScore || 2;
-      isLegacy.value = profileData.isLegacy || false; // Ensure isLegacy is loaded
-      if (profileData.nationality) nationality.value = profileData.nationality;
-      if (profileData.gender) gender.value = profileData.gender;
-      enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
-      console.log('Profile data loaded successfully');
+      if (persistentProfileData.hasOwnProperty('intendedMajor')) {
+        intendedMajor.value = persistentProfileData.intendedMajor;
+      }
+      if (persistentProfileData.hasOwnProperty('nationality')) {
+        nationality.value = persistentProfileData.nationality;
+      }
+      if (persistentProfileData.hasOwnProperty('gender')) {
+        gender.value = persistentProfileData.gender;
+      }
+      if (persistentProfileData.hasOwnProperty('enableBitterByCoffee')) {
+        enableBitterByCoffee.value = persistentProfileData.enableBitterByCoffee;
+      }
+      
+      // Optionally, provide feedback that persistent data was applied.
+      // This might be too frequent if shown every time.
+      // if (mainProfileSourceLoaded && !snackbar.value) { // Avoid overriding other snackbars
+      //   snackbarText.value = 'Applied locally stored preferences for key settings.';
+      //   snackbarColor.value = 'info';
+      //   snackbar.value = true;
+      // }
+
     } catch (e) {
-      console.error('Error parsing saved profile data:', e);
+      console.error('Error parsing or applying persistent profile data from localStorage:', e);
+      // If persistent data is corrupt, the values from main load (or defaults) will remain.
     }
   }
+
+  // Initial load is complete after all attempts to load/apply data.
+  // nextTick ensures Vue has processed DOM updates from data changes before setting initialLoadComplete.
   nextTick(() => {
     initialLoadComplete.value = true;
-    console.log('Initial load complete. Auto-save enabled.');
+    console.log('Initial load sequence complete. Auto-save monitoring active.');
   });
 });
 
