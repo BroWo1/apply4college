@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api/', // Changed to use the proxy
+  baseURL: 'https://server.gpeclub.com:8080/api/',
   headers: { 'Content-Type': 'application/json' }
 })
 

@@ -77,12 +77,6 @@ export default defineConfig({
   },
   server: {
     port: 9090,
-    proxy: {
-      '/api': {
-        target: 'https://server.gpeclub.com:8080',
-        changeOrigin: true,
-      }
-    }
   },
   css: {
     preprocessorOptions: {
