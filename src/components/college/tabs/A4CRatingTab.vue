@@ -15,12 +15,6 @@
             <span class="text-h3 font-weight-bold">{{ overallRatingDisplay }}</span>
           </v-progress-circular>
           <h2 class="text-h5 mt-4 mb-1">Overall A4C Grade</h2>
-          <p class="text-caption">
-            <a href="#" @click.prevent="showGradeInfoDialog = true">How are grades calculated?</a>
-          </p>
-          <p class="text-caption">
-            <a href="#" @click.prevent="showDataSourceDialog = true">Data Sources</a>
-          </p>
         </div>
       </v-col>
 

@@ -47,8 +47,8 @@ export const eliteColleges = [
         { name: 'Academics', rating: 'A+' },
         { name: 'Value', rating: 'A-' },
         { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'B' },
-        { name: 'Location', rating: 'B+' },
+        { name: 'Student Life', rating: 'B+' },
+        { name: 'Location', rating: 'A' },
         { name: 'Safety', rating: 'B' }
       ]
     }
@@ -91,14 +91,14 @@ export const eliteColleges = [
       }
     },
     a4cRatings: {
-      overall: 'A+',
+      overall: 'A',
       categories: [
-        { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'A-' },
-        { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'B' },
-        { name: 'Location', rating: 'B+' },
-        { name: 'Safety', rating: 'B' }
+        { name: 'Academics', rating: 'A' },
+        { name: 'Value', rating: 'A' },
+        { name: 'Campus', rating: 'A+' },
+        { name: 'Student Life', rating: 'A-' },
+        { name: 'Location', rating: 'A+' },
+        { name: 'Safety', rating: 'B+' }
       ]
     }
   }),
@@ -113,8 +113,8 @@ export const eliteColleges = [
     reviewCount: 742,
     collegeType: 'STEM-heavy',
     deadlines: {
-      earlyDecision: "November 15",
-      regularDecision: "January 15"
+      earlyDecision: "November 1",
+      regularDecision: "January 6"
     },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.09 }, sat: { mean: 1555, stdDev: 45 }
@@ -143,11 +143,11 @@ export const eliteColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'A-' },
-        { name: 'Campus', rating: 'A' },
+        { name: 'Value', rating: 'B+' },
+        { name: 'Campus', rating: 'B+' },
         { name: 'Student Life', rating: 'B' },
-        { name: 'Location', rating: 'B+' },
-        { name: 'Safety', rating: 'B' }
+        { name: 'Location', rating: 'A-' },
+        { name: 'Safety', rating: 'A-' }
       ]
     }
   }),
@@ -161,6 +161,10 @@ export const eliteColleges = [
     rating: 3.95,
     reviewCount: 1235,
     collegeType: 'Liberal-arts',
+    deadlines: {
+      earlyDecision: "November 1",
+      regularDecision: "January 2"
+    },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.94, stdDev: 0.1 }, sat: { mean: 1540, stdDev: 60 }
       // Adjusted for average applicant:
@@ -187,12 +191,12 @@ export const eliteColleges = [
     a4cRatings: {
       overall: 'A',
       categories: [
-        { name: 'Academics', rating: 'A+' },
+        { name: 'Academics', rating: 'A' },
         { name: 'Value', rating: 'A-' },
         { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'B' },
+        { name: 'Student Life', rating: 'A' },
         { name: 'Location', rating: 'B+' },
-        { name: 'Safety', rating: 'B' }
+        { name: 'Safety', rating: 'A-' }
       ]
     }
   }),
@@ -206,6 +210,10 @@ export const eliteColleges = [
     rating: 3.83,
     reviewCount: 1333,
     collegeType: 'Liberal-arts',
+    deadlines: {
+      earlyDecision: "November 1",
+      regularDecision: "January 6"
+    },
     stats: {
       // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.08 }, sat: { mean: 1535, stdDev: 55 }
       // Adjusted for average applicant:
@@ -230,13 +238,13 @@ export const eliteColleges = [
       }
     },
     a4cRatings: {
-      overall: 'A',
+      overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'A-' },
-        { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'B' },
-        { name: 'Location', rating: 'B+' },
+        { name: 'Value', rating: 'B' },
+        { name: 'Campus', rating: 'A-' },
+        { name: 'Student Life', rating: 'B+' },
+        { name: 'Location', rating: 'A' },
         { name: 'Safety', rating: 'B' }
       ]
     }

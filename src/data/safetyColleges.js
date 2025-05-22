@@ -11,6 +11,8 @@ export const safetyColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
+    allowsEarlyDecision: false,
+    applicationDeadline: 'November 15',
     stats: {
       gpa: { mean: 3.72, stdDev: 0.18 },
       sat: { mean: 1400, stdDev: 85 },
@@ -43,6 +45,9 @@ export const safetyColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
+    allowsEarlyDecision: true,
+    earlyActionDeadline: 'October 15',
+    regularDecisionDeadline: 'January 15',
     stats: {
       gpa: { mean: 3.6, stdDev: 0.25 },
       sat: { mean: 1380, stdDev: 90 },
@@ -75,6 +80,9 @@ export const safetyColleges = [
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
+    allowsEarlyDecision: true,
+    earlyActionDeadline: 'November 1',
+    regularDecisionDeadline: 'January 5',
     stats: {
       gpa: { mean: 3.62, stdDev: 0.22 },
       sat: { mean: 1400, stdDev: 95 },

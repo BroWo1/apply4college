@@ -82,43 +82,7 @@
           </v-chip-group>
         </v-card>
 
-        <!-- Contact Information -->
-        <v-card class="mb-6 pa-4">
-          
-        </v-card>
-
-        <!-- College Description -->
-        <v-card class="mb-6 pa-4">
-          <h3 class="text-h6 mb-3">About {{ college.name }}</h3>
-          <p class="text-body-1">{{ college.description }}</p>
-        </v-card>
-
-        <!-- Key Information -->
-        <v-card class="mb-6 pa-4">
-          <h3 class="text-h6 mb-3">Key Information</h3>
-          <v-list density="compact">
-            <v-list-item>
-              <v-list-item-title><strong>Tuition:</strong> ${{ college.tuition?.toLocaleString() }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title><strong>Student-Faculty Ratio:</strong> {{ college.studentFacultyRatio }}:1</v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title><strong>Graduation Rate:</strong> {{ college.graduationRate }}%</v-list-item-title>
-            </v-list-item>
-            <v-list-item v-if="college.averageSalaryAfter10Years">
-              <v-list-item-title><strong>Avg. Salary (10 yrs post-grad):</strong> ${{ college.averageSalaryAfter10Years?.toLocaleString() }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-card>
-
-        <!-- Campus Life -->
-        <v-card class="mb-6 pa-4">
-          <h3 class="text-h6 mb-3">Campus Life</h3>
-          <v-chip-group column>
-            <v-chip v-for="feature in college.campusLife" :key="feature" small class="ma-1">{{feature}}</v-chip>
-          </v-chip-group>
-        </v-card>
+    
       </v-card>
     </v-col>
 

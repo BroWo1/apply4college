@@ -13,6 +13,7 @@ export const targetColleges = [
     reviewCount: 0,
     collegeType: 'STEM-heavy',
     allowsEarlyDecision: false, // Example: UCs generally don't have ED
+    applicationDeadline: 'December 2', // All applications must be submitted by December 2
     considersLegacy: false, // Example: UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.89, stdDev: 0.12 },
@@ -48,6 +49,7 @@ export const targetColleges = [
     reviewCount: 0,
     collegeType: 'Liberal-arts',
     allowsEarlyDecision: false, // Example: UCs generally don't have ED
+    applicationDeadline: 'December 1',
     considersLegacy: false, // Example: UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.85, stdDev: 0.15 },
@@ -84,6 +86,8 @@ export const targetColleges = [
     collegeType: 'Liberal-arts',
     // Michigan has Early Action, not strictly ED, but for this example, let's say it allows a form of early application
     allowsEarlyDecision: true,
+    earlyActionDeadline: 'November 1',
+    regularDecisionDeadline: 'February 1',
     considersLegacy: true, // Public universities vary, Michigan might
     stats: {
       gpa: { mean: 3.82, stdDev: 0.15 },
@@ -118,6 +122,9 @@ export const targetColleges = [
     reviewCount: 0,
     collegeType: 'STEM-heavy',
     allowsEarlyDecision: true,
+    earlyDecisionIDeadline: 'November 1',
+    earlyDecisionIIDeadline: 'January 3',
+    regularDecisionDeadline: 'January 3', // Note: Deadline for Drama and Music is December 1
     considersLegacy: true,
     stats: {
       gpa: { mean: 3.85, stdDev: 0.14 },
