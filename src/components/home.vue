@@ -1,179 +1,191 @@
 <template>
-  <v-container fluid style="max-width: 1200px">
-    <v-row class="text-center py-6">
-      <v-col cols="12">
-        <h1 class="text-h2 font-weight-bold mb-6 pt-5">{{ $t('homePage.title') }} <span class="text-body-1 font-weight-bold bg-primary white--text px-2 py-1 rounded">.org</span></h1>
-      </v-col>
-    </v-row>
+  <v-container fluid class="pa-0">
+    <!-- Simplified Header -->
+    <v-sheet color="grey-lighten-4" class="py-6">
+      <v-container>
+        <h1 class="text-h2 font-weight-bold pt-5 text-center">
+          {{ $t('homePage.title') }}
+          <v-chip color="primary" size="small" class="ml-2">.org</v-chip>
+        </h1>
+      </v-container>
+    </v-sheet>
 
-    <v-row justify="center" class="my-8">
-      <v-col cols="12" md="10" lg="9">
-          <div class="d-flex align-center mb-5">
-            <v-avatar color="primary" class="mr-3" size="42">
-              <v-icon icon="mdi-robot" color="white"></v-icon>
-            </v-avatar>
-            <h2 class="text-h5 font-weight-bold">{{ $t('homePage.aiAdvisor') }}</h2>
-          </div>
-
-          <v-row align="center" class="mt-2 mb-2">
-            <v-col cols="11" class="pa-1 pe-2">
-              <v-text-field
-                v-model="aiQuestion"
-                :label="$t('homePage.askPlaceholder')"
-                variant="solo-filled" hide-details
-                clearable
-                @keydown.enter="askAI"
-                class="ai-input"
-                density="comfortable"
-              ></v-text-field>
+    <v-container class="mt-4">
+      <!-- Direct AI Advisor -->
+      <v-card rounded="xl" elevation="3" class="mb-8">
+        <v-card-text class="pa-6">
+          <v-row align="center" class="mb-4">
+            <v-col cols="auto">
+              <v-avatar color="primary" size="48">
+                <v-icon size="28">mdi-robot-happy</v-icon>
+              </v-avatar>
             </v-col>
-            <v-col cols="1" class="pa-1 ps-0 text-center">
+            <v-col>
+              <h2 class="text-h5 font-weight-bold">{{ $t('homePage.aiAdvisor') }}</h2>
+              <p class="text-body-2 text-grey-darken-1 mb-0">Get instant personalized college advice</p>
+            </v-col>
+          </v-row>
+
+          <!-- Simplified Input -->
+          <v-text-field
+            v-model="aiQuestion"
+            :label="$t('homePage.askPlaceholder')"
+            variant="outlined"
+            density="comfortable"
+            clearable
+            @keydown.enter="askAI"
+            :loading="loadingAiResponse"
+            :disabled="loadingAiResponse"
+            rounded="lg"
+            class="mb-3"
+          >
+            <template v-slot:append-inner>
               <v-btn
                 icon="mdi-send"
+                variant="text"
                 color="primary"
                 @click="askAI"
                 :loading="loadingAiResponse"
-                :disabled="!aiQuestion || loadingAiResponse"
-                size="large"
-              >
-              </v-btn>
-            </v-col>
-          </v-row>
+                :disabled="!aiQuestion"
+                size="small"
+              />
+            </template>
+          </v-text-field>
 
-          <v-row class="mt-3 mb-4">
-            <v-col cols="12">
-              <v-chip-group>
-                <v-chip
-                  v-for="(suggestion, i) in personalizedSuggestions"
-                  :key="i"
-                  @click="askSuggestedQuestion(suggestion)"
-                  color="primary"
-                  size="small"
-                  class="ma-1"
-                >
-                  {{ suggestion }}
-                </v-chip>
-              </v-chip-group>
-            </v-col>
-          </v-row>
+          <!-- Quick Suggestions -->
+          <v-chip-group v-if="!aiResponse">
+            <v-chip
+              v-for="(q, i) in quickQuestions"
+              :key="i"
+              @click="() => { aiQuestion = q; askAI(); }"
+              color="primary"
+              variant="outlined"
+              size="small"
+            >
+              {{ q }}
+            </v-chip>
+          </v-chip-group>
 
-          <v-progress-linear
-            v-if="loadingAiResponse"
-            indeterminate
-            color="primary"
-            class="my-3"
-          ></v-progress-linear>
+          <!-- AI Response -->
+          <v-expand-transition>
+            <v-alert
+              v-if="aiResponse"
+              color="primary"
+              variant="tonal"
+              rounded="lg"
+              class="mt-4"
+            >
+              <div v-html="formattedAiResponse"></div>
+            </v-alert>
+          </v-expand-transition>
 
-          <v-card
-            v-if="aiResponse"
-            variant="tonal"
-            color="info"
-            class="mt-4 pa-4 elevation-2"
-            rounded="lg"
-          >
-            <v-card-text>
-              <div class="d-flex align-center mb-3" v-if="Object.keys(userProfile).length > 0">
-                <v-chip size="small" color="primary" class="mr-2">{{ $t('homePage.personalizedChip') }}</v-chip>
-                <span class="text-caption">{{ $t('homePage.basedOnProfile') }}</span>
-              </div>
-              <div v-html="formattedAiResponse" class="ai-response-text"></div>
-            </v-card-text>
-          </v-card>
-
+          <!-- Error -->
           <v-alert
             v-if="aiError"
             type="error"
             variant="tonal"
+            rounded="lg"
             class="mt-4"
-            border="start"
-            density="compact"
           >
             {{ aiError }}
           </v-alert>
-      </v-col>
-    </v-row>
+        </v-card-text>
+      </v-card>
 
-    <v-row class="mt-10">
-      <v-col cols="12">
-        <div class="d-flex align-center mb-4">
-          <h2 class="text-h6 font-weight-bold">{{ $t('homePage.savedColleges') }}</h2>
-          <v-spacer></v-spacer>
+      <!-- Saved Colleges -->
+      <v-row align="center" class="mb-4">
+        <v-col>
+          <h2 class="text-h5 font-weight-bold">{{ $t('homePage.savedColleges') }}</h2>
+        </v-col>
+        <v-col cols="auto">
           <v-btn
-            variant="tonal"
+            variant="text"
             color="primary"
             to="/explore"
-            size="small"
+            append-icon="mdi-arrow-right"
           >
             {{ $t('homePage.manageList') }}
           </v-btn>
-        </div>
+        </v-col>
+      </v-row>
 
-        <div v-if="allSavedColleges.length > 0" class="saved-colleges-scroll">
-          <div class="d-flex overflow-x-auto py-3">
-            <v-card
-              v-for="college in allSavedColleges"
-              :key="college.id || `college-${college.name}`"
-              hover
-              class="college-card flex-shrink-0 me-4"
-              width="280"
-              elevation="2"
-            >
-              <div class="d-flex align-center px-3 pt-3 pb-1">
-                <v-chip
-                  size="x-small"
-                  :color="college.isEarlyDecision ? 'error' : 'primary'"
-                  class="text-caption font-weight-medium"
-                >
-                  {{ college.isEarlyDecision ? 'ED' : 'RD' }}
-                </v-chip>
-                <v-spacer></v-spacer>
-                <v-rating
-                  :model-value="college.rating"
-                  color="amber"
-                  density="compact"
-                  size="x-small"
-                  readonly
-                  class="pb-0"
-                ></v-rating>
-              </div>
-              <v-img :src="college.image" height="120" cover class="mb-2"></v-img>
-              <v-card-title class="text-subtitle-1 font-weight-bold pt-0 px-3">{{ college.name }}</v-card-title>
-              <v-card-subtitle class="px-3">{{ college.location }}</v-card-subtitle>
-              <v-card-text class="pb-2 px-3">
-                <div class="d-flex align-center my-2">
-                  <v-chip :color="getAcceptanceRateColor(college.acceptanceRate)" size="small" class="mr-2">
-                    {{ college.acceptanceRate }}% {{ $t('explorePage.acceptanceRate') }}
-                  </v-chip>
-                  <v-chip :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'" size="small">
-                    {{ college.collegeType === 'STEM-heavy' ? $t('explorePage.collegeTypeSTEM') : $t('explorePage.collegeTypeLiberal') }}
-                  </v-chip>
-                </div>
-              </v-card-text>
-              <v-card-actions class="px-3 pb-3 pt-0">
-                <v-btn variant="text" color="primary" @click="viewCollege(college)" block>{{ $t('homePage.viewDetails') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </div>
-        </div>
-
-        <v-alert
-          v-else
-          type="info"
-          variant="tonal"
-          border="start"
-          density="compact"
-          class="py-3"
+      <!-- College Grid -->
+      <v-row v-if="allSavedColleges.length > 0">
+        <v-col
+          v-for="college in allSavedColleges"
+          :key="college.id"
+          cols="12"
+          sm="6"
+          md="4"
+          lg="3"
         >
-          {{ $t('homePage.noColleges') }} <router-link to="/explore" class="text-primary font-weight-medium">{{ $t('homePage.explorePage') }}</router-link> {{ $t('homePage.toAddColleges') }}
-        </v-alert>
-      </v-col>
-    </v-row>
+          <v-card
+            rounded="lg"
+            hover
+            @click="viewCollege(college)"
+            class="cursor-pointer"
+          >
+            <v-img
+              :src="college.image"
+              height="140"
+              cover
+            >
+              <v-chip
+                :color="college.isEarlyDecision ? 'error' : 'primary'"
+                size="small"
+                class="ma-2 position-absolute"
+                style="top: 0; right: 0;"
+              >
+                {{ college.isEarlyDecision ? 'ED' : 'RD' }}
+              </v-chip>
+            </v-img>
+            
+            <v-card-text>
+              <h3 class="text-subtitle-1 font-weight-bold text-truncate">{{ college.name }}</h3>
+              <p class="text-caption text-grey-darken-1">{{ college.location }}</p>
+              
+              <div class="d-flex align-center gap-3 mt-2">
+                <v-chip size="x-small" variant="tonal">
+                  <v-icon start size="x-small">mdi-percent</v-icon>
+                  {{ college.acceptanceRate }}%
+                </v-chip>
+                <v-chip size="x-small" variant="tonal">
+                  {{ college.collegeType === 'STEM-heavy' ? 'STEM' : 'Liberal Arts' }}
+                </v-chip>
+              </div>
+              
+              <v-rating
+                :model-value="college.rating"
+                color="amber"
+                density="compact"
+                size="x-small"
+                readonly
+                class="mt-2"
+              />
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
 
+      <!-- Empty State -->
+      <v-card
+        v-else
+        variant="outlined"
+        rounded="xl"
+        class="text-center pa-12"
+      >
+        <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-school-outline</v-icon>
+        <h3 class="text-h5 mb-2">No colleges saved yet</h3>
+        <p class="text-body-1 text-grey-darken-1 mb-6">Start building your college list today</p>
+        <v-btn color="primary" size="large" to="/explore" prepend-icon="mdi-compass">
+          Explore Colleges
+        </v-btn>
+      </v-card>
+    </v-container>
   </v-container>
 </template>
 
 <script setup>
-// Script setup remains the same as the previous version
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { getGeneralAdvice } from '@/utils/profileRecommendationService';
@@ -193,101 +205,60 @@ const loadingAiResponse = ref(false);
 const earlyDecisionColleges = ref([]);
 const regularDecisionColleges = ref([]);
 
-const suggestedQuestions = computed(() => [
-  t('homePage.suggestedQuestions.essayTopics'),
-  t('homePage.suggestedQuestions.extracurriculars'),
-  t('homePage.suggestedQuestions.testPrep'),
-  t('homePage.suggestedQuestions.earlyOptions'),
-]);
+const quickQuestions = [
+  'How do I write a strong essay?',
+  'What extracurriculars should I focus on?',
+  'Should I apply early decision?',
+  'How can I improve my SAT score?'
+];
 
 const userProfile = computed(() => {
-  if (Object.keys(userStore.profile || {}).length === 0) {
+  const profile = userStore.profile;
+  if (!profile || Object.keys(profile).length === 0) {
     try {
-      const savedData = localStorage.getItem('userProfileData');
-      if (savedData) return JSON.parse(savedData);
-    } catch (e) {
-      console.error('Error loading profile from localStorage:', e);
+      const saved = localStorage.getItem('userProfileData');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
     }
   }
-  return userStore.profile;
+  return profile;
 });
 
 const formattedAiResponse = computed(() => {
-  if (!aiResponse.value) return '';
   return aiResponse.value.replace(/\n/g, '<br>');
 });
 
 const allSavedColleges = computed(() => {
-  const combined = [...earlyDecisionColleges.value, ...regularDecisionColleges.value];
-  const uniqueColleges = Array.from(new Set(combined.map(college => college.name)))
-    .map(name => {
-      const foundCollege = combined.find(college => college.name === name);
-      return foundCollege;
-    })
-    .filter(college => !!college);
-  return uniqueColleges;
+  const all = [...earlyDecisionColleges.value, ...regularDecisionColleges.value];
+  const unique = new Map();
+  all.forEach(college => {
+    if (college && college.name && !unique.has(college.name)) {
+      unique.set(college.name, college);
+    }
+  });
+  return Array.from(unique.values());
 });
 
-
 const askAI = async () => {
-  if (!aiQuestion.value) return;
+  if (!aiQuestion.value.trim()) return;
+  
   loadingAiResponse.value = true;
   aiError.value = '';
   aiResponse.value = '';
+  
   try {
-    const result = await getGeneralAdvice(userProfile.value || {}, aiQuestion.value);
-    if (result && result.success && result.advice) {
+    const result = await getGeneralAdvice(userProfile.value, aiQuestion.value);
+    if (result?.success && result?.advice) {
       aiResponse.value = result.advice;
     } else {
-      aiError.value = result?.error || 'Unable to get a response. Please try again.';
-      if (!result?.error && !result?.advice) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        aiResponse.value = "I couldn't process your question effectively right now. Please try rephrasing or ask a different question.";
-        aiError.value = '';
-      }
+      aiError.value = 'Unable to get a response. Please try again.';
     }
   } catch (error) {
-    console.error('Error asking AI:', error);
-    aiError.value = 'An unexpected error occurred. Please try again.';
+    aiError.value = 'An error occurred. Please try again.';
   } finally {
     loadingAiResponse.value = false;
   }
-};
-
-const askSuggestedQuestion = (question) => {
-  aiQuestion.value = question;
-  askAI();
-};
-
-const personalizedSuggestions = computed(() => {
-  const profile = userProfile.value || {};
-  const suggestions = [...suggestedQuestions.value];
-  
-  if (profile.intendedMajor === 'STEM') {
-    suggestions.push(t('homePage.suggestedQuestions.stemProjects'));
-    suggestions.push(t('homePage.suggestedQuestions.stemScholarships'));
-  } else if (profile.intendedMajor === 'Liberal Arts') {
-    suggestions.push(t('homePage.suggestedQuestions.humanities'));
-    suggestions.push(t('homePage.suggestedQuestions.liberalArtsScholarships'));
-  }
-  
-  if (profile.satMath && profile.satReading && (profile.satMath + profile.satReading) < 1200) {
-    suggestions.push(t('homePage.suggestedQuestions.testOptional'));
-  }
-  
-  if (profile.apClasses && profile.apClasses.length > 0) {
-    suggestions.push(t('homePage.suggestedQuestions.apScores'));
-  }
-  
-  const finalSuggestions = Array.from(new Set(suggestions));
-  return finalSuggestions.slice(0, 6);
-});
-
-const getAcceptanceRateColor = (rate) => {
-  if (rate < 10) return 'error';
-  if (rate < 20) return 'warning';
-  if (rate < 40) return 'info';
-  return 'success';
 };
 
 const viewCollege = (college) => {
@@ -295,59 +266,41 @@ const viewCollege = (college) => {
 };
 
 onMounted(() => {
-  const savedData = localStorage.getItem('userProfileData');
-  if (savedData) {
+  const saved = localStorage.getItem('userProfileData');
+  if (saved) {
     try {
-      const profileData = JSON.parse(savedData);
-      if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
-        earlyDecisionColleges.value = profileData.earlyDecisionColleges
-          .map(savedCollege => {
-            const college = colleges.find(c => c.name === savedCollege.name);
-            return college ? { ...college, id: college.id, isEarlyDecision: true } : null;
-          })
-          .filter(college => !!college);
+      const data = JSON.parse(saved);
+      
+      if (data.earlyDecisionColleges?.length) {
+        earlyDecisionColleges.value = data.earlyDecisionColleges
+          .map(c => ({
+            ...colleges.find(col => col.name === c.name),
+            isEarlyDecision: true
+          }))
+          .filter(Boolean);
       }
-      if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
-        regularDecisionColleges.value = profileData.regularDecisionColleges
-          .map(savedCollege => {
-            const college = colleges.find(c => c.name === savedCollege.name);
-            return college ? { ...college, id: college.id, isEarlyDecision: false } : null;
-          })
-          .filter(college => !!college);
+      
+      if (data.regularDecisionColleges?.length) {
+        regularDecisionColleges.value = data.regularDecisionColleges
+          .map(c => ({
+            ...colleges.find(col => col.name === c.name),
+            isEarlyDecision: false
+          }))
+          .filter(Boolean);
       }
-      console.log('Home: Loaded ED/RD colleges from localStorage');
     } catch (e) {
-      console.error('Home: Error parsing saved profile data:', e);
+      console.error('Error loading colleges:', e);
     }
   }
 });
 </script>
 
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
 
-  .saved-colleges-scroll {
-    padding-bottom: 8px;
-  }
-
-  .ai-input :deep(.v-field__input) {
-    min-height: 56px;
-    align-items: center;
-  }
-
-  .ai-response-text {
-    font-size: 1.0rem;
-    line-height: 1.65;
-  }
-
-  .v-chip.ma-1 {
-    margin: 4px !important;
-  }
-
-  .v-alert .text-primary {
-    text-decoration: none;
-    font-weight: 500;
-  }
-  .v-alert .text-primary:hover {
-    text-decoration: underline;
-  }
+.gap-3 {
+  gap: 0.75rem;
+}
 </style>
