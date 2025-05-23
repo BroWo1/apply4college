@@ -194,7 +194,7 @@ onMounted(() => {
   intervalId = setInterval(() => {
     displayedColleges.value = getRandomColleges();
     cardKey.value++; // Force re-render with new key
-  }, 3000);
+  }, 4000);
 });
 
 onUnmounted(() => {

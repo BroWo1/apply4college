@@ -1,5 +1,9 @@
 import { createCollegeData } from './collegeDataStructure'; // Assuming this path is correct
 
+// Import local images
+import uchicagoImg from '@/assets/colleges/uchicago.png';
+import dukeImg from '@/assets/colleges/duke.png';
+
 // Elite colleges (acceptance rate < 10%)
 // The statistics (GPA, SAT, AP, EC) have been adjusted to better reflect
 // the average applicant profile rather than the average admitted student profile.
@@ -157,7 +161,7 @@ export const eliteColleges = [
     location: 'Durham, NC',
     acceptanceRate: 6.8,
     tuition: 66327,
-    imageUrl: 'https://placehold.co/600x400/1976D2/ffffff?text=Duke',
+    imageUrl: dukeImg,
     rating: 3.95,
     reviewCount: 1235,
     collegeType: 'Liberal-arts',
@@ -206,7 +210,7 @@ export const eliteColleges = [
     location: 'Chicago, IL',
     acceptanceRate: 5.0,
     tuition: 67446,
-    imageUrl: 'https://placehold.co/600x400/FB8C00/ffffff?text=UChicago',
+    imageUrl: uchicagoImg,
     rating: 3.83,
     reviewCount: 1333,
     collegeType: 'Liberal-arts',

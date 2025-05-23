@@ -19,7 +19,7 @@ export const calculateZScore = (value, mean, stdDev) => {
  */
 export const generateBitterByCoffeeFactor = (enableBitterByCoffee) => {
   if (!enableBitterByCoffee) return 1.0;
-  return 0.75 + (Math.random() * 0.5);
+  return 0.85 + (Math.random() * 0.3); // Random factor between 0.85 and 1.15
 };
 
 // Define legacy boost factor

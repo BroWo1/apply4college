@@ -435,7 +435,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, onUnmounted } from 'vue'; // Added onUnmounted
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AdmitChanceComponent from './AdmitChanceComponent.vue';
 import ProfileSummaryComponent from './ProfileSummaryComponent.vue';
@@ -450,8 +450,10 @@ import {
 } from '../utils/admitChanceCalculator';
 import CollegeComparison from './CollegeComparison.vue';
 import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user'; // Added import
 
 const { t } = useI18n();
+const userStore = useUserStore(); // Initialize user store
 
 // State for responsive side panels
 const leftPanelOpen = ref(false);
@@ -466,67 +468,6 @@ const handleResize = () => {
     rightPanelOpen.value = false;
   }
 };
-
-// Add window resize event listener
-onMounted(() => {
-  window.addEventListener('resize', handleResize);
-
-  // Load saved profile data
-  const savedData = localStorage.getItem('userProfileData');
-  if (savedData) {
-    try {
-      const profileData = JSON.parse(savedData);
-
-      // Load standardized scores
-      satReading.value = profileData.satReading || 500;
-      satMath.value = profileData.satMath || 500;
-      gpa.value = profileData.gpa || 3.0;
-
-      // Load AP classes
-      if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
-        apClasses.value = profileData.apClasses;
-      }
-
-      // Load extracurriculars
-      if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
-        extracurriculars.value = profileData.extracurriculars;
-      }
-
-      // Load additional factors
-      intendedMajor.value = profileData.intendedMajor || "";
-      recScore.value = profileData.recScore || 2;
-      isLegacy.value = profileData.isLegacy || false;
-      demoScore.value = profileData.demoScore || 0;
-
-      // Load college lists
-      if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
-        // Map saved college names to full college objects
-        savedColleges.value = profileData.earlyDecisionColleges.map(savedCollege => {
-          const fullCollege = colleges.find(c => c.name === savedCollege.name);
-          return fullCollege || savedCollege;
-        }).filter(Boolean); // Ensure no undefined entries if a college isn't found
-      }
-
-      if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
-        // Map saved college names to full college objects
-        recentlyViewed.value = profileData.regularDecisionColleges.map(savedCollege => {
-          const fullCollege = colleges.find(c => c.name === savedCollege.name);
-          return fullCollege || savedCollege;
-        }).filter(Boolean); // Ensure no undefined entries
-      }
-
-      console.log('Profile data loaded successfully');
-    } catch (e) {
-      console.error('Error parsing saved profile data:', e);
-      localStorage.removeItem('userProfileData'); // Clear corrupted data
-    }
-  }
-});
-
-// Remove event listener on component unmount
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
-});
 
 // Filtering and pagination
 const searchQuery = ref('');
@@ -559,7 +500,7 @@ const sortOptions = [
 const savedColleges = ref([]);
 const recentlyViewed = ref([]);
 
-// Student profile data (now loaded from localStorage)
+// Student profile data
 const satReading = ref(500);
 const satMath = ref(500);
 const gpa = ref(3.0);
@@ -569,6 +510,117 @@ const intendedMajor = ref("");
 const recScore = ref(2);
 const isLegacy = ref(false);
 const demoScore = ref(0);
+const nationality = ref('United States'); // Added
+const gender = ref('Prefer not to say'); // Added
+const enableBitterByCoffee = ref(false); // Added
+
+// Helper function to apply profile data
+const applyProfileData = (profileData) => {
+  // Load standardized scores
+  satReading.value = profileData.satReading || 500;
+  satMath.value = profileData.satMath || 500;
+  gpa.value = profileData.gpa || 3.0;
+
+  // Load AP classes
+  if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
+    apClasses.value = profileData.apClasses;
+  }
+
+  // Load extracurriculars
+  if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
+    extracurriculars.value = profileData.extracurriculars;
+  }
+
+  // Load additional factors
+  intendedMajor.value = profileData.intendedMajor || "";
+  recScore.value = profileData.recScore || 2;
+  isLegacy.value = profileData.isLegacy || false;
+  demoScore.value = profileData.demoScore || 0;
+  
+  // Load nationality, gender, and enableBitterByCoffee if present
+  if (profileData.nationality) nationality.value = profileData.nationality;
+  if (profileData.gender) gender.value = profileData.gender;
+  if (profileData.hasOwnProperty('enableBitterByCoffee')) {
+    enableBitterByCoffee.value = profileData.enableBitterByCoffee;
+  }
+
+  // Load college lists
+  if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
+    savedColleges.value = profileData.earlyDecisionColleges.map(savedCollege => {
+      const fullCollege = colleges.find(c => c.name === savedCollege.name);
+      return fullCollege || savedCollege;
+    }).filter(Boolean);
+  }
+
+  if (profileData.regularDecisionColleges && Array.isArray(profileData.regularDecisionColleges)) {
+    recentlyViewed.value = profileData.regularDecisionColleges.map(savedCollege => {
+      const fullCollege = colleges.find(c => c.name === savedCollege.name);
+      return fullCollege || savedCollege;
+    }).filter(Boolean);
+  }
+};
+
+// Load profile data function
+const loadProfileData = () => {
+  // Step 1: Determine which key to use based on authentication status
+  const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
+  
+  // Step 2: Load main profile data
+  const savedData = localStorage.getItem(profileKey);
+  if (savedData) {
+    try {
+      const profileData = JSON.parse(savedData);
+      applyProfileData(profileData);
+      console.log(`Profile data loaded from ${profileKey}`);
+    } catch (e) {
+      console.error('Error parsing saved profile data:', e);
+    }
+  }
+
+  // Step 3: Load and apply persistent data overrides
+  const persistentData = localStorage.getItem('persistentProfileData');
+  if (persistentData) {
+    try {
+      const persistentProfileData = JSON.parse(persistentData);
+      console.log('Applying persistent local data:', persistentProfileData);
+      
+      // Override specific fields with persistent data
+      if (persistentProfileData.hasOwnProperty('apClasses') && Array.isArray(persistentProfileData.apClasses)) {
+        apClasses.value = persistentProfileData.apClasses;
+      }
+      if (persistentProfileData.hasOwnProperty('extracurriculars') && Array.isArray(persistentProfileData.extracurriculars)) {
+        extracurriculars.value = persistentProfileData.extracurriculars;
+      }
+      if (persistentProfileData.hasOwnProperty('intendedMajor')) {
+        intendedMajor.value = persistentProfileData.intendedMajor;
+      }
+      if (persistentProfileData.hasOwnProperty('nationality')) {
+        nationality.value = persistentProfileData.nationality;
+      }
+      if (persistentProfileData.hasOwnProperty('gender')) {
+        gender.value = persistentProfileData.gender;
+      }
+      if (persistentProfileData.hasOwnProperty('enableBitterByCoffee')) {
+        enableBitterByCoffee.value = persistentProfileData.enableBitterByCoffee;
+      }
+    } catch (e) {
+      console.error('Error parsing persistent profile data:', e);
+    }
+  }
+};
+
+// Add window resize event listener and load profile data on mount
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  
+  // Load profile data with same logic as profile page
+  loadProfileData();
+});
+
+// Remove event listener on component unmount
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 // Computed for filtered colleges based on filter option
 const filteredColleges = computed(() => {
@@ -640,7 +692,7 @@ const handleSearch = (value) => {
   searchQuery.value = value === null ? '' : value; // Handle clearable text field
 };
 
-// Computed student profile for admission calculations
+// Computed student profile for admission calculations - Updated to include all fields
 const studentProfile = computed(() => {
   return {
     satReading: satReading.value,
@@ -651,32 +703,46 @@ const studentProfile = computed(() => {
     intendedMajor: intendedMajor.value,
     recScore: recScore.value,
     isLegacy: isLegacy.value,
-    demoScore: demoScore.value
+    demoScore: demoScore.value,
+    nationality: nationality.value,
+    gender: gender.value,
+    enableBitterByCoffee: enableBitterByCoffee.value
   };
 });
 
-// Persist Early Decision (savedColleges) changes
+// Persist Early Decision (savedColleges) changes - Updated to use correct key
 watch(savedColleges, (newVal) => {
   try {
-    const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
-    data.earlyDecisionColleges = newVal.map(c => ({ name: c.name, location: c.location, image: c.image })); // Save more info if needed
-    localStorage.setItem('userProfileData', JSON.stringify(data));
+    const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
+    const data = JSON.parse(localStorage.getItem(profileKey) || '{}');
+    data.earlyDecisionColleges = newVal.map(c => ({ 
+      name: c.name, 
+      location: c.location, 
+      image: c.image,
+      deadlines: c.deadlines
+    }));
+    localStorage.setItem(profileKey, JSON.stringify(data));
   } catch (e) {
     console.error('Error saving early decision colleges:', e);
   }
 }, { deep: true });
 
-// Persist Regular Decision (recentlyViewed) changes
+// Persist Regular Decision (recentlyViewed) changes - Updated to use correct key
 watch(recentlyViewed, (newVal) => {
   try {
-    const data = JSON.parse(localStorage.getItem('userProfileData') || '{}');
-    data.regularDecisionColleges = newVal.map(c => ({ name: c.name, location: c.location, image: c.image })); // Save more info if needed
-    localStorage.setItem('userProfileData', JSON.stringify(data));
+    const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
+    const data = JSON.parse(localStorage.getItem(profileKey) || '{}');
+    data.regularDecisionColleges = newVal.map(c => ({ 
+      name: c.name, 
+      location: c.location, 
+      image: c.image,
+      deadlines: c.deadlines
+    }));
+    localStorage.setItem(profileKey, JSON.stringify(data));
   } catch (e) {
     console.error('Error saving regular decision colleges:', e);
   }
 }, { deep: true });
-
 
 // College action items for dropdown
 const collegeActionItems = [
@@ -698,7 +764,6 @@ const openAdmitChanceModal = (college) => {
 // Navigate to the dedicated college profile page
 const navigateToCollegeProfilePage = (college) => {
   // Encode the college name to ensure it's URL-safe
-  // Assuming a route named 'CollegeProfile' will be set up with a 'collegeIdentifier' param
   router.push({ path: `/college/${encodeURIComponent(college.name)}` });
   leftPanelOpen.value = false;
   rightPanelOpen.value = false;

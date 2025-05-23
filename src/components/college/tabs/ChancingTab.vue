@@ -91,6 +91,11 @@
                 <div class="text-body-2 text-center mt-2">
                   {{ detailedCollegeChance.timesAverageApplicant || '1.0' }} times the average applicant
                 </div>
+                <!-- Add Bitter by Coffee factor display if enabled -->
+                <div v-if="studentProfile.enableBitterByCoffee && detailedCollegeChance.bitterByCoffeeFactor && detailedCollegeChance.bitterByCoffeeFactor !== '1.00'" class="text-caption text-center mt-2">
+                  <v-icon size="small" color="warning">mdi-coffee</v-icon>
+                  Randomness factor: {{ detailedCollegeChance.bitterByCoffeeFactor }}x
+                </div>
               </div>
             </v-col>
 
@@ -103,7 +108,7 @@
                       mdi-school
                     </v-icon>
                   </template>
-                  <v-list-item-title>GPA</v-list-item-title>
+                  <v-list-item-title>GPA: {{ studentProfile.gpa || 'N/A' }}</v-list-item-title>
                   <template v-slot:append>
                     <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.gpa || 0)" size="small">
                       {{ formatZScore(detailedCollegeChance.zScores?.gpa || 0) }}σ
@@ -116,7 +121,7 @@
                       mdi-book-open-variant
                     </v-icon>
                   </template>
-                  <v-list-item-title>SAT</v-list-item-title>
+                  <v-list-item-title>SAT: {{ studentProfile.satReading && studentProfile.satMath ? studentProfile.satReading + studentProfile.satMath : 'N/A' }}</v-list-item-title>
                   <template v-slot:append>
                     <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.sat || 0)" size="small">
                       {{ formatZScore(detailedCollegeChance.zScores?.sat || 0) }}σ
@@ -129,7 +134,7 @@
                       mdi-certificate
                     </v-icon>
                   </template>
-                  <v-list-item-title>AP Courses</v-list-item-title>
+                  <v-list-item-title>AP Courses: {{ apCourseCount }}</v-list-item-title>
                   <template v-slot:append>
                     <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ap || 0)" size="small">
                       {{ formatZScore(detailedCollegeChance.zScores?.ap || 0) }}σ
@@ -142,7 +147,7 @@
                       mdi-account-group
                     </v-icon>
                   </template>
-                  <v-list-item-title>Extracurriculars</v-list-item-title>
+                  <v-list-item-title>Extracurriculars: {{ extracurricularCount }}</v-list-item-title>
                   <template v-slot:append>
                     <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ec || 0)" size="small">
                       {{ formatZScore(detailedCollegeChance.zScores?.ec || 0) }}σ
@@ -153,7 +158,6 @@
             </v-col>
           </v-row>
         </v-card>
-
         <!-- Recommendation -->
         <v-card class="mb-6 pa-4">
           <div class="d-flex align-center justify-space-between mb-3">
@@ -206,49 +210,46 @@
           </div>
         </v-card>
 
-        <!-- Strategy Advice -->
-        <v-card class="mb-6 pa-4">
-          <div class="text-subtitle-1 font-weight-medium mb-3">Application Strategy</div>
-          <v-list>
-            <v-list-item v-if="isEarlyDecision">
-              <template v-slot:prepend>
-                <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
-              </template>
-              <v-list-item-title>Early Decision Benefit</v-list-item-title>
-              <v-list-item-subtitle>
-                Applying Early Decision can increase your chances by up to 20-30% at {{ college.name }}
-              </v-list-item-subtitle>
-            </v-list-item>
-            <v-list-item v-if="isLegacy">
-              <template v-slot:prepend>
-                <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
-              </template>
-              <v-list-item-title>Legacy Status Benefit</v-list-item-title>
-              <v-list-item-subtitle>
-                Your legacy status improves your chances at {{ college.name }}
-              </v-list-item-subtitle>
-            </v-list-item>
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-icon :color="detailedCollegeChance.probabilityPercentage > 50 ? 'success' : 'warning'" class="mr-2">
-                  {{ detailedCollegeChance.probabilityPercentage > 50 ? 'mdi-thumb-up' : 'mdi-alert' }}
-                </v-icon>
-              </template>
-              <v-list-item-title>Major Match</v-list-item-title>
-              <v-list-item-subtitle>
-                {{ studentProfile.intendedMajor ? studentProfile.intendedMajor + ' is ' + (majorMatch === 'good' ? 'a good match' : majorMatch === 'neutral' ? 'an average match' : 'a challenging match') + ' for this school' : 'Add your intended major to see a match assessment' }}
-              </v-list-item-subtitle>
-            </v-list-item>
-            <v-list-item v-if="detailedCollegeChance.probabilityPercentage < 30">
-              <template v-slot:prepend>
-                <v-icon color="error" class="mr-2">mdi-alert-circle</v-icon>
-              </template>
-              <v-list-item-title>Consider Adding Safer Options</v-list-item-title>
-              <v-list-item-subtitle>
-                This is a reach school. Make sure you have backup schools with higher admission chances.
-              </v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
+        <!-- AP Courses Details Card -->
+        <v-card v-if="studentProfile.apClasses && studentProfile.apClasses.length > 0" class="mb-6 pa-4">
+          <div class="text-subtitle-1 font-weight-medium mb-3">AP Courses ({{ apCourseCount }})</div>
+          <v-row>
+            <v-col v-for="(ap, index) in studentProfile.apClasses" :key="index" cols="12" sm="6">
+              <v-chip
+                :color="getApColor(ap)"
+                variant="outlined"
+                class="ma-1"
+                size="small"
+              >
+                <v-icon start size="x-small">{{ ap.status === 'ongoing' ? 'mdi-clock-outline' : 'mdi-check' }}</v-icon>
+                {{ ap.name }}{{ ap.score && ap.score !== 'N/A' ? ` (${ap.score})` : '' }}
+              </v-chip>
+            </v-col>
+          </v-row>
+          <div v-if="studentProfile.intendedMajor" class="text-caption mt-2">
+            AP-Major Alignment: <strong>{{ getApMajorAlignment() }}</strong>
+          </div>
+        </v-card>
+
+        <!-- Extracurricular Activities Details Card -->
+        <v-card v-if="studentProfile.extracurriculars && studentProfile.extracurriculars.length > 0" class="mb-6 pa-4">
+          <div class="text-subtitle-1 font-weight-medium mb-3">Extracurricular Activities ({{ extracurricularCount }})</div>
+          <v-row>
+            <v-col v-for="(ec, index) in studentProfile.extracurriculars" :key="index" cols="12" sm="6">
+              <v-chip
+                :color="getEcColor(ec)"
+                variant="outlined"
+                class="ma-1"
+                size="small"
+              >
+                <v-icon start size="x-small">{{ getEcIcon(ec.level) }}</v-icon>
+                {{ ec.name }} (Level {{ ec.level }})
+              </v-chip>
+            </v-col>
+          </v-row>
+          <div v-if="studentProfile.intendedMajor" class="text-caption mt-2">
+            EC-Major Alignment: <strong>{{ getEcMajorAlignment() }}</strong>
+          </div>
         </v-card>
 
         <!-- Save Button -->
@@ -283,9 +284,9 @@
 
     <v-col cols="12" md="4">
       <div class="sticky-top-side">
-        <!-- Strength Metrics card is MOVED here -->
+        <!-- Strength Metrics card -->
         <v-card class="mb-6 pa-4">
-          <div class="text-h6 font-weight-bold mb-3">Key Profile Metrics</div> <!-- Optional: Renaming title for clarity in new position -->
+          <div class="text-h6 font-weight-bold mb-3">Key Profile Metrics</div>
           <v-row sm="6">
             <v-col cols="12" >
               <v-card variant="outlined" class="pa-3 mt-3">
@@ -371,7 +372,38 @@
           </v-list>
         </v-card>
 
-
+        <!-- Demographics Card -->
+        <v-card v-if="studentProfile.nationality || studentProfile.gender" class="mb-6 pa-4">
+          <div class="text-h6 font-weight-bold mb-3">Demographics</div>
+          <v-list density="compact">
+            <v-list-item v-if="studentProfile.nationality" class="pa-0">
+              <v-list-item-content class="py-2">
+                <v-list-item-title class="text-subtitle-2">Nationality</v-list-item-title>
+              </v-list-item-content>
+              <template v-slot:append>
+                <span class="text-caption">{{ studentProfile.nationality }}</span>
+              </template>
+            </v-list-item>
+            <v-list-item v-if="studentProfile.gender" class="pa-0">
+              <v-list-item-content class="py-2">
+                <v-list-item-title class="text-subtitle-2">Gender</v-list-item-title>
+              </v-list-item-content>
+              <template v-slot:append>
+                <span class="text-caption">{{ studentProfile.gender }}</span>
+              </template>
+            </v-list-item>
+            <v-list-item v-if="studentProfile.demoScore !== undefined" class="pa-0">
+              <v-list-item-content class="py-2">
+                <v-list-item-title class="text-subtitle-2">Diversity Score</v-list-item-title>
+              </v-list-item-content>
+              <template v-slot:append>
+                <v-chip size="small" :color="getDemoScoreColor(studentProfile.demoScore)">
+                  {{ (studentProfile.demoScore || 0).toFixed(2) }}
+                </v-chip>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
       </div>
     </v-col>
@@ -402,13 +434,23 @@ const props = defineProps({
       zScores: {},
       strengthBlock: 0,
       alignmentBlock: 0,
-      probability: 0
+      probability: 0,
+      bitterByCoffeeFactor: '1.00'
     })
   },
   studentProfile: {
     type: Object,
     default: () => ({
-      intendedMajor: ''
+      intendedMajor: '',
+      gpa: null,
+      satReading: null,
+      satMath: null,
+      apClasses: [],
+      extracurriculars: [],
+      nationality: '',
+      gender: '',
+      demoScore: 0,
+      enableBitterByCoffee: false
     })
   },
   useAiRecommendation: { type: Boolean, default: false },
@@ -472,6 +514,67 @@ const majorMatch = computed(() => {
   return 'neutral'; // Fallback
 });
 
+// Add computed properties for AP and EC counts
+const apCourseCount = computed(() => {
+  if (!props.studentProfile.apClasses) return 0;
+  return props.studentProfile.apClasses.reduce((total, ap) => 
+    total + (ap.status === 'ongoing' ? 0.5 : 1), 0
+  );
+});
+
+const extracurricularCount = computed(() => {
+  if (!props.studentProfile.extracurriculars) return 0;
+  return props.studentProfile.extracurriculars.length;
+});
+
+// Add helper methods for AP and EC alignment
+const getApMajorAlignment = () => {
+  if (!props.studentProfile.apClasses || props.studentProfile.apClasses.length === 0) return 'N/A';
+  const avgFitScore = props.studentProfile.apClasses.reduce((sum, ap) => sum + (ap.fitScore || 0), 0) / props.studentProfile.apClasses.length;
+  if (avgFitScore >= 2.5) return 'Excellent';
+  if (avgFitScore >= 1.5) return 'Good';
+  if (avgFitScore >= 0.5) return 'Fair';
+  return 'Weak';
+};
+
+const getEcMajorAlignment = () => {
+  if (!props.studentProfile.extracurriculars || props.studentProfile.extracurriculars.length === 0) return 'N/A';
+  const avgFitScore = props.studentProfile.extracurriculars.reduce((sum, ec) => sum + (ec.fitScore || 0), 0) / props.studentProfile.extracurriculars.length;
+  if (avgFitScore >= 2.5) return 'Excellent';
+  if (avgFitScore >= 1.5) return 'Good';
+  if (avgFitScore >= 0.5) return 'Fair';
+  return 'Weak';
+};
+
+// Add color methods for AP and EC chips
+const getApColor = (ap) => {
+  if (ap.score === 5) return 'success';
+  if (ap.score === 4) return 'info';
+  if (ap.score === 3) return 'warning';
+  if (ap.status === 'ongoing') return 'grey';
+  return 'error';
+};
+
+const getEcColor = (ec) => {
+  if (ec.level >= 4) return 'success';
+  if (ec.level === 3) return 'info';
+  if (ec.level === 2) return 'warning';
+  return 'grey';
+};
+
+const getEcIcon = (level) => {
+  if (level >= 4) return 'mdi-star';
+  if (level === 3) return 'mdi-star-half-full';
+  return 'mdi-star-outline';
+};
+
+const getDemoScoreColor = (score) => {
+  if (score >= 0.75) return 'success';
+  if (score >= 0.5) return 'info';
+  if (score >= 0.25) return 'warning';
+  return 'grey';
+};
+
 // Added computed properties for display rates and major competitiveness
 const majorAdjustedRateForDisplay = computed(() => {
   if (!props.college || !props.studentProfile) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
@@ -523,7 +626,6 @@ const isEasierMajor = computed(() => {
   );
   return majorAdjusted > baseRate * 1.1;
 });
-
 
 const formatZScore = (score) => {
   if (score === undefined || score === null) return '0.00';
