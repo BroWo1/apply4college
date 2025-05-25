@@ -216,7 +216,8 @@ const userProfile = computed(() => {
   const profile = userStore.profile;
   if (!profile || Object.keys(profile).length === 0) {
     try {
-      const saved = localStorage.getItem('userProfileData');
+      const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
+      const saved = localStorage.getItem(profileKey);
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -266,7 +267,9 @@ const viewCollege = (college) => {
 };
 
 onMounted(() => {
-  const saved = localStorage.getItem('userProfileData');
+  // Use same profile key logic as other pages
+  const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
+  const saved = localStorage.getItem(profileKey);
   if (saved) {
     try {
       const data = JSON.parse(saved);

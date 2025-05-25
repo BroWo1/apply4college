@@ -223,7 +223,7 @@
             <v-col sm="4" class="pa-0 d-none d-sm-block">
               <v-img
                 :src="college.image"
-                height="225"
+                height="200"
                 cover
                 class="rounded-l-lg"
               ></v-img>
@@ -252,8 +252,6 @@
                   </v-chip>
                 </div>
               </div>
-
-              <p class="text-body-2 mb-2">{{ college.description }}</p>
 
               <!-- Add deadline information -->
               <div class="d-flex flex-wrap mb-3">
@@ -710,7 +708,7 @@ const studentProfile = computed(() => {
   };
 });
 
-// Persist Early Decision (savedColleges) changes - Updated to use correct key
+// Persist Early Decision (savedColleges) changes - use correct key
 watch(savedColleges, (newVal) => {
   try {
     const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
@@ -719,7 +717,7 @@ watch(savedColleges, (newVal) => {
       name: c.name, 
       location: c.location, 
       image: c.image,
-      deadlines: c.deadlines
+      deadlines: c.deadlines 
     }));
     localStorage.setItem(profileKey, JSON.stringify(data));
   } catch (e) {
@@ -727,7 +725,7 @@ watch(savedColleges, (newVal) => {
   }
 }, { deep: true });
 
-// Persist Regular Decision (recentlyViewed) changes - Updated to use correct key
+// Persist Regular Decision (recentlyViewed) changes - use correct key
 watch(recentlyViewed, (newVal) => {
   try {
     const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
@@ -736,7 +734,7 @@ watch(recentlyViewed, (newVal) => {
       name: c.name, 
       location: c.location, 
       image: c.image,
-      deadlines: c.deadlines
+      deadlines: c.deadlines 
     }));
     localStorage.setItem(profileKey, JSON.stringify(data));
   } catch (e) {

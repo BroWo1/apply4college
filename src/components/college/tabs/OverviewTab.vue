@@ -73,6 +73,10 @@
             <span class="font-weight-bold">Private</span> school in {{ college.location.split(',')[1] }} with {{ college.totalStudents || '6,800' }} total undergraduate students
           </div>
 
+          <div v-if="college.description" class="text-body-2 mb-4">
+            {{ college.description }}
+          </div>
+
           <v-chip-group>
             <v-chip small class="ma-1">Urban</v-chip>
             <v-chip small class="ma-1">{{ college.location.split(',')[1].trim() }}</v-chip>
