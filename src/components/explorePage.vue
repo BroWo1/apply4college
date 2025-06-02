@@ -15,6 +15,11 @@
         style="max-width: 600px"
         @update:modelValue="handleSearch"
       ></v-text-field>
+
+      <!-- DEV ONLY: Reset Promotion Tracking Button -->
+      <v-btn v-if="isDevEnvironment" @click="resetPromotionTracking" color="warning" class="mt-2">
+        DEV: Reset Promotion Tracking
+      </v-btn>
     </v-container>
 
     <div class="floating-buttons d-md-none">
@@ -161,6 +166,77 @@
           </v-card>
         </div>
       </v-navigation-drawer>
+
+      <!-- Promotion Modal -->
+      <v-dialog
+        v-model="promotionModalOpen"
+        max-width="500"
+        persistent
+      >
+        <v-card rounded="lg" class="pa-4">
+          <v-card-title class="text-center text-h5 mb-4">
+            <v-icon icon="mdi-account-plus" size="x-large" color="primary" class="mb-2"></v-icon>
+            <div>{{ $t('explorePage.promotionModal.title', 'Join Apply4College!') }}</div>
+          </v-card-title>
+          
+          <v-card-text class="text-center">
+            <p class="text-body-1 mb-4">
+              {{ $t('explorePage.promotionModal.subtitle', 'Create an account to save your college lists, track deadlines, and get personalized recommendations!') }}
+            </p>
+            
+            <v-list density="compact" class="mb-4">
+              <v-list-item prepend-icon="mdi-content-save">
+                <v-list-item-title>{{ $t('explorePage.promotionModal.feature1', 'Save colleges across devices') }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-calendar-clock">
+                <v-list-item-title>{{ $t('explorePage.promotionModal.feature2', 'Track application deadlines') }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-chart-line">
+                <v-list-item-title>{{ $t('explorePage.promotionModal.feature3', 'Get personalized recommendations') }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+
+          <v-card-actions class="justify-center flex-column">
+            <div class="d-flex gap-2 mb-3">
+              <v-btn
+                color="primary"
+                variant="elevated"
+                size="large"
+                @click="navigateToLogin"
+                class="mr-10"
+              >
+                {{ $t('explorePage.promotionModal.signUp', 'Sign Up') }}
+              </v-btn>
+              <v-btn
+                color="primary"
+                variant="outlined"
+                size="large"
+                @click="navigateToLogin"
+              >
+                {{ $t('explorePage.promotionModal.login', 'Log In') }}
+              </v-btn>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <v-btn
+                variant="text"
+                size="small"
+                @click="dismissPromotionModal"
+              >
+                {{ $t('explorePage.promotionModal.notNow', 'Not now') }}
+              </v-btn>
+              <v-btn
+                variant="text"
+                size="small"
+                @click="dismissPromotionModalForDay"
+              >
+                {{ $t('explorePage.promotionModal.dontShowToday', "Don't show for rest of day") }}
+              </v-btn>
+            </div>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
         <ProfileSummaryComponent
@@ -453,6 +529,9 @@ import { useUserStore } from '@/stores/user'; // Added import
 const { t } = useI18n();
 const userStore = useUserStore(); // Initialize user store
 
+// Computed property to check for development environment
+const isDevEnvironment = computed(() => import.meta.env.DEV);
+
 // State for responsive side panels
 const leftPanelOpen = ref(false);
 const rightPanelOpen = ref(false);
@@ -475,6 +554,10 @@ const page = ref(1);
 const itemsPerPage = 5;
 const selectedCollege = ref(null);
 const admitChanceModalOpen = ref(false);
+
+// Promotion modal state and tracking
+const promotionModalOpen = ref(false);
+const collegeClickCount = ref(0);
 
 // Filter options
 const filterOptions = [
@@ -609,16 +692,39 @@ const loadProfileData = () => {
 
 // Add window resize event listener and load profile data on mount
 onMounted(() => {
+  console.log('🚀 explorePage mounted');
   window.addEventListener('resize', handleResize);
   
   // Load profile data with same logic as profile page
   loadProfileData();
+  
+  // Load click count for promotion modal
+  loadClickCount();
+  
+  console.log('🎯 Initial state - isAuthenticated:', userStore.isAuthenticated);
+  console.log('🎯 Initial click count:', collegeClickCount.value);
+  if (!userStore.isAuthenticated && collegeClickCount.value === 3){
+    console.log('👤 User not authenticated, showing promotion modal');
+    promotionModalOpen.value = true;
+  } else {
+    console.log('✅ User authenticated or click count not reached, skipping promotion modal');
+  }
 });
 
 // Remove event listener on component unmount
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
+
+// Function to reset promotion tracking for development
+const resetPromotionTracking = () => {
+  if (import.meta.env.DEV) {
+    localStorage.removeItem('collegeClickCount');
+    collegeClickCount.value = 0;
+    localStorage.removeItem('promotionDismissedDate');
+    console.log('DEV: Promotion tracking reset (click count and dismissed date).');
+  }
+};
 
 // Computed for filtered colleges based on filter option
 const filteredColleges = computed(() => {
@@ -761,6 +867,17 @@ const openAdmitChanceModal = (college) => {
 
 // Navigate to the dedicated college profile page
 const navigateToCollegeProfilePage = (college) => {
+  console.log('🎯 College card clicked:', college.name);
+  console.log('🔐 User authenticated:', userStore.isAuthenticated);
+  
+  // Track college card clicks for promotion modal
+  if (!userStore.isAuthenticated) {
+    console.log('👤 User not authenticated, tracking click...');
+    trackCollegeClick();
+  } else {
+    console.log('✅ User authenticated, skipping click tracking');
+  }
+
   // Encode the college name to ensure it's URL-safe
   router.push({ path: `/college/${encodeURIComponent(college.name)}` });
   leftPanelOpen.value = false;
@@ -844,6 +961,97 @@ const getAdmissionChance = (college) => {
   const chanceResult = calculateAdmissionChance(studentData, college);
   return chanceResult.probability || 0;
 };
+
+// Promotion modal functions
+const trackCollegeClick = () => {
+  console.log('📊 trackCollegeClick() called');
+  
+  // Check if user dismissed for the day
+  const today = new Date().toDateString();
+  const dismissedToday = localStorage.getItem('promotionDismissedDate');
+  
+  console.log('📅 Today:', today);
+  console.log('🚫 Dismissed date:', dismissedToday);
+  
+  if (dismissedToday === today) {
+    console.log('⏭️  Modal dismissed for today, skipping...');
+    return; // Don't show if dismissed for today
+  }
+
+  // Get current click count from localStorage or initialize
+  const storedCount = localStorage.getItem('collegeClickCount');
+  collegeClickCount.value = storedCount ? parseInt(storedCount) + 1 : 1;
+  
+  console.log('🔢 Previous click count:', storedCount);
+  console.log('🔢 New click count:', collegeClickCount.value);
+  
+  // Save updated count
+  localStorage.setItem('collegeClickCount', collegeClickCount.value.toString());
+  console.log('💾 Saved click count to localStorage');
+  
+  // Show modal after 3 clicks
+  if (collegeClickCount.value === 3) {
+    console.log('🎉 3 clicks reached! Showing promotion modal...');
+    promotionModalOpen.value = true;
+  } else {
+    console.log(`⏳ Need ${3 - collegeClickCount.value} more clicks to show modal`);
+  }
+};
+
+const dismissPromotionModal = () => {
+  console.log('❌ Promotion modal dismissed (not now)');
+  promotionModalOpen.value = false;
+  localStorage.setItem('collegeClickCount', '0');
+  collegeClickCount.value = 0; // Reset click count
+};
+
+const dismissPromotionModalForDay = () => {
+  console.log('🚫 Promotion modal dismissed for the day');
+  promotionModalOpen.value = false;
+  const today = new Date().toDateString();
+  localStorage.setItem('promotionDismissedDate', today);
+  console.log('💾 Saved dismissal date:', today);
+  // Reset click count so it can trigger again tomorrow
+  localStorage.setItem('collegeClickCount', '0');
+  collegeClickCount.value = 0;
+  console.log('🔄 Reset click count to 0');
+};
+
+const navigateToLogin = () => {
+  console.log('🔑 Navigating to login page');
+  promotionModalOpen.value = false;
+  // Navigate to login/register page - adjust route as needed
+  router.push({ path: '/login' });
+};
+
+// Load click count on mount
+const loadClickCount = () => {
+  const storedCount = localStorage.getItem('collegeClickCount');
+  console.log('🔄 Loading click count from localStorage:', storedCount);
+  if (storedCount) {
+    collegeClickCount.value = parseInt(storedCount);
+    console.log('📊 Loaded click count:', collegeClickCount.value);
+  } else {
+    console.log('🆕 No stored click count, starting at 0');
+  }
+};
+
+// Navigation guard to check authentication status
+const requireAuth = (to, from, next) => {
+  const isAuthenticated = userStore.isAuthenticated;
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Redirect to login if not authenticated
+    next({ name: 'login' });
+  } else {
+    next();
+  }
+};
+
+// Global before guard
+router.beforeEach((to, from, next) => {
+  // Check authentication for protected routes
+  requireAuth(to, from, next);
+});
 </script>
 
 <style scoped>

@@ -118,7 +118,18 @@
     "collegeTypeSTEM": "STEM-heavy",
     "collegeTypeLiberal": "Liberal Arts",
     "edDeadline": "ED:",
-    "rdDeadline": "RD:"
+    "rdDeadline": "RD:",
+    "promotionModal": {
+      "title": "Join Apply4College!",
+      "subtitle": "Create an account to save your college lists, track deadlines, and get personalized recommendations!",
+      "feature1": "Save colleges across devices",
+      "feature2": "Track application deadlines",
+      "feature3": "Get personalized recommendations",
+      "signUp": "Sign Up",
+      "login": "Log In",
+      "notNow": "Not now",
+      "dontShowToday": "Don't show for rest of day"
+    }
   },
   "profilePage": {
     "title": "Your Profile",

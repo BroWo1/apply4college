@@ -525,7 +525,17 @@ async function fetchUserProfileFromAPI() {
     // Ensure apClasses and extracurriculars are arrays even if API returns null/undefined
     apClasses.value = (data.ap_classes && Array.isArray(data.ap_classes)) ? data.ap_classes : [];
     extracurriculars.value = (data.extracurriculars && Array.isArray(data.extracurriculars)) ? data.extracurriculars : [];
-    // intendedMajor.value = data.intended_major || ""; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
+    
+    // Load intendedMajor from API and map to frontend values
+    const apiMajor = data.intended_major || "";
+    if (apiMajor === "LAH") {
+      intendedMajor.value = "Liberal Arts";
+    } else if (apiMajor === "STEM") {
+      intendedMajor.value = "STEM";
+    } else {
+      intendedMajor.value = ""; // Default to empty if API value is unexpected
+    }
+    
     recScore.value = data.recommendation_strength || 2;
     isLegacy.value = data.is_legacy || false;
     // nationality.value = data.nationality || 'United States'; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
@@ -637,7 +647,7 @@ const performSaveOperation = async (isAutoSave = false) => {
 
     // 3. Proceed with existing logic for API/Guest save for the *full* profile
     if (userStore.isAuthenticated) {
-      await api.put('profile/', {
+      const payload = {
         sat_reading: studentProfile.value.satReading,
         sat_math: studentProfile.value.satMath,
         gpa: studentProfile.value.gpa,
@@ -649,7 +659,25 @@ const performSaveOperation = async (isAutoSave = false) => {
         // nationality: studentProfile.value.nationality, // Removed: Not sent to API
         // gender: studentProfile.value.gender, // Removed: Not sent to API
         enable_bitter_by_coffee: studentProfile.value.enableBitterByCoffee // Keep this as it's part of randomization
-      });
+      };
+
+      // Conditionally add intended_major if it has a non-empty value
+      if (studentProfile.value.intendedMajor && studentProfile.value.intendedMajor !== "") {
+        let majorApiValue = studentProfile.value.intendedMajor;
+        
+        // Map frontend display/partial values to backend enum keys
+        if (majorApiValue === "Liberal Arts" || majorApiValue === "Liberal Arts & Humanities") {
+          majorApiValue = "LAH";
+        } else if (majorApiValue === "Science, Technology, Engineering, Math") {
+          majorApiValue = "STEM";
+        }
+        // Add other mappings here if new Major choices are added to models.py
+        // and the frontend uses different display strings for them.
+        
+        payload.intended_major = majorApiValue;
+      }
+
+      await api.put('profile/', payload);
 
       // USER_PROFILE_KEY will store the complete profile including locally managed fields.
       // This is for local fallback consistency for authenticated users.
@@ -882,9 +910,6 @@ onMounted(async () => {
       }
       if (persistentProfileData.hasOwnProperty('extracurriculars') && Array.isArray(persistentProfileData.extracurriculars)) {
         extracurriculars.value = persistentProfileData.extracurriculars;
-      }
-      if (persistentProfileData.hasOwnProperty('intendedMajor')) {
-        intendedMajor.value = persistentProfileData.intendedMajor;
       }
       if (persistentProfileData.hasOwnProperty('nationality')) {
         nationality.value = persistentProfileData.nationality;
