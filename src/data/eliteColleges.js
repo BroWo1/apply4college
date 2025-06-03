@@ -3,6 +3,8 @@ import { createCollegeData } from './collegeDataStructure'; // Assuming this pat
 // Import local images
 import uchicagoImg from '@/assets/colleges/uchicago.png';
 import dukeImg from '@/assets/colleges/duke.png';
+import harvard from '@/assets/colleges/harvard.png';
+import stanford from '@/assets/colleges/stanford.png';
 
 // Elite colleges (acceptance rate < 10%)
 // The statistics (GPA, SAT, AP, EC) have been adjusted to better reflect
@@ -14,7 +16,7 @@ export const eliteColleges = [
     location: 'Cambridge, MA',
     acceptanceRate: 3.5,
     tuition: 60000,
-    imageUrl: 'https://placehold.co/600x400/C2185B/ffffff?text=Harvard',
+    imageUrl: harvard,
     rating: 4.16,
     reviewCount: 881,
     collegeType: 'Liberal-arts',
@@ -63,7 +65,7 @@ export const eliteColleges = [
     location: 'Stanford, CA',
     acceptanceRate: 3.9,
     tuition: 60430,
-    imageUrl: 'https://placehold.co/600x400/D32F2F/ffffff?text=Stanford',
+    imageUrl: stanford,
     rating: 4.05,
     reviewCount: 1023,
     collegeType: 'STEM-heavy',

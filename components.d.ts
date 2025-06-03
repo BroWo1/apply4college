@@ -17,6 +17,8 @@ declare module 'vue' {
     CollegeComparison: typeof import('./src/components/CollegeComparison.vue')['default']
     CostTab: typeof import('./src/components/college/tabs/CostTab.vue')['default']
     ExplorePage: typeof import('./src/components/explorePage.vue')['default']
+    ExplorePageModern: typeof import('./src/components/explorePageModern.vue')['default']
+    ExplorePageOld: typeof import('./src/components/explorePageOld.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Home: typeof import('./src/components/home.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
