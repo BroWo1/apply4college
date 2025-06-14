@@ -15,6 +15,7 @@ declare module 'vue' {
     AuthModal: typeof import('./src/components/AuthModal.vue')['default']
     ChancingTab: typeof import('./src/components/college/tabs/ChancingTab.vue')['default']
     CollegeComparison: typeof import('./src/components/CollegeComparison.vue')['default']
+    CollegeMap: typeof import('./src/components/CollegeMap.vue')['default']
     CostTab: typeof import('./src/components/college/tabs/CostTab.vue')['default']
     ExplorePage: typeof import('./src/components/explorePage.vue')['default']
     ExplorePageModern: typeof import('./src/components/explorePageModern.vue')['default']

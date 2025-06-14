@@ -6,10 +6,54 @@
       :elevation="4"
       v-if="collegeChance"
     >
-      <v-card-title class="d-flex justify-space-between">
-        <span class="text-h6 font-weight-bold">Admission Chance Calculator</span>
-        <v-btn icon="mdi-close" variant="text" @click="closeDialog"></v-btn>
+      <!-- College Header with Image and Name -->
+      <v-card-title class="d-flex align-center pa-0 mb-4">
+        <div class="d-flex align-center flex-grow-1">
+          <v-img
+            v-if="props.college.image"
+            :src="props.college.image"
+            height="80"
+            width="80"
+            class="mr-4 rounded-lg"
+            cover
+          />
+          <div class="flex-grow-1">
+            <h2 class="text-h5 font-weight-bold mb-1">{{ props.college.name }}</h2>
+            <p class="text-subtitle-1 text-medium-emphasis mb-1">{{ props.college.location }}</p>
+            <v-chip 
+              :color="getAcceptanceRateColor(props.college.acceptanceRate)"
+              variant="tonal"
+              size="small"
+              class="mr-2"
+            >
+              {{ props.college.acceptanceRate }}% acceptance rate
+            </v-chip>
+            <v-chip 
+              :color="getCollegeTypeColor(props.college.collegeType)"
+              variant="tonal"
+              size="small"
+            >
+              {{ props.college.collegeType }}
+            </v-chip>
+          </div>
+        </div>
+        <div class="d-flex align-center">
+          <v-btn 
+            icon="mdi-open-in-new" 
+            variant="text" 
+            @click="viewCollegeDetails"
+            title="View college details page"
+            class="mr-2"
+          />
+          <v-btn icon="mdi-close" variant="text" @click="closeDialog"></v-btn>
+        </div>
       </v-card-title>
+
+      <v-divider class="mb-4" />
+
+      <v-card-subtitle class="pa-0 mb-3">
+        <span class="text-h6 font-weight-bold">Admission Chance Calculator</span>
+      </v-card-subtitle>
 
       <v-card-text>
         <v-row class="mb-4">
@@ -82,13 +126,13 @@
           <v-col cols="12" sm="6">
             <div class="d-flex flex-column align-center justify-center">
               <v-progress-circular
-                :model-value="collegeChance.probabilityPercentage"
+                :model-value="collegeChance?.probabilityPercentage || 0"
                 :color="chanceColor"
                 :size="120"
                 :width="12"
                 class="mb-2"
               >
-                {{ collegeChance.probabilityPercentage }}%
+                {{ collegeChance?.probabilityPercentage || 0 }}%
               </v-progress-circular>
               <div class="text-h6 font-weight-bold">{{ chanceDescription }}</div>
               <div class="text-body-2 text-center">
@@ -793,6 +837,33 @@ const emitSaveDecision = () => {
   }
 };
 
+// Helper functions for UI display
+const getAcceptanceRateColor = (rate) => {
+  if (rate < 10) return 'error';
+  if (rate <= 20) return 'warning';
+  return 'success';
+};
+
+const getCollegeTypeColor = (type) => {
+  return type === 'STEM-heavy' ? 'blue' : 'purple';
+};
+
+// Navigation function
+const viewCollegeDetails = () => {
+  if (props.college) {
+    // Convert college name to URL-friendly identifier
+    const collegeId = props.college.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    // Close dialog and navigate
+    closeDialog();
+    // Use window.location for simple navigation since we're in a dialog
+    window.location.href = `/college/${collegeId}`;
+  }
+};
+
 </script>
 
 <style scoped>
@@ -807,5 +878,28 @@ ul {
 }
 .text-disabled {
   color: rgba(0, 0, 0, 0.38);
+}
+
+/* Enhanced styling for college header */
+.v-card-title {
+  padding-bottom: 0 !important;
+}
+
+.v-img {
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  transition: border-color 0.3s ease;
+}
+
+.v-img:hover {
+  border-color: rgb(var(--v-theme-primary));
+}
+
+.v-chip {
+  transition: all 0.3s ease;
+}
+
+.v-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 </style>

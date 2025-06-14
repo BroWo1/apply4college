@@ -13,8 +13,10 @@
     "@fontsource/roboto": "5.2.5",
     "@mdi/font": "7.4.47",
     "axios": "^1.9.0",
+    "leaflet": "^1.9.4",
     "vue": "^3.5.13",
     "vue-i18n": "^9.14.4",
+    "vue-leaflet": "^0.1.0",
     "vuetify": "^3.8.1"
   },
   "devDependencies": {

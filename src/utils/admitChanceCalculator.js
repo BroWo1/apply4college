@@ -197,7 +197,7 @@ export const calculateAdmissionChance = (student, college) => {
     return {
       probabilityRaw: probability,
       probability: cappedProbability,
-      probabilityPercentage: Math.round(cappedProbability * 100),
+      probabilityPercentage: isNaN(cappedProbability) ? 0 : Math.round(cappedProbability * 100),
       timesAverageApplicant: comparisonToAverage.toFixed(2),
       bitterByCoffeeFactor: bitterByCoffeeFactor.toFixed(2),
       zScores,
@@ -248,27 +248,31 @@ export const prepareStudentData = (profileData) => {
   const apCount = (profileData.apClasses || []).reduce((total, ap) => total + (ap.status === 'ongoing' ? 0.5 : 1), 0);
   const ecStrengthTotal = (profileData.extracurriculars || []).reduce((total, ec) => total + (ec.level || 0), 0);
 
-  const apFit = profileData.intendedMajor && (profileData.apClasses || []).length > 0
-    ? (profileData.apClasses || []).reduce((total, ap) => total + (ap.fitScore || 0), 0) / profileData.apClasses.length
+  // Fix potential NaN calculations
+  const apClasses = profileData.apClasses || [];
+  const extracurriculars = profileData.extracurriculars || [];
+
+  const apFit = profileData.intendedMajor && apClasses.length > 0
+    ? apClasses.reduce((total, ap) => total + (ap.fitScore || 0), 0) / apClasses.length
     : 0;
 
-  const ecFit = profileData.intendedMajor && (profileData.extracurriculars || []).length > 0
-    ? (profileData.extracurriculars || []).reduce((total, ec) => total + (ec.fitScore || 0), 0) / profileData.extracurriculars.length
+  const ecFit = profileData.intendedMajor && extracurriculars.length > 0
+    ? extracurriculars.reduce((total, ec) => total + (ec.fitScore || 0), 0) / extracurriculars.length
     : 0;
 
   return {
-    gpa: profileData.gpa || 0,
-    satTotal,
-    apCount,
-    ecStrengthTotal,
-    apFit,
-    ecFit,
-    recScore: profileData.recScore || 0,
-    isLegacy: profileData.isLegacy || false,
-    demoScore: profileData.demoScore || 0,
-    intendedMajor: profileData.intendedMajor,
-    enableBitterByCoffee: profileData.enableBitterByCoffee || false,
-    isEarlyDecision: profileData.isEarlyDecision || false
+    gpa: parseFloat(profileData.gpa) || 0,
+    satTotal: isNaN(satTotal) ? 0 : satTotal,
+    apCount: isNaN(apCount) ? 0 : apCount,
+    ecStrengthTotal: isNaN(ecStrengthTotal) ? 0 : ecStrengthTotal,
+    apFit: isNaN(apFit) ? 0 : apFit,
+    ecFit: isNaN(ecFit) ? 0 : ecFit,
+    recScore: parseFloat(profileData.recScore) || 0,
+    isLegacy: Boolean(profileData.isLegacy),
+    demoScore: parseFloat(profileData.demoScore) || 0,
+    intendedMajor: profileData.intendedMajor || null,
+    enableBitterByCoffee: Boolean(profileData.enableBitterByCoffee),
+    isEarlyDecision: Boolean(profileData.isEarlyDecision)
   };
 };
 
