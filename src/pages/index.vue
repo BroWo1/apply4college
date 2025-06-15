@@ -1,64 +1,76 @@
 <template>
-  <v-container fluid class="pa-0">
-    <!-- Hero Section with College Cards -->
-    <v-sheet class="hero-section" color="primary">
-      <v-container>
-        <v-row align="center" class="py-8 py-md-12">
-          <v-col cols="12" md="6" class="text-start">
-            <v-img 
-              src="../assets/a4c.svg" 
-              alt="Apply 4 College Logo" 
-              :max-width="$vuetify.display.xs ? 80 : 100"
-              class="mb-4"
-            />
-            <h1 class="text-h4 text-md-h2 font-weight-black mb-3">
-              {{ $t('indexPage.title') }}
-            </h1>
-            <p class="text-body-1 text-md-h6 font-weight-light mb-6 opacity-90">
-              {{ $t('indexPage.subtitle') }}
-            </p>
-            <v-btn
-              size="large"
-              variant="flat"
-              color="white"
-              class="text-primary"
-              to="/home"
-              rounded="lg"
-              prepend-icon="mdi-rocket-launch"
-            >
-              {{ $t('indexPage.getStarted') }}
-            </v-btn>
-          </v-col>
-          
-          <!-- Animated College Cards -->
-          <v-col cols="12" md="6" class="d-none d-md-block position-relative" style="height: 400px;">
-            <div class="college-cards-container">
-              <v-card
-                v-for="(college, index) in displayedColleges"
-                :key="`${college.name}-${cardKey}`"
-                class="college-preview-card"
-                :style="getCardStyle(index)"
-                rounded="lg"
-                elevation="8"
+  <div class="index-page">
+    <!-- Modern Hero Section -->
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <div class="hero-decoration">
+          <div class="floating-icons">
+            <v-icon class="floating-icon icon-1">mdi-school</v-icon>
+            <v-icon class="floating-icon icon-2">mdi-star</v-icon>
+            <v-icon class="floating-icon icon-3">mdi-lightbulb</v-icon>
+          </div>
+        </div>
+        <v-container>
+          <v-row align="center" class="py-4 py-md-6">
+            <v-col cols="12" md="6" class="text-start">
+              <v-img 
+                src="../assets/a4c.svg" 
+                alt="Apply 4 College Logo" 
+                :max-width="$vuetify.display.xs ? 80 : 100"
+                class="mb-4"
+              />
+              <h1 id="hero-title" class="hero-title">
+                {{ $t('indexPage.title') }}
+              </h1>
+              <p class="hero-subtitle">
+                {{ $t('indexPage.subtitle') }}
+              </p>
+              <v-btn
+                size="x-large"
+                variant="flat"
+                color="white"
+                class="text-primary cta-button"
+                to="/home"
+                rounded="xl"
+                prepend-icon="mdi-rocket-launch"
               >
-                <v-img
-                  :src="college.image"
-                  height="120"
-                  cover
-                />
-                <v-card-text class="pa-3">
-                  <h4 class="text-subtitle-2 font-weight-bold text-truncate">{{ college.name }}</h4>
-                  <p class="text-caption mb-1">{{ college.location }}</p>
-                  <v-chip size="x-small" color="white" variant="tonal">
-                    {{ college.acceptanceRate }}% acceptance
-                  </v-chip>
-                </v-card-text>
-              </v-card>
-            </div>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-sheet>
+                {{ $t('indexPage.getStarted') }}
+              </v-btn>
+            </v-col>
+            
+            <!-- Animated College Cards -->
+            <v-col cols="12" md="6" class="d-none d-md-block position-relative" style="height: 300px;">
+              <div class="college-cards-container">
+                <v-card
+                  v-for="(college, index) in displayedColleges"
+                  :key="`${college.name}-${cardKey}`"
+                  class="college-preview-card"
+                  :style="getCardStyle(index)"
+                  rounded="lg"
+                  elevation="8"
+                >
+                  <v-img
+                    :src="college.image"
+                    height="120"
+                    cover
+                  />
+                  <v-card-text class="pa-3">
+                    <h4 class="text-subtitle-2 font-weight-bold text-truncate">{{ college.name }}</h4>
+                    <p class="text-caption mb-1">{{ college.location }}</p>
+                    <v-chip size="x-small" color="white" variant="tonal">
+                      {{ college.acceptanceRate }}% acceptance
+                    </v-chip>
+                  </v-card-text>
+                </v-card>
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
 
     <!-- Features Section -->
     <v-container class="py-12 py-md-16">
@@ -116,7 +128,7 @@
       <v-container>
         <div class="text-center mb-8">
           <h2 class="text-h4 font-weight-black mb-2">{{ $t('indexPage.meetTeam') }}</h2>
-          <p class="text-subtitle-1 text-grey-darken-2">{{ $t('indexPage.teamSubtitle') }}</p>
+          <p class="text-subtitle-1" style="color: #1f2937;">{{ $t('indexPage.teamSubtitle') }}</p>
         </div>
 
         <v-row>
@@ -152,7 +164,8 @@
         </v-card>
       </v-container>
     </v-sheet>
-  </v-container>
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -266,10 +279,113 @@ const teamMembers = [
 </script>
 
 <style scoped>
+.index-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* Modern Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, var(--v-theme-primary) 0%, var(--v-theme-primary-darken-1) 100%);
-  min-height: auto;
+  position: relative;
+  background: linear-gradient(135deg, 
+    #8b5cf6 0%, 
+    #7c3aed 50%,
+    #6d28d9 100%
+  );
+  padding: 2rem 2rem;
   overflow: hidden;
+  color: white;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.cta-button {
+  text-transform: none;
+  font-weight: 600;
+  padding: 0 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Floating Animation */
+.hero-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-icons {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.floating-icon {
+  position: absolute;
+  opacity: 0.1;
+  font-size: 3rem;
+  animation: float 6s ease-in-out infinite;
+}
+
+.icon-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.icon-2 {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.icon-3 {
+  bottom: 30%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(10deg); 
+  }
+}
+
+/* Main Content */
+.main-content {
+  position: relative;
+  z-index: 1;
 }
 
 /* College Cards Animation */
@@ -285,6 +401,8 @@ const teamMembers = [
   background: rgba(255, 255, 255, 0.95);
   transition: all 0.5s ease;
   animation: fadeInSlide 0.5s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 @keyframes fadeInSlide {
@@ -300,6 +418,7 @@ const teamMembers = [
 .college-preview-card:hover {
   transform: translateY(-8px) rotate(0deg) !important;
   z-index: 10 !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
 }
 
 /* Card hover effects */
@@ -317,5 +436,33 @@ const teamMembers = [
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+  
+  .cta-button {
+    width: 100%;
+  }
+}
+
+/* Update text colors to black */
+:deep(.text-caption) {
+  color: #1f2937 !important;
+}
+
+:deep(.v-list-item-subtitle) {
+  color: #1f2937 !important;
 }
 </style>
