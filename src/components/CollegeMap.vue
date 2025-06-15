@@ -1,12 +1,14 @@
 <template>
   <div class="college-map-container">
     <!-- Header -->
+     <!--
     <div class="map-header">
       <h1 class="text-h4 font-weight-bold mb-2">College Map</h1>
       <p class="text-subtitle-1 text-medium-emphasis mb-4">
         Explore colleges across the United States. Markers show your personalized admission chances based on your profile.
       </p>
     </div>
+    -->
 
     <!-- Legend for marker colors -->
     <v-card class="mb-4" elevation="1" variant="tonal">
@@ -21,15 +23,15 @@
           <div class="d-flex align-center justify-end text-caption">
             <div class="d-flex align-center mr-4">
               <div class="marker-legend" style="background-color: #d32f2f;"></div>
-              <span class="ml-1">Reach (< 10%)</span>
+              <span class="ml-1">Reach (< 20%)</span>
             </div>
             <div class="d-flex align-center mr-4">
               <div class="marker-legend" style="background-color: #f57c00;"></div>
-              <span class="ml-1">Target (10-20%)</span>
+              <span class="ml-1">Target (20-50%)</span>
             </div>
             <div class="d-flex align-center">
               <div class="marker-legend" style="background-color: #388e3c;"></div>
-              <span class="ml-1">Safety (> 20%)</span>
+              <span class="ml-1">Safety (> 50%)</span>
             </div>
           </div>
         </div>
@@ -211,9 +213,10 @@ const collegeTypes = [
 
 const acceptanceRanges = [
   { title: 'All Ranges', value: null },
-  { title: 'Elite (< 10%)', value: 'elite' },
-  { title: 'Target (10-20%)', value: 'target' },
-  { title: 'Safety (> 20%)', value: 'safety' }
+  { title: 'Elite (< 10%)', value: 'elite' }, // This remains for filtering, but legend/color logic changes
+  { title: 'Reach (< 20%)', value: 'reach_map' }, // New/adjusted for map legend
+  { title: 'Target (20-50%)', value: 'target_map' }, // New/adjusted for map legend
+  { title: 'Safety (> 50%)', value: 'safety_map' } // New/adjusted for map legend
 ];
 
 // Computed college data with coordinates
@@ -233,15 +236,27 @@ const filteredColleges = computed(() => {
   // Filter by acceptance range
   if (selectedAcceptanceRange.value) {
     switch (selectedAcceptanceRange.value) {
-      case 'elite':
+      case 'elite': // Keep this for filtering if needed, or adjust if it should align with new map legend
         filtered = filtered.filter(college => college.acceptanceRate < 10);
         break;
-      case 'target':
-        filtered = filtered.filter(college => college.acceptanceRate >= 10 && college.acceptanceRate <= 20);
+      // Add cases for new/adjusted map legend values if they are used for filtering
+      // Or, if the existing 'elite', 'target', 'safety' values in the dropdown
+      // should now map to the new ranges for filtering, update these conditions:
+      case 'target': // This was 10-20, if it means the new "Target (20-50%)" for filtering:
+        filtered = filtered.filter(college => college.acceptanceRate >= 20 && college.acceptanceRate <= 50);
         break;
-      case 'safety':
-        filtered = filtered.filter(college => college.acceptanceRate > 20);
+      case 'safety': // This was >20, if it means the new "Safety (>50%)" for filtering:
+        filtered = filtered.filter(college => college.acceptanceRate > 50);
         break;
+      // It might be clearer to rename the values in acceptanceRanges to avoid confusion
+      // e.g., elite_filter, target_filter_old, safety_filter_old
+      // and then add new ones for the map's visual representation if filtering logic is different.
+      // For now, I'll assume the filter dropdown's 'target' and 'safety' should map to the new ranges.
+      // And 'elite' still means <10 for filtering.
+      // If 'Reach (<20%)' from legend needs a filter option:
+      case 'reach_map':
+         filtered = filtered.filter(college => college.acceptanceRate < 20);
+         break;
     }
   }
 
@@ -339,7 +354,6 @@ const updateMarkers = () => {
     });
 
     // Add click popup with detailed info
-    marker.bindPopup(popupContent);
 
     // Add click event to open AdmitChance component
     marker.on('click', () => {
@@ -352,9 +366,9 @@ const updateMarkers = () => {
 };
 
 // Helper functions
-const getMarkerColor = (acceptanceRate) => {
-  if (acceptanceRate < 10) return '#d32f2f'; // Red for elite
-  if (acceptanceRate <= 20) return '#f57c00'; // Orange for target
+const getMarkerColor = (admissionChance) => { // Changed parameter to admissionChance
+  if (admissionChance < 20) return '#d32f2f'; // Red for reach
+  if (admissionChance <= 50) return '#f57c00'; // Orange for target
   return '#388e3c'; // Green for safety
 };
 

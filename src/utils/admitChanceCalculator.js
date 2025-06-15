@@ -66,6 +66,58 @@ export const adjustAcceptanceRateByStrategicFactors = (baseAcceptanceRate, isEar
   return Math.min(Math.max(adjustedRate, 1), 99);
 };
 
+/**
+ * Apply a sigmoid-like adjustment to the probability to prevent it from being too high.
+ * This function helps to model the diminishing returns of very high calculated scores.
+ * @param {number} probability - The calculated probability before adjustment.
+ * @param {number} originalBaseRate - The college's original base acceptance rate (0-100).
+ * @returns {number} - The adjusted probability.
+ */
+export const applySigmoidAdjustment = (probability, originalBaseRate) => {
+  // k controls the steepness of the curve. Higher k = steeper curve.
+  // x0 is the midpoint of the sigmoid.
+  // L is the maximum value (usually 1 for probability).
+  const L = 1;
+  let k, x0;
+
+  // Adjust k and x0 based on school selectivity
+  if (originalBaseRate >= 70) { // Very high acceptance rate
+    k = 1.25; // Less steep, more conservative
+    x0 = 0.9; // Shift midpoint higher, harder to reach top
+  } else if (originalBaseRate >= 50) { // High acceptance rate
+    k = 1.9;
+    x0 = 0.8;
+  } else if (originalBaseRate >= 20) { // Moderately selective
+    k = 2.5;
+    x0 = 0.65;
+  } else { // Highly selective
+    k = 3; // Steeper curve, allows for higher differentiation at top
+    x0 = 0.5;
+  }
+
+  // Basic logistic function: L / (1 + exp(-k * (probability - x0)))
+  // We want to ensure that if the input probability is already low, it doesn't get artificially inflated.
+  // And if it's high, it gets capped gracefully.
+
+  // If the initial probability is very low, don't boost it too much with sigmoid.
+  // This sigmoid is more for capping and shaping the upper end.
+  if (probability < p0ToProbability(originalBaseRate / 100, 0.1)) { // if probability is less than what a 0.1 exponent would give
+      return probability; // return as is or apply a much milder adjustment
+  }
+  
+  const sigmoidValue = L / (1 + Math.exp(-k * (probability - x0)));
+
+  // Blend the original probability with the sigmoid value.
+  // Give more weight to sigmoid as probability increases.
+  // This creates a smoother transition and avoids overly aggressive capping at lower probabilities.
+  const weight = Math.min(1, probability * 2); // Weight increases as probability approaches 0.5 and above
+
+  return probability * (1 - weight) + sigmoidValue * weight;
+};
+
+// Helper to convert p0 and exponent back to a rough probability for comparison
+const p0ToProbability = (p0, exponent) => p0 * Math.exp(exponent);
+
 
 /**
  * Adjust college acceptance rate based on the intended major and college type
@@ -188,6 +240,9 @@ export const calculateAdmissionChance = (student, college) => {
       // For highly selective schools, keep the original exponential model
       probability = p0 * Math.exp(exponent);
     }
+
+    // Apply sigmoid adjustment to the calculated probability
+    probability = applySigmoidAdjustment(probability, originalBaseRate);
 
     const bitterByCoffeeFactor = generateBitterByCoffeeFactor(student.enableBitterByCoffee);
     const adjustedProbability = probability * bitterByCoffeeFactor;
