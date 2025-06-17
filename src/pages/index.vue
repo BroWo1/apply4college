@@ -299,7 +299,7 @@ const teamMembers = [
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 10;
 }
 
 .hero-title {
@@ -338,14 +338,16 @@ const teamMembers = [
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .floating-icons {
   position: relative;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 .floating-icon {
@@ -353,6 +355,7 @@ const teamMembers = [
   opacity: 0.1;
   font-size: 3rem;
   animation: float 6s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .icon-1 {
@@ -385,7 +388,7 @@ const teamMembers = [
 /* Main Content */
 .main-content {
   position: relative;
-  z-index: 1;
+  z-index: 5;
 }
 
 /* College Cards Animation */

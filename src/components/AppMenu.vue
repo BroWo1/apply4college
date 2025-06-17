@@ -2,7 +2,7 @@
   <v-app-bar
     :height="appBarHeight"
     color="surface"
-    elevation="2"
+    elevation="1"
     class="app-bar-relative"
   >
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
@@ -186,10 +186,10 @@ const isDevelopment = computed(() => import.meta.env.DEV);
 const appBarHeight = computed(() => {
   // Using Vuetify's breakpoint names
   switch (breakpoint.value) {
-    case 'xs': return 48 // Increased slightly for better touch on mobile
-    case 'sm': return 56
-    case 'md': return 64
-    default: return 72 // lg and xl
+    case 'xs': return 40 // Increased slightly for better touch on mobile
+    case 'sm': return 48
+    case 'md': return 56
+    default: return 64 // lg and xl
   }
 })
 

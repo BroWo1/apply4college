@@ -10,33 +10,12 @@
     </div>
     -->
 
-    <!-- Legend for marker colors -->
+    <!-- Legend for marker colors - REMAINS REMOVED as per previous step -->
+    <!-- 
     <v-card class="mb-4" elevation="1" variant="tonal">
-      <v-card-text class="py-2">
-        <div class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center">
-            <v-icon icon="mdi-information-outline" size="small" class="mr-2" />
-            <span class="text-caption font-weight-medium">
-              {{ userStore.isAuthenticated ? 'Using your profile' : 'Using sample profile' }}
-            </span>
-          </div>
-          <div class="d-flex align-center justify-end text-caption">
-            <div class="d-flex align-center mr-4">
-              <div class="marker-legend" style="background-color: #d32f2f;"></div>
-              <span class="ml-1">Reach (< 20%)</span>
-            </div>
-            <div class="d-flex align-center mr-4">
-              <div class="marker-legend" style="background-color: #f57c00;"></div>
-              <span class="ml-1">Target (20-50%)</span>
-            </div>
-            <div class="d-flex align-center">
-              <div class="marker-legend" style="background-color: #388e3c;"></div>
-              <span class="ml-1">Safety (> 50%)</span>
-            </div>
-          </div>
-        </div>
-      </v-card-text>
+      ...
     </v-card>
+    -->
 
     <!-- Map Container -->
     <v-card elevation="4" class="map-card">
@@ -117,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -411,16 +390,27 @@ watch(currentStudentProfile, () => {
 
 // Lifecycle
 onMounted(() => {
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
   setTimeout(() => {
     initializeMap();
   }, 100);
+});
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  if (map.value) {
+    map.value.remove();
+  }
 });
 </script>
 
 <style scoped>
 .college-map-container {
   padding: 20px;
-  position: relative;
+  position: relative; /* Restored original, was implicitly kept */
+  /* Removed: position: fixed, top, left, width, height, z-index, background-color */
 }
 
 .map-header {
@@ -429,17 +419,19 @@ onMounted(() => {
 }
 
 .map-card {
-  margin-bottom: 20px;
+  margin-bottom: 20px; /* Restored */
+  /* Removed: width: 100%; height: 100%; border-radius: 0 !important; box-shadow: none !important; */
 }
 
 .map-container {
-  border-radius: 8px;
+  border-radius: 8px; /* Restored */
+  /* Removed: height: 100%; width: 100%; */
 }
 
 /* Floating filters at bottom */
 .floating-filters {
   position: fixed;
-  bottom: 60px;
+  bottom: 60px; /* Restored original value */
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -528,7 +520,7 @@ onMounted(() => {
 /* Responsive adjustments for floating filters */
 @media (max-width: 960px) {
   .floating-filters {
-    bottom: 10px;
+    bottom: 10px; /* Ensured original responsive value */
     left: 10px;
     right: 10px;
     transform: none;
@@ -538,7 +530,7 @@ onMounted(() => {
 
 @media (max-width: 600px) {
   .college-map-container {
-    padding: 10px;
+    padding: 10px; /* Restored */
   }
   
   .floating-filters .v-row {
