@@ -227,12 +227,6 @@ const menuItems = [
     to: '/explore',
   },
   {
-    title: 'map',
-    icon: 'mdi-map',
-    value: 'map',
-    to: '/map',
-  },
-  {
     title: 'profile',
     icon: 'mdi-account-group',
     value: 'profile',

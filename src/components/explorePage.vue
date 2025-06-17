@@ -1,26 +1,37 @@
 <template>
-  <v-container fluid class="" style="max-width: 2000px">
-    <v-container class="text-center py-6">
-      <h1 class="text-h2 font-weight-bold mb-4 pt-5">{{ $t('explorePage.title') }}</h1>
-      <p class="text-body-1 mb-6">
-        {{ $t('explorePage.subtitle') }}
-      </p>
-      <v-text-field
-        v-model="searchQuery"
-        :label="$t('explorePage.searchPlaceholder')"
-        variant="outlined"
-        prepend-inner-icon="mdi-magnify"
-        clearable
-        class="mx-auto py-2"
-        style="max-width: 600px"
-        @update:modelValue="handleSearch"
-      ></v-text-field>
-
-      <!-- DEV ONLY: Reset Promotion Tracking Button -->
-      <v-btn v-if="isDevEnvironment" @click="resetPromotionTracking" color="warning" class="mt-2">
-        DEV: Reset Promotion Tracking
+  <div class="explore-page">
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <div class="hero-text-container">
+          <h1 id="hero-title" class="hero-title">
+            {{ $t('explorePage.title') }}
+          </h1>
+          <p class="hero-subtitle">
+            {{ $t('explorePage.subtitle') }}
+          </p>
+          <v-text-field
+            v-model="searchQuery"
+            :label="$t('explorePage.searchPlaceholder')"
+            variant="solo"
+            prepend-inner-icon="mdi-magnify"
+            clearable
+            class="mx-auto py-2 search-field"
+            style="max-width: 600px"
+            rounded="lg"
+          ></v-text-field>
+        </div>
+        <div class="hero-decoration">
+          <div class="floating-icons">
+            <v-icon class="floating-icon icon-1">mdi-school</v-icon>
+            <v-icon class="floating-icon icon-2">mdi-star</v-icon>
+            <v-icon class="floating-icon icon-3">mdi-lightbulb</v-icon>
+          </div>
+        </div>
+      </div>
+       <v-btn v-if="isDevEnvironment" @click="resetPromotionTracking" color="warning" class="mt-2" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+        DEV: Reset
       </v-btn>
-    </v-container>
+    </section>
 
     <div class="floating-buttons d-md-none">
       <v-btn
@@ -36,26 +47,277 @@
         icon="mdi-bookmark"
         fab
         size="small"
+        class="mb-2"
         @click="rightPanelOpen = !rightPanelOpen"
       ></v-btn>
+      <v-btn
+        color="success"
+        icon="mdi-map"
+        fab
+        size="small"
+        @click="openMapModal"
+        class="map-btn-pulse"
+      >
+        <v-icon>mdi-map</v-icon>
+      </v-btn>
     </div>
 
-    <v-row class="fill-height ma-0">
-      <v-navigation-drawer
-        v-model="leftPanelOpen"
-        location="left"
-        temporary
-        width="300"
-        class="d-md-none"
-      >
+    <!-- Desktop floating map button -->
+    <v-tooltip
+      text="Open College Map"
+      location="top"
+    >
+      <template v-slot:activator="{ props }">
         <v-btn
-          icon="mdi-close"
-          variant="text"
-          size="small"
-          class="close-btn"
-          @click="leftPanelOpen = false"
-        ></v-btn>
-        <div class="pa-3">
+          v-bind="props"
+          color="success"
+          fab
+          size="x-large"
+          class="floating-map-btn d-none d-md-flex map-btn-pulse"
+          @click="openMapModal"
+          elevation="12"
+        >
+          <v-icon size="x-large">mdi-map-marker-radius</v-icon>
+          <div class="map-btn-label">Map</div>
+        </v-btn>
+      </template>
+    </v-tooltip>
+
+    <!-- Map Modal Dialog -->
+    <v-dialog
+      v-model="mapModalOpen"
+      max-width="95vw"
+      max-height="95vh"
+      transition="fade-transition"
+      scrollable
+      persistent
+    >
+      <v-card 
+        class="map-modal-card"
+        rounded="xl"
+        elevation="24"
+        @click:outside="mapModalOpen = false"
+      >
+        <v-card-title class="map-modal-header d-flex align-center">
+          <v-icon class="mr-3" color="success" size="large">mdi-map-marker-radius</v-icon>
+          <span class="text-h5 font-weight-bold">{{ $t('explorePage.collegeMap', 'College Map') }}</span>
+          <v-spacer></v-spacer>
+          <v-btn 
+            icon="mdi-close" 
+            variant="text" 
+            size="large"
+            @click="closeMapModal"
+            class="close-modal-btn"
+          ></v-btn>
+        </v-card-title>
+        
+        <v-divider></v-divider>
+        
+        <v-card-text class="map-modal-content pa-0">
+          <CollegeMap />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <main class="main-content">
+      <v-row class="fill-height ma-0">
+        <v-navigation-drawer
+          v-model="leftPanelOpen"
+          location="left"
+          temporary
+          width="300"
+          class="d-md-none"
+        >
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            class="close-btn"
+            @click="leftPanelOpen = false"
+          ></v-btn>
+          <div class="pa-3">
+            <ProfileSummaryComponent
+              :satReading="satReading"
+              :satMath="satMath"
+              :gpa="gpa"
+              :intendedMajor="intendedMajor"
+              :apClasses="apClasses"
+              :extracurriculars="extracurriculars"
+            />
+          </div>
+        </v-navigation-drawer>
+
+        <v-navigation-drawer
+          v-model="rightPanelOpen"
+          location="right"
+          temporary
+          width="300"
+          class="d-md-none"
+        >
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            class="close-btn"
+            @click="rightPanelOpen = false"
+          ></v-btn>
+          <div class="pa-3">
+            <v-card class="pa-4" rounded="lg">
+              <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
+              <v-divider class="my-2"></v-divider>
+
+              <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+                <div>{{ $t('explorePage.noSavedColleges') }}</div>
+                <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
+              </div>
+
+              <v-list v-else lines="two" density="compact">
+                <v-list-item
+                  v-for="(college, i) in savedColleges"
+                  :key="`saved-${i}`"
+                  :title="college.name"
+                  :subtitle="college.location"
+                  @click="navigateToCollegeProfilePage(college)"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar size="40">
+                      <v-img :src="college.image" cover></v-img>
+                    </v-avatar>
+                  </template>
+                  <template v-slot:append>
+                    <v-btn icon="mdi-delete" size="small" variant="text"
+                           @click.stop="removeSavedCollege(i)"
+                    ></v-btn>
+                  </template>
+                  <div class="d-flex flex-wrap mt-2">
+                    <v-chip
+                      color="purple-lighten-1"
+                      size="x-small"
+                      prepend-icon="mdi-calendar-clock"
+                      class="my-1"
+                    >
+                      Deadline: {{ college.deadlines?.earlyDecision}}
+                    </v-chip>
+                  </div>
+                </v-list-item>
+              </v-list>
+
+              <v-divider class="my-4"></v-divider>
+
+              <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
+              <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+                <div>{{ $t('explorePage.noSavedColleges') }}</div>
+                <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
+              </div>
+              <v-list v-else lines="two" density="compact">
+                <v-list-item
+                  v-for="(college, i) in recentlyViewed"
+                  :key="`recent-${i}`"
+                  :title="college.name"
+                  :subtitle="college.location"
+                  @click="navigateToCollegeProfilePage(college)"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar size="40">
+                      <v-img :src="college.image" cover></v-img>
+                    </v-avatar>
+                  </template>
+                  <template v-slot:append>
+                    <v-btn icon="mdi-delete" size="small" variant="text"
+                           @click.stop="removeRecentlyViewedCollege(i)"
+                    ></v-btn>
+                  </template>
+                  <div class="d-flex flex-wrap mt-2">
+                    <v-chip
+                      color="indigo-lighten-1"
+                      size="x-small"
+                      prepend-icon="mdi-calendar"
+                      class="my-1"
+                    >
+                      Deadline: {{ college.deadlines?.regularDecision}}
+                    </v-chip>
+                  </div>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </div>
+        </v-navigation-drawer>
+
+        <v-dialog
+          v-model="promotionModalOpen"
+          max-width="500"
+          persistent
+        >
+          <v-card rounded="xl" class="pa-4">
+            <v-card-title class="text-center text-h5 mb-4">
+              <v-icon icon="mdi-account-plus" size="x-large" color="primary" class="mb-2"></v-icon>
+              <div>{{ $t('explorePage.promotionModal.title', 'Join Apply4College!') }}</div>
+            </v-card-title>
+            
+            <v-card-text class="text-center">
+              <p class="text-body-1 mb-4">
+                {{ $t('explorePage.promotionModal.subtitle', 'Create an account to save your college lists, track deadlines, and get personalized recommendations!') }}
+              </p>
+              
+              <v-list density="compact" class="mb-4 bg-transparent">
+                <v-list-item prepend-icon="mdi-content-save" class="text-left">
+                  <v-list-item-title>{{ $t('explorePage.promotionModal.feature1', 'Save colleges across devices') }}</v-list-item-title>
+                </v-list-item>
+                <v-list-item prepend-icon="mdi-calendar-clock" class="text-left">
+                  <v-list-item-title>{{ $t('explorePage.promotionModal.feature2', 'Track application deadlines') }}</v-list-item-title>
+                </v-list-item>
+                <v-list-item prepend-icon="mdi-chart-line" class="text-left">
+                  <v-list-item-title>{{ $t('explorePage.promotionModal.feature3', 'Get personalized recommendations') }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+
+            <v-card-actions class="justify-center flex-column">
+              <div class="d-flex gap-2 mb-3">
+                <v-btn
+                  color="primary"
+                  variant="elevated"
+                  size="large"
+                  @click="navigateToLogin"
+                  rounded="lg"
+                  class="mr-4"
+                >
+                  {{ $t('explorePage.promotionModal.signUp', 'Sign Up') }}
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  variant="outlined"
+                  size="large"
+                  @click="navigateToLogin"
+                  rounded="lg"
+                >
+                  {{ $t('explorePage.promotionModal.login', 'Log In') }}
+                </v-btn>
+              </div>
+              
+              <div class="d-flex gap-2">
+                <v-btn
+                  variant="text"
+                  size="small"
+                  @click="dismissPromotionModal"
+                >
+                  {{ $t('explorePage.promotionModal.notNow', 'Not now') }}
+                </v-btn>
+                <v-btn
+                  variant="text"
+                  size="small"
+                  @click="dismissPromotionModalForDay"
+                >
+                  {{ $t('explorePage.promotionModal.dontShowToday', "Don't show for rest of day") }}
+                </v-btn>
+              </div>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
           <ProfileSummaryComponent
             :satReading="satReading"
             :satMath="satMath"
@@ -64,24 +326,187 @@
             :apClasses="apClasses"
             :extracurriculars="extracurriculars"
           />
-        </div>
-      </v-navigation-drawer>
+        </v-col>
 
-      <v-navigation-drawer
-        v-model="rightPanelOpen"
-        location="right"
-        temporary
-        width="300"
-        class="d-md-none"
-      >
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          size="small"
-          class="close-btn"
-          @click="rightPanelOpen = false"
-        ></v-btn>
-        <div class="pa-3">
+        <v-col cols="12" md="6" class="pa-3">
+
+          <v-card class="mb-4" variant="flat" color="transparent" rounded="lg">
+            <v-card-title class="d-flex align-center flex-wrap">
+              <span class="text-h6 me-auto">{{ $t('explorePage.collegesCount') }} ({{ displayedColleges.length }})</span>
+              <v-select
+                v-model="filterBy"
+                :items="filterOptions"
+                :label="$t('explorePage.filter')"
+                hide-details
+                density="compact"
+                style="max-width: 150px"
+                class="mx-2 my-1"
+                variant="outlined"
+              ></v-select>
+              <v-select
+                v-model="sortBy"
+                :items="sortOptions"
+                :label="$t('explorePage.sort')"
+                hide-details
+                density="compact"
+                style="max-width: 150px"
+                class="my-1"
+                variant="outlined"
+              ></v-select>
+            </v-card-title>
+          </v-card>
+
+          <AdmitChanceComponent
+            v-if="selectedCollege"
+            :college="selectedCollege"
+            :studentProfile="studentProfile"
+            :savedColleges="savedColleges"
+            :recentlyViewed="recentlyViewed"
+            v-model="admitChanceModalOpen"
+            @saveToEarly="handleSaveToEarly"
+            @saveToRegular="handleSaveToRegular"
+            @close="closeAdmitChanceModal"
+          />
+
+          <v-card
+            v-for="(college, i) in displayedColleges"
+            :key="i"
+            class="mb-4 college-card"
+            rounded="lg"
+            elevation="2"
+            @click="navigateToCollegeProfilePage(college)"
+          >
+            <v-row class="ma-0">
+              <v-col sm="4" class="pa-0 d-none d-sm-block">
+                <v-img
+                  :src="college.image"
+                  height="100%"
+                  cover
+                  class="rounded-l-lg"
+                ></v-img>
+              </v-col>
+              <v-col cols="12" sm="8" class="pa-4">
+                <div class="d-flex justify-space-between align-start">
+                  <div>
+                    <h3 class="text-h6 font-weight-bold mb-1">{{ college.name }}</h3>
+                    <div class="text-body-2 text-medium-emphasis mb-2">
+                      {{ college.location }}
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column align-end">
+                    <v-chip
+                      :color="getAcceptanceRateColor(college.acceptanceRate)"
+                      size="small"
+                      class="mb-1"
+                    >
+                      {{ college.acceptanceRate }}% Acceptance
+                    </v-chip>
+                    <v-chip
+                      :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'"
+                      size="small"
+                    >
+                      {{ college.collegeType }}
+                    </v-chip>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap my-3">
+                  <v-chip
+                    color="purple-lighten-1"
+                    size="small"
+                    prepend-icon="mdi-calendar-clock"
+                    class="mr-2 my-1"
+                    label
+                  >
+                    ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
+                  </v-chip>
+                  <v-chip
+                    color="indigo-lighten-1"
+                    size="small"
+                    prepend-icon="mdi-calendar"
+                    class="my-1"
+                    label
+                  >
+                    RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                  </v-chip>
+                </div>
+
+                <v-divider class="my-2"></v-divider>
+
+                <div class="d-flex align-center justify-space-between mt-2">
+                  <div class="d-flex align-center">
+                    <v-chip
+                      :color="getAdmissionChanceColor(getAdmissionChance(college))"
+                      size="small"
+                      class="mr-2"
+                      label
+                    >
+                      {{ Math.round(getAdmissionChance(college) * 100) }}% {{ $t('explorePage.admissionChance') }}
+                    </v-chip>
+                    <span class="text-body-2">{{ getAdmissionChanceDescription(getAdmissionChance(college)) }}</span>
+                  </div>
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        v-bind="props"
+                        variant="text"
+                        color="primary"
+                        density="comfortable"
+                      >
+                        {{ $t('explorePage.options') }}
+                        <v-icon end>mdi-chevron-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item
+                        v-for="(item, index) in collegeActionItems"
+                        :key="index"
+                        :value="index"
+                        @click.stop="handleCollegeAction(item.action, college)"
+                      >
+                        <template v-slot:prepend>
+                          <v-icon :icon="item.icon" size="small" class="me-3"></v-icon>
+                        </template>
+                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card>
+
+          <v-card
+            v-if="displayedColleges.length === 0"
+            class="pa-6 text-center"
+            rounded="lg"
+            variant="tonal"
+          >
+            <v-icon icon="mdi-school-outline" size="x-large" class="mb-3"></v-icon>
+            <h3 class="text-h6 mb-2">{{ $t('explorePage.noMatches') }}</h3>
+            <p class="text-body-2">{{ $t('explorePage.adjustFilters') }}</p>
+            <v-btn
+              color="primary"
+              class="mt-3"
+              @click="resetFilters"
+              rounded="lg"
+            >
+              {{ $t('explorePage.resetFilters') }}
+            </v-btn>
+          </v-card>
+
+          <div v-if="displayedColleges.length > 0" class="d-flex justify-center mt-4">
+            <v-pagination
+              v-model="page"
+              :length="Math.ceil(filteredColleges.length / itemsPerPage)"
+              show-first-last-page
+              :total-visible="7"
+              rounded="circle"
+            ></v-pagination>
+          </div>
+        </v-col>
+
+        <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
           <v-card class="pa-4" rounded="lg">
             <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
             <v-divider class="my-2"></v-divider>
@@ -92,7 +517,7 @@
               <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
             </div>
 
-            <v-list v-else lines="two" density="compact">
+            <v-list v-else lines="two" density="compact" class="bg-transparent">
               <v-list-item
                 v-for="(college, i) in savedColleges"
                 :key="`saved-${i}`"
@@ -110,7 +535,6 @@
                          @click.stop="removeSavedCollege(i)"
                   ></v-btn>
                 </template>
-                <!-- Display only ED deadline in Early Decision section -->
                 <div class="d-flex flex-wrap mt-2">
                   <v-chip
                     color="purple-lighten-1"
@@ -118,7 +542,7 @@
                     prepend-icon="mdi-calendar-clock"
                     class="my-1"
                   >
-                    Deadline: {{ college.deadlines?.earlyDecision}}
+                    Deadline: {{ college.deadlines?.earlyDecision || "Nov 1" }}
                   </v-chip>
                 </div>
               </v-list-item>
@@ -132,7 +556,7 @@
               <div>{{ $t('explorePage.noSavedColleges') }}</div>
               <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
             </div>
-            <v-list v-else lines="two" density="compact">
+            <v-list v-else lines="two" density="compact" class="bg-transparent">
               <v-list-item
                 v-for="(college, i) in recentlyViewed"
                 :key="`recent-${i}`"
@@ -150,7 +574,6 @@
                          @click.stop="removeRecentlyViewedCollege(i)"
                   ></v-btn>
                 </template>
-                <!-- Display only RD deadline in Regular Decision section -->
                 <div class="d-flex flex-wrap mt-2">
                   <v-chip
                     color="indigo-lighten-1"
@@ -158,354 +581,16 @@
                     prepend-icon="mdi-calendar"
                     class="my-1"
                   >
-                    Deadline: {{ college.deadlines?.regularDecision}}
+                    Deadline: {{ college.deadlines?.regularDecision || "Jan 1" }}
                   </v-chip>
                 </div>
               </v-list-item>
             </v-list>
           </v-card>
-        </div>
-      </v-navigation-drawer>
-
-      <!-- Promotion Modal -->
-      <v-dialog
-        v-model="promotionModalOpen"
-        max-width="500"
-        persistent
-      >
-        <v-card rounded="lg" class="pa-4">
-          <v-card-title class="text-center text-h5 mb-4">
-            <v-icon icon="mdi-account-plus" size="x-large" color="primary" class="mb-2"></v-icon>
-            <div>{{ $t('explorePage.promotionModal.title', 'Join Apply4College!') }}</div>
-          </v-card-title>
-          
-          <v-card-text class="text-center">
-            <p class="text-body-1 mb-4">
-              {{ $t('explorePage.promotionModal.subtitle', 'Create an account to save your college lists, track deadlines, and get personalized recommendations!') }}
-            </p>
-            
-            <v-list density="compact" class="mb-4">
-              <v-list-item prepend-icon="mdi-content-save">
-                <v-list-item-title>{{ $t('explorePage.promotionModal.feature1', 'Save colleges across devices') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-calendar-clock">
-                <v-list-item-title>{{ $t('explorePage.promotionModal.feature2', 'Track application deadlines') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-chart-line">
-                <v-list-item-title>{{ $t('explorePage.promotionModal.feature3', 'Get personalized recommendations') }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-
-          <v-card-actions class="justify-center flex-column">
-            <div class="d-flex gap-2 mb-3">
-              <v-btn
-                color="primary"
-                variant="elevated"
-                size="large"
-                @click="navigateToLogin"
-                class="mr-10"
-              >
-                {{ $t('explorePage.promotionModal.signUp', 'Sign Up') }}
-              </v-btn>
-              <v-btn
-                color="primary"
-                variant="outlined"
-                size="large"
-                @click="navigateToLogin"
-              >
-                {{ $t('explorePage.promotionModal.login', 'Log In') }}
-              </v-btn>
-            </div>
-            
-            <div class="d-flex gap-2">
-              <v-btn
-                variant="text"
-                size="small"
-                @click="dismissPromotionModal"
-              >
-                {{ $t('explorePage.promotionModal.notNow', 'Not now') }}
-              </v-btn>
-              <v-btn
-                variant="text"
-                size="small"
-                @click="dismissPromotionModalForDay"
-              >
-                {{ $t('explorePage.promotionModal.dontShowToday', "Don't show for rest of day") }}
-              </v-btn>
-            </div>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
-        <ProfileSummaryComponent
-          :satReading="satReading"
-          :satMath="satMath"
-          :gpa="gpa"
-          :intendedMajor="intendedMajor"
-          :apClasses="apClasses"
-          :extracurriculars="extracurriculars"
-        />
-      </v-col>
-
-      <v-col cols="12" md="6" class="pa-3">
-
-        <v-card class="mb-4 no-hover" variant="outlined" rounded="lg">
-          <v-card-title class="d-flex align-center">
-            <span class="text-h6">{{ $t('explorePage.collegesCount') }} ({{ displayedColleges.length }})</span>
-            <v-spacer></v-spacer>
-            <v-select
-              v-model="filterBy"
-              :items="filterOptions"
-              :label="$t('explorePage.filter')"
-              hide-details
-              density="compact"
-              style="max-width: 150px"
-              class="mx-2"
-            ></v-select>
-            <v-select
-              v-model="sortBy"
-              :items="sortOptions"
-              :label="$t('explorePage.sort')"
-              hide-details
-              density="compact"
-              style="max-width: 150px"
-            ></v-select>
-          </v-card-title>
-        </v-card>
-
-        <AdmitChanceComponent
-          v-if="selectedCollege"
-          :college="selectedCollege"
-          :studentProfile="studentProfile"
-          :savedColleges="savedColleges"
-          :recentlyViewed="recentlyViewed"
-          v-model="admitChanceModalOpen"
-          @saveToEarly="handleSaveToEarly"
-          @saveToRegular="handleSaveToRegular"
-          @close="closeAdmitChanceModal"
-        />
-
-        <v-card
-          v-for="(college, i) in displayedColleges"
-          :key="i"
-          class="mb-4"
-          rounded="lg"
-          :elevation="4"
-          @click="navigateToCollegeProfilePage(college)"
-        >
-          <v-row class="ma-0">
-            <v-col sm="4" class="pa-0 d-none d-sm-block">
-              <v-img
-                :src="college.image"
-                height="200"
-                cover
-                class="rounded-l-lg"
-              ></v-img>
-            </v-col>
-            <v-col cols="12" sm="8" class="pa-4">
-              <div class="d-flex justify-space-between align-start">
-                <div>
-                  <h3 class="text-h6 font-weight-bold mb-1">{{ college.name }}</h3>
-                  <div class="text-body-2 text-medium-emphasis mb-2">
-                    {{ college.location }}
-                  </div>
-                </div>
-                <div class="d-flex flex-column align-end">
-                  <v-chip
-                    :color="getAcceptanceRateColor(college.acceptanceRate)"
-                    size="small"
-                    class="mb-1"
-                  >
-                    {{ college.acceptanceRate }}% Acceptance
-                  </v-chip>
-                  <v-chip
-                    :color="college.collegeType === 'STEM-heavy' ? 'info' : 'success'"
-                    size="small"
-                  >
-                    {{ college.collegeType }}
-                  </v-chip>
-                </div>
-              </div>
-
-              <!-- Add deadline information -->
-              <div class="d-flex flex-wrap mb-3">
-                <v-chip
-                  color="purple-lighten-1"
-                  size="small"
-                  prepend-icon="mdi-calendar-clock"
-                  class="mr-2 my-1"
-                >
-                  ED: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                </v-chip>
-                <v-chip
-                  color="indigo-lighten-1"
-                  size="small"
-                  prepend-icon="mdi-calendar"
-                  class="my-1"
-                >
-                  RD: {{ college.deadlines?.regularDecision || "Jan 1" }}
-                </v-chip>
-              </div>
-
-              <v-spacer class="my-2"></v-spacer>
-              <v-divider class="my-2"></v-divider>
-
-              <div class="d-flex align-center justify-space-between mt-2">
-                <div class="d-flex align-center">
-                  <v-chip
-                    :color="getAdmissionChanceColor(getAdmissionChance(college))"
-                    size="small"
-                    class="mr-2"
-                  >
-                    {{ Math.round(getAdmissionChance(college) * 100) }}% {{ $t('explorePage.admissionChance') }}
-                  </v-chip>
-                  <span class="text-body-2">{{ getAdmissionChanceDescription(getAdmissionChance(college)) }}</span>
-                </div>
-                <v-menu>
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      v-bind="props"
-                      variant="text"
-                      color="primary"
-                      density="comfortable"
-                    >
-                      {{ $t('explorePage.options') }}
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-for="(item, index) in collegeActionItems"
-                      :key="index"
-                      :value="index"
-                      @click.stop="handleCollegeAction(item.action, college)"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon :icon="item.icon" size="small" class="ml-2"></v-icon>
-                      </template>
-                      <v-list-item-title>{{ item.title }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </div>
-            </v-col>
-          </v-row>
-        </v-card>
-
-        <v-card
-          v-if="displayedColleges.length === 0"
-          class="pa-6 text-center"
-          rounded="lg"
-        >
-          <v-icon icon="mdi-school-outline" size="x-large" class="mb-3"></v-icon>
-          <h3 class="text-h6 mb-2">{{ $t('explorePage.noMatches') }}</h3>
-          <p class="text-body-2">{{ $t('explorePage.adjustFilters') }}</p>
-          <v-btn
-            color="primary"
-            class="mt-3"
-            @click="resetFilters"
-          >
-            {{ $t('explorePage.resetFilters') }}
-          </v-btn>
-        </v-card>
-
-        <div v-if="displayedColleges.length > 0" class="d-flex justify-center mt-4">
-          <v-pagination
-            v-model="page"
-            :length="Math.ceil(filteredColleges.length / itemsPerPage)"
-            show-first-last-page
-            :total-visible="7"
-          ></v-pagination>
-        </div>
-      </v-col>
-
-      <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
-        <v-card class="pa-4" rounded="lg">
-          <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
-          <v-divider class="my-2"></v-divider>
-
-          <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
-            <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-            <div>{{ $t('explorePage.noSavedColleges') }}</div>
-            <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
-          </div>
-
-          <v-list v-else lines="two" density="compact">
-            <v-list-item
-              v-for="(college, i) in savedColleges"
-              :key="`saved-${i}`"
-              :title="college.name"
-              :subtitle="college.location"
-              @click="navigateToCollegeProfilePage(college)"
-            >
-              <template v-slot:prepend>
-                <v-avatar size="40">
-                  <v-img :src="college.image" cover></v-img>
-                </v-avatar>
-              </template>
-              <template v-slot:append>
-                <v-btn icon="mdi-delete" size="small" variant="text"
-                       @click.stop="removeSavedCollege(i)"
-                ></v-btn>
-              </template>
-              <!-- Display only ED deadline in Early Decision section -->
-              <div class="d-flex flex-wrap mt-2">
-                <v-chip
-                  color="purple-lighten-1"
-                  size="x-small"
-                  prepend-icon="mdi-calendar-clock"
-                  class="my-1"
-                >
-                  Deadline: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                </v-chip>
-              </div>
-            </v-list-item>
-          </v-list>
-
-          <v-divider class="my-4"></v-divider>
-
-          <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
-          <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
-            <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-            <div>{{ $t('explorePage.noSavedColleges') }}</div>
-            <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
-          </div>
-          <v-list v-else lines="two" density="compact">
-            <v-list-item
-              v-for="(college, i) in recentlyViewed"
-              :key="`recent-${i}`"
-              :title="college.name"
-              :subtitle="college.location"
-              @click="navigateToCollegeProfilePage(college)"
-            >
-              <template v-slot:prepend>
-                <v-avatar size="40">
-                  <v-img :src="college.image" cover></v-img>
-                </v-avatar>
-              </template>
-              <template v-slot:append>
-                <v-btn icon="mdi-delete" size="small" variant="text"
-                       @click.stop="removeRecentlyViewedCollege(i)"
-                ></v-btn>
-              </template>
-              <!-- Display only RD deadline in Regular Decision section -->
-              <div class="d-flex flex-wrap mt-2">
-                <v-chip
-                  color="indigo-lighten-1"
-                  size="x-small"
-                  prepend-icon="mdi-calendar"
-                  class="my-1"
-                >
-                  Deadline: {{ college.deadlines?.regularDecision || "Jan 1" }}
-                </v-chip>
-              </div>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+        </v-col>
+      </v-row>
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -513,6 +598,7 @@ import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AdmitChanceComponent from './AdmitChanceComponent.vue';
 import ProfileSummaryComponent from './ProfileSummaryComponent.vue';
+import CollegeMap from './CollegeMap.vue';
 import { colleges, getCollegesByType, getCollegesByAcceptanceRate, sortCollegesBy, searchColleges } from '../data/colleges.js';
 import { majors, calculateFitScore, determineAPCourseCategory, determineActivityCategory } from '../utils/majorData';
 import {
@@ -558,6 +644,9 @@ const admitChanceModalOpen = ref(false);
 // Promotion modal state and tracking
 const promotionModalOpen = ref(false);
 const collegeClickCount = ref(0);
+
+// Map modal state
+const mapModalOpen = ref(false);
 
 // Filter options
 const filterOptions = [
@@ -703,7 +792,7 @@ onMounted(() => {
   
   console.log('🎯 Initial state - isAuthenticated:', userStore.isAuthenticated);
   console.log('🎯 Initial click count:', collegeClickCount.value);
-  if (!userStore.isAuthenticated && collegeClickCount.value === 3){
+  if (!userStore.isAuthenticated && collegeClickCount.value >= 3){
     console.log('👤 User not authenticated, showing promotion modal');
     promotionModalOpen.value = true;
   } else {
@@ -722,7 +811,7 @@ const resetPromotionTracking = () => {
     localStorage.removeItem('collegeClickCount');
     collegeClickCount.value = 0;
     localStorage.removeItem('promotionDismissedDate');
-    console.log('DEV: Promotion tracking reset (click count and dismissed date).');
+    alert('DEV: Promotion tracking has been reset.');
   }
 };
 
@@ -791,11 +880,6 @@ const resetFilters = () => {
   searchQuery.value = '';
 };
 
-// Handle search input
-const handleSearch = (value) => {
-  searchQuery.value = value === null ? '' : value; // Handle clearable text field
-};
-
 // Computed student profile for admission calculations - Updated to include all fields
 const studentProfile = computed(() => {
   return {
@@ -850,7 +934,7 @@ watch(recentlyViewed, (newVal) => {
 
 // College action items for dropdown
 const collegeActionItems = [
-  { title: 'View College Profile', action: 'view', icon: 'mdi-school' },
+  { title: 'View Details', action: 'view', icon: 'mdi-eye-outline' },
   { title: 'Save to Regular Decision', action: 'saveRegular', icon: 'mdi-bookmark-outline' },
   { title: 'Save to Early Decision', action: 'saveEarly', icon: 'mdi-bookmark' },
 ];
@@ -897,7 +981,7 @@ const handleCollegeAction = (action, college) => {
   // Implement action handling
   switch(action) {
     case 'view':
-      openAdmitChanceModal(college);
+      navigateToCollegeProfilePage(college); // Navigate to full page instead of modal
       break;
     case 'saveRegular':
       handleSaveToRegular({ college, action: 'add' });
@@ -913,7 +997,7 @@ const handleCollegeAction = (action, college) => {
 const handleSaveToEarly = ({ college, action, index }) => {
   if (action === 'add') {
     if (!savedColleges.value.some(c => c.name === college.name)) {
-      savedColleges.value.push(college);
+      savedColleges.value.unshift(college); // Add to the beginning of the list
     }
   } else if (action === 'remove' && index !== undefined) {
     savedColleges.value.splice(index, 1);
@@ -924,7 +1008,7 @@ const handleSaveToEarly = ({ college, action, index }) => {
 const handleSaveToRegular = ({ college, action, index }) => {
   if (action === 'add') {
     if (!recentlyViewed.value.some(c => c.name === college.name)) {
-      recentlyViewed.value.push(college);
+      recentlyViewed.value.unshift(college); // Add to the beginning of the list
     }
   } else if (action === 'remove' && index !== undefined) {
     recentlyViewed.value.splice(index, 1);
@@ -990,7 +1074,7 @@ const trackCollegeClick = () => {
   console.log('💾 Saved click count to localStorage');
   
   // Show modal after 3 clicks
-  if (collegeClickCount.value === 3) {
+  if (collegeClickCount.value >= 3) {
     console.log('🎉 3 clicks reached! Showing promotion modal...');
     promotionModalOpen.value = true;
   } else {
@@ -1047,6 +1131,35 @@ const requireAuth = (to, from, next) => {
   }
 };
 
+// Function to open map modal
+const openMapModal = () => {
+  // Add a slight delay for smoother animation
+  setTimeout(() => {
+    mapModalOpen.value = true;
+  }, 100);
+};
+
+// Function to close map modal
+const closeMapModal = () => {
+  mapModalOpen.value = false;
+};
+
+// Handle keyboard events for modal
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && mapModalOpen.value) {
+    closeMapModal();
+  }
+};
+
+// Add keyboard event listener when modal is open
+watch(mapModalOpen, (isOpen) => {
+  if (isOpen) {
+    document.addEventListener('keydown', handleKeydown);
+  } else {
+    document.removeEventListener('keydown', handleKeydown);
+  }
+});
+
 // Global before guard
 router.beforeEach((to, from, next) => {
   // Check authentication for protected routes
@@ -1055,32 +1168,282 @@ router.beforeEach((to, from, next) => {
 </script>
 
 <style scoped>
+.explore-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* Modern Hero Section */
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, 
+    #8b5cf6 0%, 
+    #7c3aed 50%,
+    #6d28d9 100%
+  );
+  padding: 4rem 2rem;
+  overflow: hidden;
+  color: white;
+  z-index: 1;
+}
+.search-field{
+  position: relative;
+  z-index: 2;
+}
+
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+/* Floating Animation */
+.hero-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-icons {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.floating-icon {
+  position: absolute;
+  opacity: 0.1;
+  font-size: 3rem;
+  animation: float 6s ease-in-out infinite;
+}
+
+.icon-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.icon-2 {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.icon-3 {
+  bottom: 30%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(10deg); 
+  }
+}
+
+/* Main Content */
+.main-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
 .sticky-panel {
   position: sticky;
-  top: 80px; /* Adjust based on your header height */
+  top: 80px;
   align-self: start;
-  height: calc(100vh - 80px); /* Adjust based on your header height */
+  height: calc(100vh - 100px);
   overflow-y: auto;
 }
 
-.v-card {
-  transition: transform 0.2s, box-shadow 0.2s;
+.college-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.08);
 }
 
-/* Apply hover effect only to cards that are not expansion panels, dialog cards, sticky panel cards, or marked with .no-hover */
-.v-card:not(.v-expansion-panel):not(.v-dialog .v-card):not(.sticky-panel .v-card):not(.no-hover):hover {
+.college-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
 }
+
 
 /* Floating buttons styling */
 .floating-buttons {
   position: fixed;
-  bottom: 60px; /* Adjusted for potential bottom navigation */
+  bottom: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
-  z-index: 100; /* Ensure they are above other content but below modals */
+  z-index: 100;
+}
+
+.floating-buttons .v-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-buttons .v-btn:hover {
+  transform: scale(1.1);
+}
+
+.floating-buttons .map-btn-pulse {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Desktop floating map button */
+.floating-map-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 40px;
+  z-index: 100;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%) !important;
+  color: white !important;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  width: 80px !important;
+  height: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.map-btn-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Pulsing animation for the map button */
+.map-btn-pulse {
+  animation: mapPulse 2s infinite;
+  position: relative;
+}
+
+.map-btn-pulse::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  opacity: 0;
+  animation: mapPulseRing 2s infinite;
+  z-index: -1;
+}
+
+@keyframes mapPulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 
+      0 8px 24px rgba(76, 175, 80, 0.3),
+      0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 
+      0 12px 32px rgba(76, 175, 80, 0.5),
+      0 0 0 8px rgba(76, 175, 80, 0.1);
+  }
+}
+
+@keyframes mapPulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Map modal styling */
+.map-modal-card {
+  width: 95vw !important;
+  height: 85vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: auto;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.map-modal-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 24px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.map-modal-content {
+  height: calc(85vh - 88px) !important; /* Account for header height */
+  overflow: hidden !important;
+}
+
+.close-modal-btn {
+  background: rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.3s ease !important;
+}
+
+.close-modal-btn:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  transform: rotate(90deg);
+}
+
+/* Smooth fade transition for modal */
+:deep(.fade-transition-enter-active),
+:deep(.fade-transition-leave-active) {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.fade-transition-enter-from),
+:deep(.fade-transition-leave-to) {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Map modal content */
+.map-modal-content {
+  height: calc(100vh - 64px); /* Account for toolbar height */
+  overflow: hidden;
 }
 
 /* Close button in mobile drawer */
@@ -1088,17 +1451,48 @@ router.beforeEach((to, from, next) => {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1; /* Ensure it's above other drawer content */
+  z-index: 1;
 }
 
-/* Ensure navigation drawers stay on top */
 .v-navigation-drawer {
-  z-index: 1000; /* High z-index for drawers */
+  z-index: 1000;
 }
 
-/* Ensure the college image corners are rounded correctly with the card */
 .rounded-l-lg {
   border-top-left-radius: inherit;
   border-bottom-left-radius: inherit;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 1rem;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+}
+
+
+/* Deep styles for consistency */
+:deep(.v-card) {
+  border: none;
+}
+
+:deep(.v-btn) {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
 }
 </style>
