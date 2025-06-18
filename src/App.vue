@@ -1,6 +1,6 @@
 <template>
   <v-app>
-      <div>★ Hello from GPE Club ★</div>
+      <!-- <div>★ Hello from GPE Club ★</div> -->
     <!--ProfileView/-->
     <!--ProfileEdit/-->
     <router-view />

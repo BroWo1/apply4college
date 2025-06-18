@@ -1,4 +1,6 @@
 import { createCollegeData } from './collegeDataStructure';
+import ucb from '@/assets/colleges/ucb.png';
+import ucla from '@/assets/colleges/ucla.png';
 
 // Target colleges (acceptance rate between 10% and 20%)
 export const targetColleges = [
@@ -8,7 +10,7 @@ export const targetColleges = [
     description: 'A public research university known for its strong engineering and science programs.',
     acceptanceRate: 10,
     tuition: 14000,
-    imageUrl: 'https://placehold.co/600x400/f4e9fe/9C27B0?text=UCB',
+    imageUrl: ucb,
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
@@ -17,7 +19,7 @@ export const targetColleges = [
     considersLegacy: false, // Example: UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.89, stdDev: 0.12 },
-      sat: { mean: 1480, stdDev: 70 },
+      sat: { mean: 1470, stdDev: 70 },
       ap: { mean: 7, stdDev: 2 },
       ec: { mean: 10, stdDev: 3 },
       weights: {
@@ -44,7 +46,7 @@ export const targetColleges = [
     description: 'A public research university known for its diverse programs and vibrant campus life.',
     acceptanceRate: 12,
     tuition: 14000,
-    imageUrl: 'https://placehold.co/600x400/e9fef3/4CAF50?text=UCLA',
+    imageUrl: ucla,
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
@@ -70,6 +72,16 @@ export const targetColleges = [
           legacy: 0.10,
           demo: 0.22
         }
+      }
+    },
+    majorFactors: {
+      STEM: {
+        competitive: 1.1, 
+        popular: 1.05     
+      },
+      'Liberal Arts': {
+        competitive: 0.85, 
+        popular: 0.9
       }
     }
   }),
@@ -145,6 +157,16 @@ export const targetColleges = [
           legacy: 0.10,
           demo: 0.20
         }
+      }
+    },
+    majorFactors: {
+      STEM: {
+        competitive: 0.6, 
+        popular: 0.65,
+      },
+      'Liberal Arts': {
+        competitive: 1.2, 
+        popular:  1.15
       }
     }
   })

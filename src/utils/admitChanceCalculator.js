@@ -120,27 +120,29 @@ const p0ToProbability = (p0, exponent) => p0 * Math.exp(exponent);
 
 
 /**
- * Adjust college acceptance rate based on the intended major and college type
+ * Adjust college acceptance rate based on the intended major and college-specific factors
  * @param {number} baseAcceptanceRate - The college's overall acceptance rate
  * @param {string} intendedMajor - The student's intended major ('STEM' or 'Liberal Arts')
- * @param {string} collegeType - The college's focus ('STEM-heavy' or 'Liberal-arts')
+ * @param {Object} college - The college object containing majorFactors
  * @returns {number} - The adjusted acceptance rate for the specific major
  */
-export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, collegeType) => {
+export const adjustAcceptanceRateByMajor = (baseAcceptanceRate, intendedMajor, college) => {
   let rate = parseFloat(baseAcceptanceRate);
-  const competitiveMajorFactor = 0.7; // 30% harder
-  const lessFocusedMajorFactor = 1.2; // 20% easier
+  
+  if (!intendedMajor || !college.majorFactors) return rate;
 
-  if (!intendedMajor) return rate;
+  const majorFactors = college.majorFactors[intendedMajor];
+  if (!majorFactors) return rate;
 
-  if (intendedMajor === 'STEM' && collegeType === 'STEM-heavy') {
-    rate *= competitiveMajorFactor;
-  } else if (intendedMajor === 'Liberal Arts' && collegeType === 'Liberal-arts') {
-    rate *= competitiveMajorFactor;
-  } else if (intendedMajor === 'STEM' && collegeType === 'Liberal-arts') {
-    rate *= lessFocusedMajorFactor;
-  } else if (intendedMajor === 'Liberal Arts' && collegeType === 'STEM-heavy') {
-    rate *= lessFocusedMajorFactor;
+  // Use college-specific competitive factor
+  if (intendedMajor === 'STEM' && college.collegeType === 'STEM-heavy') {
+    rate *= majorFactors.competitive;
+  } else if (intendedMajor === 'Liberal Arts' && college.collegeType === 'Liberal-arts') {
+    rate *= majorFactors.competitive;
+  } else if (intendedMajor === 'STEM' && college.collegeType === 'Liberal-arts') {
+    rate *= majorFactors.popular || 1.2; // Use popular factor or default
+  } else if (intendedMajor === 'Liberal Arts' && college.collegeType === 'STEM-heavy') {
+    rate *= majorFactors.popular || 1.2; // Use popular factor or default
   }
   return rate;
 };
@@ -163,7 +165,7 @@ export const calculateAdmissionChance = (student, college) => {
     currentAcceptanceRate = adjustAcceptanceRateByMajor(
       currentAcceptanceRate,
       student.intendedMajor,
-      collegeType
+      college // Pass the full college object
     );
 
     // 3. Adjust for strategic factors (ED/RD and Legacy)

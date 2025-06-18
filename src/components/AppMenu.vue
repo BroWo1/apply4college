@@ -2,7 +2,7 @@
   <v-app-bar
     :height="appBarHeight"
     color="surface"
-    elevation="1"
+    elevation="2"
     class="app-bar-relative"
   >
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
@@ -186,18 +186,18 @@ const isDevelopment = computed(() => import.meta.env.DEV);
 const appBarHeight = computed(() => {
   // Using Vuetify's breakpoint names
   switch (breakpoint.value) {
-    case 'xs': return 40 // Increased slightly for better touch on mobile
-    case 'sm': return 48
-    case 'md': return 56
+    case 'xs': return 56 // Increased slightly for better touch on mobile
+    case 'sm': return 56
+    case 'md': return 64
     default: return 64 // lg and xl
   }
 })
 
 const logoSize = computed(() => {
   switch (breakpoint.value) {
-    case 'xs': return 30 // Slightly increased
-    case 'sm': return 32
-    case 'md': return 36
+    case 'xs': return 36 // Slightly increased
+    case 'sm': return 36
+    case 'md': return 40
     default: return 40 // lg and xl
   }
 })

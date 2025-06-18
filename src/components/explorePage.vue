@@ -56,32 +56,20 @@
         fab
         size="small"
         @click="openMapModal"
-        class="map-btn-pulse"
-      >
-        <v-icon>mdi-map</v-icon>
-      </v-btn>
+      ></v-btn>
     </div>
 
     <!-- Desktop floating map button -->
-    <v-tooltip
-      text="Open College Map"
-      location="top"
+    <v-btn
+      color="success"
+      fab
+      size="large"
+      class="floating-map-btn d-none d-md-flex"
+      @click="openMapModal"
+      elevation="4"
     >
-      <template v-slot:activator="{ props }">
-        <v-btn
-          v-bind="props"
-          color="success"
-          fab
-          size="x-large"
-          class="floating-map-btn d-none d-md-flex map-btn-pulse"
-          @click="openMapModal"
-          elevation="12"
-        >
-          <v-icon size="x-large">mdi-map-marker-radius</v-icon>
-          <div class="map-btn-label">Map</div>
-        </v-btn>
-      </template>
-    </v-tooltip>
+      <v-icon>mdi-map</v-icon>
+    </v-btn>
 
     <!-- Map Modal Dialog -->
     <v-dialog
@@ -981,7 +969,7 @@ const handleCollegeAction = (action, college) => {
   // Implement action handling
   switch(action) {
     case 'view':
-      navigateToCollegeProfilePage(college); // Navigate to full page instead of modal
+      openAdmitChanceModal(college); // Navigate to modal
       break;
     case 'saveRegular':
       handleSaveToRegular({ college, action: 'add' });
@@ -1313,85 +1301,23 @@ router.beforeEach((to, from, next) => {
   transform: scale(1.1);
 }
 
-.floating-buttons .map-btn-pulse {
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%) !important;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
 /* Desktop floating map button */
 .floating-map-btn {
   position: fixed;
-  bottom: 30px;
-  left: 40px;
+  bottom: 60px;
+  right: 30px;
   z-index: 100;
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%) !important;
-  color: white !important;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  width: 80px !important;
-  height: 80px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.map-btn-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.floating-map-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
 }
 
-/* Pulsing animation for the map button */
-.map-btn-pulse {
-  animation: mapPulse 2s infinite;
-  position: relative;
-}
-
-.map-btn-pulse::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4caf50, #66bb6a);
-  opacity: 0;
-  animation: mapPulseRing 2s infinite;
-  z-index: -1;
-}
-
-@keyframes mapPulse {
-  0%, 100% { 
-    transform: scale(1);
-    box-shadow: 
-      0 8px 24px rgba(76, 175, 80, 0.3),
-      0 0 0 0 rgba(76, 175, 80, 0.4);
-  }
-  50% { 
-    transform: scale(1.05);
-    box-shadow: 
-      0 12px 32px rgba(76, 175, 80, 0.5),
-      0 0 0 8px rgba(76, 175, 80, 0.1);
-  }
-}
-
-@keyframes mapPulseRing {
-  0% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.1;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
+.floating-map-btn:active {
+  transform: translateY(-2px);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Map modal styling */
@@ -1434,11 +1360,6 @@ router.beforeEach((to, from, next) => {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:deep(.fade-transition-enter-from),
-:deep(.fade-transition-leave-to) {
-  opacity: 0;
-  transform: scale(0.9);
-}
 
 /* Map modal content */
 .map-modal-content {

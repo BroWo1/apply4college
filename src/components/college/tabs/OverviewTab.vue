@@ -106,18 +106,39 @@
           :isDialogMode="false"
         />
 
-        <!-- Similar Schools -->
+        <!-- External Links -->
         <v-card class="pa-4">
-          <h3 class="text-h6 font-weight-bold mb-4">Similar schools</h3>
+          <h3 class="text-h6 font-weight-bold mb-4">External Resources</h3>
           <v-list>
-            <v-list-item v-for="(school, index) in similarSchools" :key="index" :to="'/college/' + encodeURIComponent(school.name)">
+            <v-list-item 
+              :href="college.websiteUrl" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="mb-2"
+            >
               <template v-slot:prepend>
-                <v-avatar size="40" class="mr-3">
-                  <v-img :src="school.image" cover></v-img>
-                </v-avatar>
+                <v-icon class="mr-3" color="primary">mdi-web</v-icon>
               </template>
-              <v-list-item-title class="font-weight-medium">{{ school.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ school.location }}</v-list-item-subtitle>
+              <v-list-item-title class="font-weight-medium">Official Website</v-list-item-title>
+              <v-list-item-subtitle>Visit {{ college.name }}'s homepage</v-list-item-subtitle>
+              <template v-slot:append>
+                <v-icon>mdi-open-in-new</v-icon>
+              </template>
+            </v-list-item>
+            
+            <v-list-item 
+              :href="college.usNewsUrl" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <template v-slot:prepend>
+                <v-icon class="mr-3" color="blue">mdi-newspaper</v-icon>
+              </template>
+              <v-list-item-title class="font-weight-medium">US News Rankings</v-list-item-title>
+              <v-list-item-subtitle>View rankings and detailed info</v-list-item-subtitle>
+              <template v-slot:append>
+                <v-icon>mdi-open-in-new</v-icon>
+              </template>
             </v-list-item>
           </v-list>
         </v-card>
@@ -149,10 +170,6 @@ const props = defineProps({
     required: true,
   },
   recentlyViewed: {
-    type: Array,
-    required: true,
-  },
-  similarSchools: {
     type: Array,
     required: true,
   },

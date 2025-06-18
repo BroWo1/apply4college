@@ -5,6 +5,7 @@ import uchicagoImg from '@/assets/colleges/uchicago.png';
 import dukeImg from '@/assets/colleges/duke.png';
 import harvard from '@/assets/colleges/harvard.png';
 import stanford from '@/assets/colleges/stanford.png';
+import mit from '@/assets/colleges/mit.png';
 
 // Elite colleges (acceptance rate < 10%)
 // The statistics (GPA, SAT, AP, EC) have been adjusted to better reflect
@@ -20,6 +21,8 @@ export const eliteColleges = [
     rating: 4.16,
     reviewCount: 881,
     collegeType: 'Liberal-arts',
+    websiteUrl: 'https://www.harvard.edu',
+    usNewsUrl: 'https://www.usnews.com/best-colleges/harvard-university-2155',
     deadlines: {
       earlyDecision: "November 1",
       regularDecision: "January 1"
@@ -57,6 +60,17 @@ export const eliteColleges = [
         { name: 'Location', rating: 'A' },
         { name: 'Safety', rating: 'B' }
       ]
+    },
+    // Custom major factors for Harvard - Liberal Arts focused school
+    majorFactors: {
+      STEM: {
+        competitive: 1.1, // STEM is less competitive at Harvard (10% easier)
+        popular: 1.05     // But still somewhat popular
+      },
+      'Liberal Arts': {
+        competitive: 0.75, // Liberal Arts is very competitive (25% harder)
+        popular: 0.8       // And very popular
+      }
     }
   }),
 
@@ -106,6 +120,17 @@ export const eliteColleges = [
         { name: 'Location', rating: 'A+' },
         { name: 'Safety', rating: 'B+' }
       ]
+    },
+    // Custom major factors for Stanford - STEM-heavy school with strong Liberal Arts
+    majorFactors: {
+      STEM: {
+        competitive: 0.65, // STEM is extremely competitive at Stanford (35% harder)
+        popular: 0.7       // Very popular, especially CS and Engineering
+      },
+      'Liberal Arts': {
+        competitive: 1.15, // Liberal Arts is less competitive (15% easier)
+        popular: 1.1       // But still respected
+      }
     }
   }),
 
@@ -114,7 +139,7 @@ export const eliteColleges = [
     location: 'Cambridge, MA',
     acceptanceRate: 4.1,
     tuition: 57986,
-    imageUrl: 'https://placehold.co/600x400/2196F3/ffffff?text=MIT',
+    imageUrl: mit,
     rating: 4.18,
     reviewCount: 742,
     collegeType: 'STEM-heavy',

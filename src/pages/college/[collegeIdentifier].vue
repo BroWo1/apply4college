@@ -1,11 +1,13 @@
 <template>
   <v-container fluid style="max-width: 1200px; ;" class="py-8" >
+    <!--
     <div class="mb-4 d-flex justify-start">
       <v-btn text color="primary" @click="router.push({ path: '/explore' })">
         <v-icon left>mdi-chevron-left</v-icon>
         Back to Explore
       </v-btn>
     </div>
+    -->
     <div v-if="loading" class="text-center">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
       <p class="mt-3">Loading college data...</p>
@@ -19,16 +21,18 @@
       </div>
     </div>
     <div v-else>
-      <!-- College Banner and Header -->
-      <v-card flat class="mb-6">
-        <v-img :src="college.image" height="300px" cover class="rounded-t-lg"></v-img>
-      </v-card>
-
       <!-- College Title and Location -->
       <div class="mb-6">
         <h1 class="text-h3 font-weight-bold mb-2">{{ college.name }}</h1>
         <div class="text-subtitle-1 mb-2">{{ college.location }} • {{ college.collegeType }}</div>
       </div>
+
+      <!-- College Banner and Header -->
+      <v-card flat class="mb-6">
+        <v-img :src="college.image" height="300px" cover class="rounded-t-lg"></v-img>
+      </v-card>
+
+      
 
       <!-- Navigation Tabs -->
       <v-tabs v-model="activeTab" slider-color="primary" class="mb-6">
