@@ -2,8 +2,9 @@
   <v-app-bar
     :height="appBarHeight"
     color="surface"
-    elevation="2"
-    class="app-bar-relative"
+    elevation="0"
+    border
+    class="app-bar"
   >
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
       <v-img
@@ -17,11 +18,12 @@
 
     <v-spacer></v-spacer>
 
-    <div class="d-none d-sm-flex nav-center-absolute">
+    <div class="d-none d-sm-flex">
       <v-tabs
         v-model="activeTab"
         :color="primary"
         align-tabs="center"
+        grow
       >
         <v-tab
           v-for="item in menuItems"
@@ -29,8 +31,9 @@
           :value="item.value"
           :to="item.to"
           :class="textSizeClass"
+          class="nav-tab"
         >
-          <v-icon :icon="item.icon" class="mr-2"></v-icon>
+          <v-icon :icon="item.icon" start></v-icon>
           {{ $t('appMenu.' + item.title) }}
         </v-tab>
       </v-tabs>
@@ -48,10 +51,11 @@
     </v-btn>
 
     <div class="d-flex align-center">
-      <div v-if="!userStore.isAuthenticated" class="d-none d-sm-flex align-center"> <v-btn color="primary" variant="text" @click="openAuthModal('login')">
-        {{ $t('appMenu.login') }}
-      </v-btn>
-        <v-btn color="primary" variant="outlined" class="ml-2 mr-3" @click="openAuthModal('register')">
+      <div v-if="!userStore.isAuthenticated" class="d-none d-sm-flex align-center">
+        <v-btn color="primary" variant="text" @click="openAuthModal('login')" rounded="lg">
+          {{ $t('appMenu.login') }}
+        </v-btn>
+        <v-btn color="primary" variant="flat" class="ml-2 mr-3" @click="openAuthModal('register')" rounded="lg">
           {{ $t('appMenu.register') }}
         </v-btn>
       </div>
@@ -60,21 +64,24 @@
         v-else
         v-model="userMenu"
         :close-on-content-click="false"
-        location="bottom"
+        location="bottom end"
+        transition="slide-y-transition"
       >
         <template v-slot:activator="{ props }">
-          <div class="d-flex align-center mr-1" v-bind="props"> <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.isAuthenticated ? userStore.username : $t('appMenu.guest') }}</span>
-            <v-avatar size="40" :class="{'mr-2': breakpoint !== 'xs'}"> <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
-              <v-icon v-else icon="mdi-account" />
+          <div class="d-flex align-center mr-1 user-activator" v-bind="props">
+            <span :class="[textSizeClass, 'd-none d-md-flex']" class="mr-2">{{ userStore.isAuthenticated ? userStore.username : $t('appMenu.guest') }}</span>
+            <v-avatar size="40" :class="{'mr-2': breakpoint !== 'xs'}">
+              <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" cover />
+              <v-icon v-else icon="mdi-account-circle" />
             </v-avatar>
           </div>
         </template>
-        <v-card min-width="200">
-          <v-list>
-            <v-list-item prepend-icon="mdi-account" :title="$t('appMenu.profile')" :to="'/profile'"></v-list-item>
-            <v-list-item prepend-icon="mdi-cog" :title="$t('appMenu.settings')" :to="'/settings'"></v-list-item>
-            <v-divider></v-divider>
-            <v-list-item prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout"></v-list-item>
+        <v-card min-width="220" rounded="xl" elevation="4">
+          <v-list nav density="compact">
+            <v-list-item prepend-icon="mdi-account-circle-outline" :title="$t('appMenu.profile')" :to="'/profile'" rounded="lg"></v-list-item>
+            <v-list-item prepend-icon="mdi-cog-outline" :title="$t('appMenu.settings')" :to="'/settings'" rounded="lg"></v-list-item>
+            <v-divider class="my-2"></v-divider>
+            <v-list-item prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout" rounded="lg" base-color="error"></v-list-item>
           </v-list>
         </v-card>
       </v-menu>
@@ -91,14 +98,15 @@
     temporary
     location="left"
   >
-    <v-list>
+    <v-list nav>
       <v-list-item
         :title="userStore.isAuthenticated ? userStore.username : $t('appMenu.guest')"
+        class="mb-2"
       >
         <template v-slot:prepend>
           <v-avatar size="40">
-            <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" />
-            <v-icon v-else icon="mdi-account" />
+            <v-img v-if="userStore.profilePicture" :src="userStore.profilePicture" alt="User" cover />
+            <v-icon v-else icon="mdi-account-circle" />
           </v-avatar>
         </template>
       </v-list-item>
@@ -112,21 +120,25 @@
         :title="$t('appMenu.' + item.title)"
         :to="item.to"
         :value="item.value"
-        @click="mobileDrawer = false" ></v-list-item>
+        @click="mobileDrawer = false"
+        rounded="lg"
+      ></v-list-item>
 
       <v-list-item
         v-if="isDevelopment"
         prepend-icon="mdi-school"
         :title="$t('appMenu.showSchoolsDev')"
-        @click="showSchoolsDialog = true; mobileDrawer = false" ></v-list-item>
+        @click="showSchoolsDialog = true; mobileDrawer = false"
+        rounded="lg"
+      ></v-list-item>
 
       <v-divider></v-divider>
 
       <template v-if="!userStore.isAuthenticated">
-        <v-list-item prepend-icon="mdi-login" :title="$t('appMenu.login')" @click="openAuthModal('login'); mobileDrawer = false"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-plus" :title="$t('appMenu.register')" @click="openAuthModal('register'); mobileDrawer = false"></v-list-item>
+        <v-list-item prepend-icon="mdi-login" :title="$t('appMenu.login')" @click="openAuthModal('login'); mobileDrawer = false" rounded="lg"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-plus" :title="$t('appMenu.register')" @click="openAuthModal('register'); mobileDrawer = false" rounded="lg"></v-list-item>
       </template>
-      <v-list-item v-else prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout(); mobileDrawer = false"></v-list-item>
+      <v-list-item v-else prepend-icon="mdi-logout" :title="$t('appMenu.logout')" @click="logout(); mobileDrawer = false" rounded="lg" base-color="error"></v-list-item>
     </v-list>
   </v-navigation-drawer>
 
@@ -137,7 +149,7 @@
   />
 
   <v-dialog v-model="showSchoolsDialog" max-width="800px" v-if="isDevelopment">
-    <v-card>
+    <v-card rounded="xl">
       <v-card-title>
         <span class="headline">{{ $t('appMenu.schoolsComponentDev') }}</span>
         <v-spacer></v-spacer>
@@ -216,25 +228,25 @@ const textSizeClass = computed(() => {
 const menuItems = [
   {
     title: 'home',
-    icon: 'mdi-view-dashboard',
+    icon: 'mdi-view-dashboard-outline',
     value: 'home',
     to: '/home',
   },
   {
     title: 'explore',
-    icon: 'mdi-folder',
+    icon: 'mdi-compass-outline',
     value: 'explore',
     to: '/explore',
   },
   {
     title: 'profile',
-    icon: 'mdi-account-group',
+    icon: 'mdi-account-circle-outline',
     value: 'profile',
     to: '/profile',
   },
   {
     title: 'settings',
-    icon: 'mdi-cog',
+    icon: 'mdi-cog-outline',
     value: 'settings',
     to: '/settings',
   },
@@ -267,27 +279,24 @@ const logout = () => {
 </script>
 
 <style scoped>
-.v-app-bar {
-  transition: height 0.2s ease-in-out; /* Smooth height transition */
-}
-/* Add relative positioning to the app bar for absolute centering context */
-.app-bar-relative {
-  position: relative;
-}
-/* Absolutely center the navigation tabs */
-.nav-center-absolute {
-  position: absolute;
-  left: 50%;
-  top: 50%; /* Vertically center */
-  transform: translate(-50%, -50%); /* Correct transform for centering */
-  /* height: 100%; Removed, as v-tabs will define its own height */
-  align-items: center;
-  display: flex;
-  z-index: 1; /* Ensure tabs are above other elements if needed, but below app-bar content */
+.app-bar {
+  /* This makes the border on the app-bar more subtle */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Ensure avatar has a pointer cursor when it's a menu activator */
-.v-avatar[role="button"] {
+.nav-tab {
+  text-transform: none; /* Prevents uppercase text in tabs */
+  letter-spacing: normal;
+}
+
+.user-activator {
   cursor: pointer;
+  padding: 4px;
+  border-radius: 24px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.user-activator:hover {
+  background-color: rgba(0,0,0,0.05);
 }
 </style>
