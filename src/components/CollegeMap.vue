@@ -149,38 +149,88 @@ const defaultStudentProfile = ref({
   enableBitterByCoffee: false
 });
 
-// Use actual user profile if available, otherwise use default
-const currentStudentProfile = computed(() => {
-  // Try to get the actual user profile from localStorage
-  try {
-    const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
-    const storedProfile = localStorage.getItem(profileKey);
-    
-    if (storedProfile) {
-      const parsedProfile = JSON.parse(storedProfile);
-      
-      // Return a properly structured profile, merging with defaults for missing fields
-      return {
-        gpa: parsedProfile.gpa || defaultStudentProfile.value.gpa,
-        satReading: parsedProfile.satReading || defaultStudentProfile.value.satReading,
-        satMath: parsedProfile.satMath || defaultStudentProfile.value.satMath,
-        apClasses: parsedProfile.apClasses || defaultStudentProfile.value.apClasses,
-        extracurriculars: parsedProfile.extracurriculars || defaultStudentProfile.value.extracurriculars,
-        intendedMajor: parsedProfile.intendedMajor || defaultStudentProfile.value.intendedMajor,
-        recScore: parsedProfile.recScore || defaultStudentProfile.value.recScore,
-        isLegacy: parsedProfile.isLegacy || defaultStudentProfile.value.isLegacy,
-        demoScore: parsedProfile.demoScore || defaultStudentProfile.value.demoScore,
-        nationality: parsedProfile.nationality || defaultStudentProfile.value.nationality,
-        gender: parsedProfile.gender || defaultStudentProfile.value.gender,
-        enableBitterByCoffee: parsedProfile.enableBitterByCoffee || defaultStudentProfile.value.enableBitterByCoffee
-      };
-    }
-  } catch (error) {
-    console.warn('Error loading user profile for map, using default:', error);
-  }
+// Reactive profile data that will be updated with loaded data
+const loadedProfile = ref({
+  gpa: defaultStudentProfile.value.gpa,
+  satReading: defaultStudentProfile.value.satReading,
+  satMath: defaultStudentProfile.value.satMath,
+  apClasses: defaultStudentProfile.value.apClasses,
+  extracurriculars: defaultStudentProfile.value.extracurriculars,
+  intendedMajor: defaultStudentProfile.value.intendedMajor,
+  recScore: defaultStudentProfile.value.recScore,
+  isLegacy: defaultStudentProfile.value.isLegacy,
+  demoScore: defaultStudentProfile.value.demoScore,
+  nationality: defaultStudentProfile.value.nationality,
+  gender: defaultStudentProfile.value.gender,
+  enableBitterByCoffee: defaultStudentProfile.value.enableBitterByCoffee
+});
+
+// Load profile data using the same logic as explore page
+const loadProfileData = () => {
+  // Step 1: Determine which key to use based on authentication status
+  const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
   
-  // Fall back to default profile
-  return defaultStudentProfile.value;
+  // Step 2: Load main profile data
+  const savedData = localStorage.getItem(profileKey);
+  if (savedData) {
+    try {
+      const profileData = JSON.parse(savedData);
+      
+      // Apply main profile data
+      loadedProfile.value.gpa = profileData.gpa || defaultStudentProfile.value.gpa;
+      loadedProfile.value.satReading = profileData.satReading || defaultStudentProfile.value.satReading;
+      loadedProfile.value.satMath = profileData.satMath || defaultStudentProfile.value.satMath;
+      loadedProfile.value.apClasses = (profileData.apClasses && Array.isArray(profileData.apClasses)) ? profileData.apClasses : defaultStudentProfile.value.apClasses;
+      loadedProfile.value.extracurriculars = (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) ? profileData.extracurriculars : defaultStudentProfile.value.extracurriculars;
+      loadedProfile.value.intendedMajor = profileData.intendedMajor || defaultStudentProfile.value.intendedMajor;
+      loadedProfile.value.recScore = profileData.recScore || defaultStudentProfile.value.recScore;
+      loadedProfile.value.isLegacy = profileData.isLegacy || defaultStudentProfile.value.isLegacy;
+      loadedProfile.value.demoScore = profileData.demoScore || defaultStudentProfile.value.demoScore;
+      loadedProfile.value.nationality = profileData.nationality || defaultStudentProfile.value.nationality;
+      loadedProfile.value.gender = profileData.gender || defaultStudentProfile.value.gender;
+      loadedProfile.value.enableBitterByCoffee = profileData.enableBitterByCoffee || defaultStudentProfile.value.enableBitterByCoffee;
+      
+      console.log(`Map: Profile data loaded from ${profileKey}`);
+    } catch (e) {
+      console.error('Map: Error parsing saved profile data:', e);
+    }
+  }
+
+  // Step 3: Load and apply persistent data overrides
+  const persistentData = localStorage.getItem('persistentProfileData');
+  if (persistentData) {
+    try {
+      const persistentProfileData = JSON.parse(persistentData);
+      console.log('Map: Applying persistent local data:', persistentProfileData);
+      
+      // Override specific fields with persistent data
+      if (persistentProfileData.hasOwnProperty('apClasses') && Array.isArray(persistentProfileData.apClasses)) {
+        loadedProfile.value.apClasses = persistentProfileData.apClasses;
+      }
+      if (persistentProfileData.hasOwnProperty('extracurriculars') && Array.isArray(persistentProfileData.extracurriculars)) {
+        loadedProfile.value.extracurriculars = persistentProfileData.extracurriculars;
+      }
+      if (persistentProfileData.hasOwnProperty('intendedMajor')) {
+        loadedProfile.value.intendedMajor = persistentProfileData.intendedMajor;
+      }
+      if (persistentProfileData.hasOwnProperty('nationality')) {
+        loadedProfile.value.nationality = persistentProfileData.nationality;
+      }
+      if (persistentProfileData.hasOwnProperty('gender')) {
+        loadedProfile.value.gender = persistentProfileData.gender;
+      }
+      if (persistentProfileData.hasOwnProperty('enableBitterByCoffee')) {
+        loadedProfile.value.enableBitterByCoffee = persistentProfileData.enableBitterByCoffee;
+      }
+    } catch (e) {
+      console.error('Map: Error parsing persistent profile data:', e);
+    }
+  }
+};
+
+// Use loaded profile data
+const currentStudentProfile = computed(() => {
+  return loadedProfile.value;
 });
 
 // Filter options
@@ -388,10 +438,30 @@ watch(currentStudentProfile, () => {
   updateMarkers();
 }, { deep: true });
 
+// Watch for authentication changes to reload profile data
+watch(() => userStore.isAuthenticated, () => {
+  loadProfileData();
+}, { immediate: false });
+
+// Handle storage events to detect profile updates from other tabs/components
+const handleStorageChange = (event) => {
+  if (event.key === 'userProfileData' || event.key === 'guestProfileData' || event.key === 'persistentProfileData') {
+    console.log('Map: Profile data changed in storage, reloading...');
+    loadProfileData();
+  }
+};
+
 // Lifecycle
 onMounted(() => {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
+  
+  // Load profile data on mount
+  loadProfileData();
+  
+  // Listen for storage changes
+  window.addEventListener('storage', handleStorageChange);
+  
   setTimeout(() => {
     initializeMap();
   }, 100);
@@ -400,6 +470,10 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
+  
+  // Remove storage listener
+  window.removeEventListener('storage', handleStorageChange);
+  
   if (map.value) {
     map.value.remove();
   }

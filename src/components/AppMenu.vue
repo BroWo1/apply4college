@@ -4,7 +4,7 @@
     color="surface"
     elevation="0"
     border
-    class="app-bar"
+    class="app-bar glass-effect"
   >
     <router-link to="/" class="d-flex align-center px-1" style="text-decoration: none; color: inherit;">
       <v-img
@@ -282,6 +282,24 @@ const logout = () => {
 .app-bar {
   /* This makes the border on the app-bar more subtle */
   border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.glass-effect {
+  /* Semi-transparent background */
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  /* Backdrop blur for glass effect */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* Add subtle border for definition */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Box shadow for depth */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme support */
+.v-theme--dark .glass-effect {
+  background-color: rgba(33, 33, 33, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-tab {

@@ -8,6 +8,9 @@
             <v-icon class="floating-icon icon-1">mdi-school</v-icon>
             <v-icon class="floating-icon icon-2">mdi-star</v-icon>
             <v-icon class="floating-icon icon-3">mdi-lightbulb</v-icon>
+            <v-icon class="floating-icon icon-4">mdi-book-open-variant</v-icon>
+            <v-icon class="floating-icon icon-5">mdi-account-group</v-icon>
+            <v-icon class="floating-icon icon-6">mdi-map-marker</v-icon>
           </div>
         </div>
         <v-container>
@@ -359,21 +362,50 @@ const teamMembers = [
 }
 
 .icon-1 {
-  top: 20%;
-  left: 10%;
-  animation-delay: 0s;
+  top: 10%;
+  left: 15%;
+  font-size: 2.5rem;
+  animation-duration: 7s;
 }
 
 .icon-2 {
   top: 60%;
   right: 15%;
-  animation-delay: 2s;
+  font-size: 3.5rem;
+  animation-duration: 8s;
+  animation-delay: 1s;
 }
 
 .icon-3 {
-  bottom: 30%;
-  left: 20%;
+  bottom: 20%;
+  left: 5%;
+  font-size: 2rem;
+  animation-duration: 6s;
+  animation-delay: 2s;
+}
+
+.icon-4 {
+  top: 15%;
+  right: 5%;
+  font-size: 3rem;
+  animation-duration: 9s;
+  animation-delay: 3s;
+}
+
+.icon-5 {
+  bottom: 10%;
+  right: 25%;
+  font-size: 2.8rem;
+  animation-duration: 7.5s;
   animation-delay: 4s;
+}
+
+.icon-6 {
+  top: 50%;
+  left: 25%;
+  font-size: 2.2rem;
+  animation-duration: 8.5s;
+  animation-delay: 5s;
 }
 
 @keyframes float {

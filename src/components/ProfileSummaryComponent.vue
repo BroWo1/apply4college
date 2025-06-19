@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-4" rounded="lg">
+  <v-card class="pa-4" rounded="xl">
     <v-card-title class="d-flex align-center">
       <span class="text-h6">Personal Profile</span>
       <v-spacer></v-spacer>

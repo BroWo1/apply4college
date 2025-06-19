@@ -42,15 +42,6 @@
         </v-chip>
       </div>
       
-      <div class="college-rating">
-        <v-rating
-          :model-value="college.rating"
-          color="amber"
-          density="compact"
-          size="small"
-          readonly
-        />
-      </div>
     </div>
   </article>
 </template>

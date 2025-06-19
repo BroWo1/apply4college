@@ -59,7 +59,17 @@
       ></v-btn>
     </div>
 
-    <!-- Desktop floating map button -->
+    <!-- Desktop panel toggle buttons -->
+    <v-btn
+      :color="rightPanelDesktopOpen ? 'secondary' : 'surface-variant'"
+      :icon="rightPanelDesktopOpen ? 'mdi-chevron-right' : 'mdi-bookmark'"
+      fab
+      size="small"
+      class="right-toggle d-none d-md-flex"
+      @click="rightPanelDesktopOpen = !rightPanelDesktopOpen"
+      :title="rightPanelDesktopOpen ? 'Hide Saved Colleges' : 'Show Saved Colleges'"
+    ></v-btn>
+
     <v-btn
       color="success"
       fab
@@ -71,7 +81,6 @@
       <v-icon>mdi-map</v-icon>
     </v-btn>
 
-    <!-- Map Modal Dialog -->
     <v-dialog
       v-model="mapModalOpen"
       max-width="95vw"
@@ -150,7 +159,7 @@
             @click="rightPanelOpen = false"
           ></v-btn>
           <div class="pa-3">
-            <v-card class="pa-4" rounded="lg">
+            <v-card class="pa-4" rounded="xl">
               <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
               <v-divider class="my-2"></v-divider>
 
@@ -305,42 +314,68 @@
           </v-card>
         </v-dialog>
 
-        <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
-          <ProfileSummaryComponent
-            :satReading="satReading"
-            :satMath="satMath"
-            :gpa="gpa"
-            :intendedMajor="intendedMajor"
-            :apClasses="apClasses"
-            :extracurriculars="extracurriculars"
-          />
-        </v-col>
+        <!-- Desktop Left Panel -->
+        <transition name="slide-left">
+          <v-col 
+            v-if="leftPanelDesktopOpen" 
+            cols="12" 
+            md="3" 
+            class="pa-3 hidden-sm-and-down sticky-panel desktop-panel"
+          >
+            <ProfileSummaryComponent
+              :satReading="satReading"
+              :satMath="satMath"
+              :gpa="gpa"
+              :intendedMajor="intendedMajor"
+              :apClasses="apClasses"
+              :extracurriculars="extracurriculars"
+            />
+          </v-col>
+        </transition>
 
-        <v-col cols="12" md="6" class="pa-3">
+        <v-col cols="12" :md="getMainColumnSize" class="pa-3 main-column">
 
           <v-card class="mb-4" variant="flat" color="transparent" rounded="lg">
-            <v-card-title class="d-flex align-center flex-wrap">
-              <span class="text-h6 me-auto">{{ $t('explorePage.collegesCount') }} ({{ displayedColleges.length }})</span>
-              <v-select
-                v-model="filterBy"
-                :items="filterOptions"
-                :label="$t('explorePage.filter')"
-                hide-details
-                density="compact"
-                style="max-width: 150px"
-                class="mx-2 my-1"
-                variant="outlined"
-              ></v-select>
-              <v-select
-                v-model="sortBy"
-                :items="sortOptions"
-                :label="$t('explorePage.sort')"
-                hide-details
-                density="compact"
-                style="max-width: 150px"
-                class="my-1"
-                variant="outlined"
-              ></v-select>
+            <v-card-title>
+              <v-row align="center">
+                <v-col cols="12" sm="auto" class="me-sm-auto">
+                  <span class="text-h6">{{ $t('explorePage.collegesCount') }} ({{ displayedColleges.length }})</span>
+                </v-col>
+                <v-col cols="6" sm="4" md="3" lg="2">
+                  <v-select
+                    v-model="filterBy"
+                    :items="filterOptions"
+                    :label="$t('explorePage.filter')"
+                    hide-details
+                    density="compact"
+                    class="my-1"
+                    variant="outlined"
+                    rounded="lg"
+                    :menu-props="{ transition: 'slide-y-transition' }"
+                  >
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                    </template>
+                  </v-select>
+                </v-col>
+                <v-col cols="6" sm="4" md="3" lg="2">
+                  <v-select
+                    v-model="sortBy"
+                    :items="sortOptions"
+                    :label="$t('explorePage.sort')"
+                    hide-details
+                    density="compact"
+                    class="my-1"
+                    variant="outlined"
+                    rounded="lg"
+                    :menu-props="{ transition: 'slide-y-transition' }"
+                  >
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                    </template>
+                  </v-select>
+                </v-col>
+              </v-row>
             </v-card-title>
           </v-card>
 
@@ -362,10 +397,9 @@
             class="mb-4 college-card"
             rounded="lg"
             elevation="2"
-            @click="navigateToCollegeProfilePage(college)"
           >
             <v-row class="ma-0">
-              <v-col sm="4" class="pa-0 d-none d-sm-block">
+              <v-col sm="4" class="pa-0 d-none d-sm-block" @click="navigateToCollegeProfilePage(college)" style="cursor: pointer;">
                 <v-img
                   :src="college.image"
                   height="100%"
@@ -374,7 +408,7 @@
                 ></v-img>
               </v-col>
               <v-col cols="12" sm="8" class="pa-4">
-                <div class="d-flex justify-space-between align-start">
+                <div class="d-flex justify-space-between align-start" @click="navigateToCollegeProfilePage(college)" style="cursor: pointer;">
                   <div>
                     <h3 class="text-h6 font-weight-bold mb-1">{{ college.name }}</h3>
                     <div class="text-body-2 text-medium-emphasis mb-2">
@@ -398,7 +432,7 @@
                   </div>
                 </div>
 
-                <div class="d-flex flex-wrap my-3">
+                <div class="d-flex flex-wrap my-3" @click="navigateToCollegeProfilePage(college)" style="cursor: pointer;">
                   <v-chip
                     color="purple-lighten-1"
                     size="small"
@@ -422,7 +456,7 @@
                 <v-divider class="my-2"></v-divider>
 
                 <div class="d-flex align-center justify-space-between mt-2">
-                  <div class="d-flex align-center">
+                  <div class="d-flex align-center" @click="navigateToCollegeProfilePage(college)" style="cursor: pointer;">
                     <v-chip
                       :color="getAdmissionChanceColor(getAdmissionChance(college))"
                       size="small"
@@ -433,31 +467,36 @@
                     </v-chip>
                     <span class="text-body-2">{{ getAdmissionChanceDescription(getAdmissionChance(college)) }}</span>
                   </div>
-                  <v-menu>
+                  
+                  <v-menu
+                    location="bottom end"
+                    transition="slide-y-transition"
+                  >
                     <template v-slot:activator="{ props }">
                       <v-btn
                         v-bind="props"
+                        icon="mdi-dots-vertical"
                         variant="text"
-                        color="primary"
                         density="comfortable"
                       >
-                        {{ $t('explorePage.options') }}
-                        <v-icon end>mdi-chevron-down</v-icon>
                       </v-btn>
                     </template>
-                    <v-list>
-                      <v-list-item
-                        v-for="(item, index) in collegeActionItems"
-                        :key="index"
-                        :value="index"
-                        @click.stop="handleCollegeAction(item.action, college)"
-                      >
-                        <template v-slot:prepend>
-                          <v-icon :icon="item.icon" size="small" class="me-3"></v-icon>
-                        </template>
-                        <v-list-item-title>{{ item.title }}</v-list-item-title>
-                      </v-list-item>
-                    </v-list>
+                    <v-card min-width="250" rounded="xl" elevation="4">
+                      <v-list nav density="compact">
+                        <v-list-item
+                          v-for="(item, index) in collegeActionItems"
+                          :key="index"
+                          :value="index"
+                          @click="handleCollegeAction(item.action, college)"
+                          rounded="lg"
+                        >
+                          <template v-slot:prepend>
+                            <v-icon :icon="item.icon" size="small" class="me-3"></v-icon>
+                          </template>
+                          <v-list-item-title>{{ item.title }}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-card>
                   </v-menu>
                 </div>
               </v-col>
@@ -494,88 +533,96 @@
           </div>
         </v-col>
 
-        <v-col cols="12" md="3" class="pa-3 hidden-sm-and-down sticky-panel">
-          <v-card class="pa-4" rounded="lg">
-            <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
-            <v-divider class="my-2"></v-divider>
+        <!-- Desktop Right Panel -->
+        <transition name="slide-right">
+          <v-col 
+            v-if="rightPanelDesktopOpen" 
+            cols="12" 
+            md="3" 
+            class="pa-3 hidden-sm-and-down sticky-panel desktop-panel"
+          >
+            <v-card class="pa-4" rounded="xl">
+              <v-card-title class="text-h6">{{ $t('explorePage.earlyDecision') }}</v-card-title>
+              <v-divider class="my-2"></v-divider>
 
-            <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
-              <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-              <div>{{ $t('explorePage.noSavedColleges') }}</div>
-              <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
-            </div>
+              <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+                <div>{{ $t('explorePage.noSavedColleges') }}</div>
+                <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
+              </div>
 
-            <v-list v-else lines="two" density="compact" class="bg-transparent">
-              <v-list-item
-                v-for="(college, i) in savedColleges"
-                :key="`saved-${i}`"
-                :title="college.name"
-                :subtitle="college.location"
-                @click="navigateToCollegeProfilePage(college)"
-              >
-                <template v-slot:prepend>
-                  <v-avatar size="40">
-                    <v-img :src="college.image" cover></v-img>
-                  </v-avatar>
-                </template>
-                <template v-slot:append>
-                  <v-btn icon="mdi-delete" size="small" variant="text"
-                         @click.stop="removeSavedCollege(i)"
-                  ></v-btn>
-                </template>
-                <div class="d-flex flex-wrap mt-2">
-                  <v-chip
-                    color="purple-lighten-1"
-                    size="x-small"
-                    prepend-icon="mdi-calendar-clock"
-                    class="my-1"
-                  >
-                    Deadline: {{ college.deadlines?.earlyDecision || "Nov 1" }}
-                  </v-chip>
-                </div>
-              </v-list-item>
-            </v-list>
+              <v-list v-else lines="two" density="compact" class="bg-transparent">
+                <v-list-item
+                  v-for="(college, i) in savedColleges"
+                  :key="`saved-${i}`"
+                  :title="college.name"
+                  :subtitle="college.location"
+                  @click="navigateToCollegeProfilePage(college)"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar size="40">
+                      <v-img :src="college.image" cover></v-img>
+                    </v-avatar>
+                  </template>
+                  <template v-slot:append>
+                    <v-btn icon="mdi-delete" size="small" variant="text"
+                           @click.stop="removeSavedCollege(i)"
+                    ></v-btn>
+                  </template>
+                  <div class="d-flex flex-wrap mt-2">
+                    <v-chip
+                      color="purple-lighten-1"
+                      size="x-small"
+                      prepend-icon="mdi-calendar-clock"
+                      class="my-1"
+                    >
+                      Deadline: {{ college.deadlines?.earlyDecision || "Nov 1" }}
+                    </v-chip>
+                  </div>
+                </v-list-item>
+              </v-list>
 
-            <v-divider class="my-4"></v-divider>
+              <v-divider class="my-4"></v-divider>
 
-            <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
-            <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
-              <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
-              <div>{{ $t('explorePage.noSavedColleges') }}</div>
-              <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
-            </div>
-            <v-list v-else lines="two" density="compact" class="bg-transparent">
-              <v-list-item
-                v-for="(college, i) in recentlyViewed"
-                :key="`recent-${i}`"
-                :title="college.name"
-                :subtitle="college.location"
-                @click="navigateToCollegeProfilePage(college)"
-              >
-                <template v-slot:prepend>
-                  <v-avatar size="40">
-                    <v-img :src="college.image" cover></v-img>
-                  </v-avatar>
-                </template>
-                <template v-slot:append>
-                  <v-btn icon="mdi-delete" size="small" variant="text"
-                         @click.stop="removeRecentlyViewedCollege(i)"
-                  ></v-btn>
-                </template>
-                <div class="d-flex flex-wrap mt-2">
-                  <v-chip
-                    color="indigo-lighten-1"
-                    size="x-small"
-                    prepend-icon="mdi-calendar"
-                    class="my-1"
-                  >
-                    Deadline: {{ college.deadlines?.regularDecision || "Jan 1" }}
-                  </v-chip>
-                </div>
-              </v-list-item>
-            </v-list>
-          </v-card>
-        </v-col>
+              <v-card-title class="text-h6">{{ $t('explorePage.regularDecision') }}</v-card-title>
+              <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+                <div>{{ $t('explorePage.noSavedColleges') }}</div>
+                <div class="text-caption">{{ $t('explorePage.savedCollegesDesc') }}</div>
+              </div>
+              <v-list v-else lines="two" density="compact" class="bg-transparent">
+                <v-list-item
+                  v-for="(college, i) in recentlyViewed"
+                  :key="`recent-${i}`"
+                  :title="college.name"
+                  :subtitle="college.location"
+                  @click="navigateToCollegeProfilePage(college)"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar size="40">
+                      <v-img :src="college.image" cover></v-img>
+                    </v-avatar>
+                  </template>
+                  <template v-slot:append>
+                    <v-btn icon="mdi-delete" size="small" variant="text"
+                           @click.stop="removeRecentlyViewedCollege(i)"
+                    ></v-btn>
+                  </template>
+                  <div class="d-flex flex-wrap mt-2">
+                    <v-chip
+                      color="indigo-lighten-1"
+                      size="x-small"
+                      prepend-icon="mdi-calendar"
+                      class="my-1"
+                    >
+                      Deadline: {{ college.deadlines?.regularDecision || "Jan 1" }}
+                    </v-chip>
+                  </div>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
+        </transition>
       </v-row>
     </main>
   </div>
@@ -598,29 +645,27 @@ import {
 } from '../utils/admitChanceCalculator';
 import CollegeComparison from './CollegeComparison.vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user'; // Added import
+import { useUserStore } from '@/stores/user';
 
 const { t } = useI18n();
-const userStore = useUserStore(); // Initialize user store
+const userStore = useUserStore();
 
-// Computed property to check for development environment
 const isDevEnvironment = computed(() => import.meta.env.DEV);
 
-// State for responsive side panels
 const leftPanelOpen = ref(false);
 const rightPanelOpen = ref(false);
+const leftPanelDesktopOpen = ref(true);
+const rightPanelDesktopOpen = ref(true);
 
 const router = useRouter();
 
-// Close panels when screen size changes to desktop
 const handleResize = () => {
-  if (window.innerWidth >= 960) { // md breakpoint in Vuetify
+  if (window.innerWidth >= 960) {
     leftPanelOpen.value = false;
     rightPanelOpen.value = false;
   }
 };
 
-// Filtering and pagination
 const searchQuery = ref('');
 const filterBy = ref('All');
 const sortBy = ref('acceptanceRate');
@@ -629,14 +674,11 @@ const itemsPerPage = 8;
 const selectedCollege = ref(null);
 const admitChanceModalOpen = ref(false);
 
-// Promotion modal state and tracking
 const promotionModalOpen = ref(false);
 const collegeClickCount = ref(0);
 
-// Map modal state
 const mapModalOpen = ref(false);
 
-// Filter options
 const filterOptions = [
   'All',
   'Elite (< 10%)',
@@ -646,7 +688,6 @@ const filterOptions = [
   'Liberal Arts'
 ];
 
-// Sort options
 const sortOptions = [
   { title: 'Acceptance Rate', value: 'acceptanceRate' },
   { title: 'College Name', value: 'name' },
@@ -654,11 +695,9 @@ const sortOptions = [
   { title: 'Tuition', value: 'tuition' }
 ];
 
-// Saved and recently viewed colleges
 const savedColleges = ref([]);
 const recentlyViewed = ref([]);
 
-// Student profile data
 const satReading = ref(500);
 const satMath = ref(500);
 const gpa = ref(3.0);
@@ -668,41 +707,34 @@ const intendedMajor = ref("");
 const recScore = ref(2);
 const isLegacy = ref(false);
 const demoScore = ref(0);
-const nationality = ref('United States'); // Added
-const gender = ref('Prefer not to say'); // Added
-const enableBitterByCoffee = ref(false); // Added
+const nationality = ref('United States');
+const gender = ref('Prefer not to say');
+const enableBitterByCoffee = ref(false);
 
-// Helper function to apply profile data
 const applyProfileData = (profileData) => {
-  // Load standardized scores
   satReading.value = profileData.satReading || 500;
   satMath.value = profileData.satMath || 500;
   gpa.value = profileData.gpa || 3.0;
 
-  // Load AP classes
   if (profileData.apClasses && Array.isArray(profileData.apClasses)) {
     apClasses.value = profileData.apClasses;
   }
 
-  // Load extracurriculars
   if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
     extracurriculars.value = profileData.extracurriculars;
   }
 
-  // Load additional factors
   intendedMajor.value = profileData.intendedMajor || "";
   recScore.value = profileData.recScore || 2;
   isLegacy.value = profileData.isLegacy || false;
   demoScore.value = profileData.demoScore || 0;
   
-  // Load nationality, gender, and enableBitterByCoffee if present
   if (profileData.nationality) nationality.value = profileData.nationality;
   if (profileData.gender) gender.value = profileData.gender;
   if (profileData.hasOwnProperty('enableBitterByCoffee')) {
     enableBitterByCoffee.value = profileData.enableBitterByCoffee;
   }
 
-  // Load college lists
   if (profileData.earlyDecisionColleges && Array.isArray(profileData.earlyDecisionColleges)) {
     savedColleges.value = profileData.earlyDecisionColleges.map(savedCollege => {
       const fullCollege = colleges.find(c => c.name === savedCollege.name);
@@ -718,31 +750,24 @@ const applyProfileData = (profileData) => {
   }
 };
 
-// Load profile data function
 const loadProfileData = () => {
-  // Step 1: Determine which key to use based on authentication status
   const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
   
-  // Step 2: Load main profile data
   const savedData = localStorage.getItem(profileKey);
   if (savedData) {
     try {
       const profileData = JSON.parse(savedData);
       applyProfileData(profileData);
-      console.log(`Profile data loaded from ${profileKey}`);
     } catch (e) {
       console.error('Error parsing saved profile data:', e);
     }
   }
 
-  // Step 3: Load and apply persistent data overrides
   const persistentData = localStorage.getItem('persistentProfileData');
   if (persistentData) {
     try {
       const persistentProfileData = JSON.parse(persistentData);
-      console.log('Applying persistent local data:', persistentProfileData);
       
-      // Override specific fields with persistent data
       if (persistentProfileData.hasOwnProperty('apClasses') && Array.isArray(persistentProfileData.apClasses)) {
         apClasses.value = persistentProfileData.apClasses;
       }
@@ -767,33 +792,20 @@ const loadProfileData = () => {
   }
 };
 
-// Add window resize event listener and load profile data on mount
 onMounted(() => {
-  console.log('🚀 explorePage mounted');
   window.addEventListener('resize', handleResize);
-  
-  // Load profile data with same logic as profile page
   loadProfileData();
-  
-  // Load click count for promotion modal
   loadClickCount();
   
-  console.log('🎯 Initial state - isAuthenticated:', userStore.isAuthenticated);
-  console.log('🎯 Initial click count:', collegeClickCount.value);
   if (!userStore.isAuthenticated && collegeClickCount.value >= 3){
-    console.log('👤 User not authenticated, showing promotion modal');
     promotionModalOpen.value = true;
-  } else {
-    console.log('✅ User authenticated or click count not reached, skipping promotion modal');
   }
 });
 
-// Remove event listener on component unmount
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
 
-// Function to reset promotion tracking for development
 const resetPromotionTracking = () => {
   if (import.meta.env.DEV) {
     localStorage.removeItem('collegeClickCount');
@@ -803,11 +815,9 @@ const resetPromotionTracking = () => {
   }
 };
 
-// Computed for filtered colleges based on filter option
 const filteredColleges = computed(() => {
   let filtered = [];
 
-  // Apply filter
   switch(filterBy.value) {
     case 'Elite (< 10%)':
       filtered = getCollegesByAcceptanceRate(0, 10);
@@ -825,10 +835,9 @@ const filteredColleges = computed(() => {
       filtered = getCollegesByType('Liberal-arts');
       break;
     default:
-      filtered = [...colleges]; // Use a copy to avoid modifying the original array
+      filtered = [...colleges];
   }
 
-  // Apply search query
   if (searchQuery.value) {
     const lowerSearchQuery = searchQuery.value.toLowerCase();
     filtered = filtered.filter(college =>
@@ -837,23 +846,19 @@ const filteredColleges = computed(() => {
     );
   }
 
-  // Apply sorting
   return sortCollegesBy(filtered, sortBy.value);
 });
 
-// Computed for paginated colleges
 const displayedColleges = computed(() => {
   const start = (page.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   return filteredColleges.value.slice(start, end);
 });
 
-// Reset to page 1 when filter changes
 watch([filterBy, sortBy, searchQuery], () => {
   page.value = 1;
 });
 
-// Helper function to determine chip color based on acceptance rate
 const getAcceptanceRateColor = (rate) => {
   if (rate < 10) return 'error';
   if (rate < 20) return 'warning';
@@ -861,14 +866,12 @@ const getAcceptanceRateColor = (rate) => {
   return 'success';
 };
 
-// Reset filters
 const resetFilters = () => {
   filterBy.value = 'All';
   sortBy.value = 'acceptanceRate';
   searchQuery.value = '';
 };
 
-// Computed student profile for admission calculations - Updated to include all fields
 const studentProfile = computed(() => {
   return {
     satReading: satReading.value,
@@ -886,7 +889,16 @@ const studentProfile = computed(() => {
   };
 });
 
-// Persist Early Decision (savedColleges) changes - use correct key
+// Computed property to dynamically set main column size based on panel visibility
+const getMainColumnSize = computed(() => {
+  const leftOpen = leftPanelDesktopOpen.value;
+  const rightOpen = rightPanelDesktopOpen.value;
+  
+  if (leftOpen && rightOpen) return 6;
+  if (leftOpen || rightOpen) return 9;
+  return 12;
+});
+
 watch(savedColleges, (newVal) => {
   try {
     const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
@@ -903,7 +915,6 @@ watch(savedColleges, (newVal) => {
   }
 }, { deep: true });
 
-// Persist Regular Decision (recentlyViewed) changes - use correct key
 watch(recentlyViewed, (newVal) => {
   try {
     const profileKey = userStore.isAuthenticated ? 'userProfileData' : 'guestProfileData';
@@ -920,56 +931,37 @@ watch(recentlyViewed, (newVal) => {
   }
 }, { deep: true });
 
-// College action items for dropdown
 const collegeActionItems = [
   { title: 'View Details', action: 'view', icon: 'mdi-eye-outline' },
   { title: 'Save to Regular Decision', action: 'saveRegular', icon: 'mdi-bookmark-outline' },
   { title: 'Save to Early Decision', action: 'saveEarly', icon: 'mdi-bookmark' },
 ];
 
-// Handle college selection to open admission chance modal
 const openAdmitChanceModal = (college) => {
   selectedCollege.value = college;
   admitChanceModalOpen.value = true;
-
-  // Close mobile panels when selecting a college
   leftPanelOpen.value = false;
   rightPanelOpen.value = false;
 };
 
-// Navigate to the dedicated college profile page
 const navigateToCollegeProfilePage = (college) => {
-  console.log('🎯 College card clicked:', college.name);
-  console.log('🔐 User authenticated:', userStore.isAuthenticated);
-  
-  // Track college card clicks for promotion modal
   if (!userStore.isAuthenticated) {
-    console.log('👤 User not authenticated, tracking click...');
     trackCollegeClick();
-  } else {
-    console.log('✅ User authenticated, skipping click tracking');
   }
-
-  // Encode the college name to ensure it's URL-safe
   router.push({ path: `/college/${encodeURIComponent(college.name)}` });
   leftPanelOpen.value = false;
   rightPanelOpen.value = false;
 };
 
-// Close the admission chance modal
 const closeAdmitChanceModal = () => {
   admitChanceModalOpen.value = false;
-  selectedCollege.value = null; // Clear selected college
+  selectedCollege.value = null;
 };
 
-// Handle college action selections
 const handleCollegeAction = (action, college) => {
-  console.log(`Action: ${action} for college: ${college.name}`);
-
-  // Implement action handling
   switch(action) {
     case 'view':
-      openAdmitChanceModal(college); // Navigate to modal
+      navigateToCollegeProfilePage(college);
       break;
     case 'saveRegular':
       handleSaveToRegular({ college, action: 'add' });
@@ -977,45 +969,38 @@ const handleCollegeAction = (action, college) => {
     case 'saveEarly':
       handleSaveToEarly({ college, action: 'add' });
       break;
-    // Additional cases can be implemented as needed
   }
 };
 
-// Handle save to early decision
 const handleSaveToEarly = ({ college, action, index }) => {
   if (action === 'add') {
     if (!savedColleges.value.some(c => c.name === college.name)) {
-      savedColleges.value.unshift(college); // Add to the beginning of the list
+      savedColleges.value.unshift(college);
     }
   } else if (action === 'remove' && index !== undefined) {
     savedColleges.value.splice(index, 1);
   }
 };
 
-// Handle save to regular decision
 const handleSaveToRegular = ({ college, action, index }) => {
   if (action === 'add') {
     if (!recentlyViewed.value.some(c => c.name === college.name)) {
-      recentlyViewed.value.unshift(college); // Add to the beginning of the list
+      recentlyViewed.value.unshift(college);
     }
   } else if (action === 'remove' && index !== undefined) {
     recentlyViewed.value.splice(index, 1);
   }
 };
 
-// Function to remove a college from the saved list
 const removeSavedCollege = (index) => {
   savedColleges.value.splice(index, 1);
 };
 
-// Function to remove a college from the recently viewed list
 const removeRecentlyViewedCollege = (index) => {
   recentlyViewed.value.splice(index, 1);
 };
 
-// Function to calculate admission chance for a college
 const getAdmissionChance = (college) => {
-  // Create student profile from current values
   const studentData = prepareStudentData({
     satReading: satReading.value,
     satMath: satMath.value,
@@ -1026,120 +1011,81 @@ const getAdmissionChance = (college) => {
     recScore: recScore.value,
     isLegacy: isLegacy.value,
     demoScore: demoScore.value,
-    isEarlyDecision: false // Default to Regular Decision in the listing
+    isEarlyDecision: false
   });
-
-  // Calculate chance
   const chanceResult = calculateAdmissionChance(studentData, college);
   return chanceResult.probability || 0;
 };
 
-// Promotion modal functions
 const trackCollegeClick = () => {
-  console.log('📊 trackCollegeClick() called');
-  
-  // Check if user dismissed for the day
   const today = new Date().toDateString();
   const dismissedToday = localStorage.getItem('promotionDismissedDate');
   
-  console.log('📅 Today:', today);
-  console.log('🚫 Dismissed date:', dismissedToday);
-  
   if (dismissedToday === today) {
-    console.log('⏭️  Modal dismissed for today, skipping...');
-    return; // Don't show if dismissed for today
+    return;
   }
 
-  // Get current click count from localStorage or initialize
   const storedCount = localStorage.getItem('collegeClickCount');
   collegeClickCount.value = storedCount ? parseInt(storedCount) + 1 : 1;
   
-  console.log('🔢 Previous click count:', storedCount);
-  console.log('🔢 New click count:', collegeClickCount.value);
-  
-  // Save updated count
   localStorage.setItem('collegeClickCount', collegeClickCount.value.toString());
-  console.log('💾 Saved click count to localStorage');
   
-  // Show modal after 3 clicks
   if (collegeClickCount.value >= 3) {
-    console.log('🎉 3 clicks reached! Showing promotion modal...');
     promotionModalOpen.value = true;
-  } else {
-    console.log(`⏳ Need ${3 - collegeClickCount.value} more clicks to show modal`);
   }
 };
 
 const dismissPromotionModal = () => {
-  console.log('❌ Promotion modal dismissed (not now)');
   promotionModalOpen.value = false;
   localStorage.setItem('collegeClickCount', '0');
-  collegeClickCount.value = 0; // Reset click count
+  collegeClickCount.value = 0;
 };
 
 const dismissPromotionModalForDay = () => {
-  console.log('🚫 Promotion modal dismissed for the day');
   promotionModalOpen.value = false;
   const today = new Date().toDateString();
   localStorage.setItem('promotionDismissedDate', today);
-  console.log('💾 Saved dismissal date:', today);
-  // Reset click count so it can trigger again tomorrow
   localStorage.setItem('collegeClickCount', '0');
   collegeClickCount.value = 0;
-  console.log('🔄 Reset click count to 0');
 };
 
 const navigateToLogin = () => {
-  console.log('🔑 Navigating to login page');
   promotionModalOpen.value = false;
-  // Navigate to login/register page - adjust route as needed
   router.push({ path: '/login' });
 };
 
-// Load click count on mount
 const loadClickCount = () => {
   const storedCount = localStorage.getItem('collegeClickCount');
-  console.log('🔄 Loading click count from localStorage:', storedCount);
   if (storedCount) {
     collegeClickCount.value = parseInt(storedCount);
-    console.log('📊 Loaded click count:', collegeClickCount.value);
-  } else {
-    console.log('🆕 No stored click count, starting at 0');
   }
 };
 
-// Navigation guard to check authentication status
 const requireAuth = (to, from, next) => {
   const isAuthenticated = userStore.isAuthenticated;
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirect to login if not authenticated
     next({ name: 'login' });
   } else {
     next();
   }
 };
 
-// Function to open map modal
 const openMapModal = () => {
-  // Add a slight delay for smoother animation
   setTimeout(() => {
     mapModalOpen.value = true;
   }, 100);
 };
 
-// Function to close map modal
 const closeMapModal = () => {
   mapModalOpen.value = false;
 };
 
-// Handle keyboard events for modal
 const handleKeydown = (event) => {
   if (event.key === 'Escape' && mapModalOpen.value) {
     closeMapModal();
   }
 };
 
-// Add keyboard event listener when modal is open
 watch(mapModalOpen, (isOpen) => {
   if (isOpen) {
     document.addEventListener('keydown', handleKeydown);
@@ -1148,9 +1094,7 @@ watch(mapModalOpen, (isOpen) => {
   }
 });
 
-// Global before guard
 router.beforeEach((to, from, next) => {
-  // Check authentication for protected routes
   requireAuth(to, from, next);
 });
 </script>
@@ -1273,8 +1217,9 @@ router.beforeEach((to, from, next) => {
 
 .college-card {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
   border: 1px solid rgba(0,0,0,0.08);
+  max-width: 800px;
+  margin: 0 auto 1rem auto;
 }
 
 .college-card:hover {
@@ -1384,7 +1329,76 @@ router.beforeEach((to, from, next) => {
   border-bottom-left-radius: inherit;
 }
 
+/* Desktop panel toggle buttons */
+.left-toggle {
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.right-toggle {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.left-toggle:hover,
+.right-toggle:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Desktop panel transitions */
+.desktop-panel {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-column {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide animations for panels */
+.slide-left-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-left-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-left-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-right-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
