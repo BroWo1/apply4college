@@ -57,8 +57,6 @@ export const sortCollegesBy = (colleges, criterion) => {
       return [...colleges].sort((a, b) => a.acceptanceRate - b.acceptanceRate);
     case 'tuition':
       return [...colleges].sort((a, b) => a.tuition - b.tuition);
-    case 'rating':
-      return [...colleges].sort((a, b) => b.rating - a.rating);
     default:
       return colleges;
   }

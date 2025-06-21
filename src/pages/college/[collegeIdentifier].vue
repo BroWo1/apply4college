@@ -1,13 +1,5 @@
 <template>
   <v-container fluid style="max-width: 1200px; ;" class="py-8" >
-    <!--
-    <div class="mb-4 d-flex justify-start">
-      <v-btn text color="primary" @click="router.push({ path: '/explore' })">
-        <v-icon left>mdi-chevron-left</v-icon>
-        Back to Explore
-      </v-btn>
-    </div>
-    -->
     <div v-if="loading" class="text-center">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
       <p class="mt-3">Loading college data...</p>
@@ -21,31 +13,216 @@
       </div>
     </div>
     <div v-else>
-      <!-- College Title and Location -->
       <div class="mb-6">
-        <h1 class="text-h3 font-weight-bold mb-2">{{ college.name }}</h1>
+        <div class="d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between mb-2">
+          <h1 class="text-h3 font-weight-bold">{{ college.name }}</h1>
+          <v-btn 
+            variant="outlined" 
+            color="primary" 
+            @click="$router.push({ path: '/explore' })"
+            prepend-icon="mdi-chevron-left"
+            class="back-btn mt-2 mt-sm-0"
+          >
+            Back to Explore
+          </v-btn>
+        </div>
         <div class="text-subtitle-1 mb-2">{{ college.location }} • {{ college.collegeType }}</div>
       </div>
 
-      <!-- College Banner and Header -->
       <v-card flat class="mb-6">
         <v-img :src="college.image" height="300px" cover class="rounded-t-lg"></v-img>
       </v-card>
 
-      
-
-      <!-- Navigation Tabs -->
-      <v-tabs v-model="activeTab" slider-color="primary" class="mb-6">
-        <v-tab value="overview">Overview</v-tab>
-        <v-tab value="chancing">Chancing</v-tab>
-        <v-tab value="a4c-rating">Rating</v-tab>
-      </v-tabs>
+      <v-card
+        flat
+        class="mb-4 pa-3"
+        style="background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(156, 39, 176, 0.1)); border: 1px solid rgba(33, 150, 243, 0.2); border-radius: 12px;"
+      >
+        <v-row align="center" justify="space-between">
+          <v-col>
+            <v-tabs v-model="activeTab" slider-color="primary" class="nav-tabs">
+              <v-tab value="overview" class="tab-item">
+                <v-icon start>mdi-information-outline</v-icon>
+                Overview
+              </v-tab>
+              <v-tab value="chancing" class="tab-item">
+                <v-icon start>mdi-calculator</v-icon>
+                Chancing
+              </v-tab>
+              <v-tab value="a4c-rating" class="tab-item">
+                <v-icon start>mdi-star-outline</v-icon>
+                Rating
+              </v-tab>
+            </v-tabs>
+          </v-col>
+          <v-col cols="auto">
+            <v-menu
+              v-model="saveMenu"
+              :close-on-content-click="true"
+              location="bottom end"
+              transition="slide-y-transition"
+            >
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  color="primary"
+                  variant="elevated"
+                  v-bind="props"
+                  class="save-btn"
+                >
+                  <v-icon start>mdi-bookmark-plus</v-icon>
+                  Save to List
+                  <v-icon end>mdi-chevron-down</v-icon>
+                </v-btn>
+              </template>
+              <v-card min-width="240" rounded="xl" elevation="8" class="save-menu-card">
+                <v-list nav density="compact" class="pa-2">
+                  <v-list-item
+                    prepend-icon="mdi-star"
+                    title="Early Decision"
+                    subtitle="Higher acceptance rate"
+                    @click="handleSaveToEarly({ college: college, action: 'add' })"
+                    rounded="lg"
+                    class="menu-item"
+                  >
+                    <template v-slot:append>
+                      <v-chip size="small" color="primary" variant="tonal">ED</v-chip>
+                    </template>
+                  </v-list-item>
+                  <v-list-item
+                    prepend-icon="mdi-content-save"
+                    title="Regular Decision"
+                    subtitle="Standard application"
+                    @click="handleSaveToRegular({ college: college, action: 'add' })"
+                    rounded="lg"
+                    class="menu-item"
+                  >
+                    <template v-slot:append>
+                      <v-chip size="small" color="secondary" variant="tonal">RD</v-chip>
+                    </template>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-menu>
+          </v-col>
+        </v-row>
+      </v-card>
 
       <v-divider class="mb-6"></v-divider>
 
-      <!-- Main Content Area -->
+      <v-btn
+        :color="rightPanelOpen ? 'secondary' : 'primary'"
+        :icon="rightPanelOpen ? 'mdi-chevron-right' : 'mdi-bookmark'"
+        fab
+        size="small"
+        class="right-toggle d-none d-md-flex"
+        @click="rightPanelOpen = !rightPanelOpen"
+        :title="rightPanelOpen ? 'Hide Saved Colleges' : 'Show Saved Colleges'"
+      ></v-btn>
+
+      <v-navigation-drawer
+        v-model="rightPanelOpen"
+        location="right"
+        temporary
+        color="transparent"
+        width="400"
+        elevation="0"
+        class="floating-drawer"
+        border="none"
+      >
+        <div class="pa-3">
+          <v-card class="pa-4" rounded="xl" elevation="12" style="margin-left: 20px;">
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              size="small"
+              @click="rightPanelOpen = false"
+              style="position: absolute; top: 12px; right: 12px; z-index: 1;"
+            ></v-btn>
+            <v-card-title class="text-h6">Early Decision</v-card-title>
+            <v-divider class="my-2"></v-divider>
+
+            <div v-if="savedColleges.length === 0" class="text-center py-8 text-medium-emphasis">
+              <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+              <div>No Saved Colleges</div>
+              <div class="text-caption">Add colleges to this list!</div>
+            </div>
+
+            <v-list v-else lines="two" density="compact" class="bg-transparent">
+              <v-list-item
+                v-for="(savedItem, i) in savedColleges"
+                :key="`saved-${i}`"
+                :title="savedItem.name"
+                :subtitle="savedItem.location"
+                @click="navigateToCollegeProfilePage(savedItem)"
+                class="saved-college-item"
+              >
+                <template v-slot:prepend>
+                  <v-avatar size="40">
+                    <v-img :src="savedItem.image" cover></v-img>
+                  </v-avatar>
+                </template>
+                <template v-slot:append>
+                  <v-btn icon="mdi-delete" size="small" variant="text"
+                         @click.stop="handleSaveToEarly({ action: 'remove', index: i })"
+                  ></v-btn>
+                </template>
+                <div class="d-flex flex-wrap mt-2">
+                  <v-chip
+                    color="purple-lighten-1"
+                    size="x-small"
+                    prepend-icon="mdi-calendar-clock"
+                    class="my-1"
+                  >
+                    Deadline: {{ savedItem.deadlines?.earlyDecision || "Nov 1" }}
+                  </v-chip>
+                </div>
+              </v-list-item>
+            </v-list>
+
+            <v-divider class="my-4"></v-divider>
+
+            <v-card-title class="text-h6">Regular Decision</v-card-title>
+             <div v-if="recentlyViewed.length === 0" class="text-center py-8 text-medium-emphasis">
+                <v-icon icon="mdi-bookmark-outline" size="large" class="mb-2"></v-icon>
+                <div>No Saved Colleges</div>
+                <div class="text-caption">Add colleges to this list!</div>
+              </div>
+            <v-list v-else lines="two" density="compact" class="bg-transparent">
+              <v-list-item
+                v-for="(recentItem, i) in recentlyViewed"
+                :key="`recent-${i}`"
+                :title="recentItem.name"
+                :subtitle="recentItem.location"
+                @click="navigateToCollegeProfilePage(recentItem)"
+                class="saved-college-item"
+              >
+                <template v-slot:prepend>
+                  <v-avatar size="40">
+                    <v-img :src="recentItem.image" cover></v-img>
+                  </v-avatar>
+                </template>
+                <template v-slot:append>
+                  <v-btn icon="mdi-delete" size="small" variant="text"
+                         @click.stop="handleSaveToRegular({ action: 'remove', index: i })"
+                  ></v-btn>
+                </template>
+                <div class="d-flex flex-wrap mt-2">
+                  <v-chip
+                    color="indigo-lighten-1"
+                    size="x-small"
+                    prepend-icon="mdi-calendar"
+                    class="my-1"
+                  >
+                    Deadline: {{ recentItem.deadlines?.regularDecision || "Jan 1" }}
+                  </v-chip>
+                </div>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </div>
+      </v-navigation-drawer>
+
       <v-window v-model="activeTab" class="mb-6">
-        <!-- Overview Tab -->
         <v-window-item value="overview">
           <OverviewTab
             :college="college"
@@ -61,7 +238,6 @@
           />
         </v-window-item>
 
-        <!-- Chancing Tab - We'll implement full content later -->
         <v-window-item value="chancing">
           <ChancingTab
             :college="college"
@@ -94,19 +270,16 @@
           />
         </v-window-item>
 
-        <!-- Cost & Scholarships Tab - We'll implement full content later -->
         <v-window-item value="a4c-rating">
           <A4CRatingTab :college="college" />
         </v-window-item>
 
-        <!-- Majors Tab - We'll implement full content later -->
         <v-window-item value="majors">
           <MajorsTab :collegeName="college ? college.name : 'this school'" />
         </v-window-item>
       </v-window>
     </div>
 
-    <!-- Add snackbar component -->
     <v-snackbar
       v-model="snackbar"
       :color="snackbarColor"
@@ -148,9 +321,15 @@ const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref('success');
 
+// Menu state
+const saveMenu = ref(false);
+
 const college = ref(null);
 const loading = ref(true);
 const activeTab = ref('overview');
+
+// Right panel state for foldable list
+const rightPanelOpen = ref(false);
 
 // Student profile data - include ALL fields
 const satReading = ref(500);
@@ -416,6 +595,11 @@ watch(intendedMajor, (newMajor) => {
   }
 });
 
+const navigateToCollegeProfilePage = (college) => {
+  rightPanelOpen.value = false; // Close drawer on navigation
+  router.push({ path: `/college/${encodeURIComponent(college.name)}` });
+};
+
 const handleSaveToEarly = ({ college: targetCollege, action, index }) => {
   if (action === 'add') {
     if (!savedColleges.value.some(c => c.name === targetCollege.name)) {
@@ -627,5 +811,90 @@ watch([isEarlyDecision, isLegacy], () => {
 }
 .sticky-top-side::-webkit-scrollbar-track {
   background-color: #f1f1f1;
+}
+
+/* Enhanced Navigation Bar Styles */
+.nav-tabs .v-tab {
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-tabs .v-tab:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+  transform: translateY(-1px);
+}
+
+.save-btn {
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3) !important;
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.save-menu-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.menu-item {
+  transition: all 0.2s ease;
+  margin: 2px 0;
+}
+
+.menu-item:hover {
+  background-color: rgba(33, 150, 243, 0.1) !important;
+  transform: translateX(4px);
+}
+
+.tab-item {
+  border-radius: 8px;
+  margin: 0 4px;
+}
+
+/* Back to Explore button styling */
+.back-btn {
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  transform: translateX(-2px);
+}
+
+@media (max-width: 768px) {
+  .back-btn {
+    margin-top: 8px;
+  }
+}
+
+/* Floating button for saved list */
+.right-toggle {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.right-toggle:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.saved-college-item {
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.saved-college-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+:deep(.v-navigation-drawer .v-overlay__scrim) {
+  background: transparent;
 }
 </style>

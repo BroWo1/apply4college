@@ -6,8 +6,6 @@ export const createCollegeData = ({
   acceptanceRate,
   tuition,
   imageUrl,
-  rating,
-  reviewCount,
   collegeType, // 'STEM-heavy' or 'Liberal-arts'
   stats,
   deadlines = {}, // Add default empty deadlines object
@@ -41,8 +39,6 @@ export const createCollegeData = ({
     acceptanceRate,
     tuition,
     image,
-    rating: rating || 0,
-    reviewCount: reviewCount || 0,
     collegeType,
     stats: {
       gpa: stats.gpa || { mean: 3.8, stdDev: 0.15 },

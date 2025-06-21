@@ -1,5 +1,6 @@
 import { createCollegeData } from './collegeDataStructure';
 import ucb from '@/assets/colleges/ucb.png';
+import georgetown from '@/assets/colleges/georgetown.png';
 import ucla from '@/assets/colleges/ucla.png';
 
 // Target colleges (acceptance rate between 10% and 20%)
@@ -100,9 +101,9 @@ export const targetColleges = [
     allowsEarlyDecision: true,
     earlyActionDeadline: 'November 1',
     regularDecisionDeadline: 'February 1',
-    considersLegacy: true, // Public universities vary, Michigan might
+    considersLegacy: true, // Example: UMich considers legacy
     stats: {
-      gpa: { mean: 3.82, stdDev: 0.15 },
+      gpa: { mean: 3.88, stdDev: 0.13 },
       sat: { mean: 1435, stdDev: 80 },
       ap: { mean: 6, stdDev: 2 },
       ec: { mean: 8, stdDev: 3 },
@@ -169,5 +170,37 @@ export const targetColleges = [
         popular:  1.15
       }
     }
-  })
+  }),
+
+  createCollegeData({
+    name: 'Georgetown University',
+    location: 'Washington, D.C.',
+    description: 'A private research university known for its programs in international relations, law, and public policy.',
+    acceptanceRate: 12,
+    tuition: 64896,
+    imageUrl: georgetown,
+    collegeType: 'Liberal-arts',
+    stats: {
+      gpa: { mean: 3.9, stdDev: 0.12 },
+      sat: { mean: 1470, stdDev: 75 },
+      ap: { mean: 7, stdDev: 2.5 },
+      ec: { mean: 9, stdDev: 2 },
+    },
+    deadlines: {
+      earlyDecision: 'November 1',
+      regularDecision: 'January 10',
+    },
+    allowsEarlyDecision: true,
+    considersLegacy: true,
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Value', rating: 'A-' },
+      ],
+    },
+    websiteUrl: 'https://www.georgetown.edu',
+    usNewsUrl: 'https://www.usnews.com/best-colleges/georgetown-university-1445',
+  }),
 ];

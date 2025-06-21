@@ -1,408 +1,444 @@
 <template>
   <v-row>
     <v-col cols="12" md="8">
-      <v-card flat class="mb-6" style="background-color: transparent;">
-        <v-card-title class="text-h5 font-weight-bold pb-4">
+      <div class="chancing-content">
+        <v-card-title class="text-h5 font-weight-bold pb-4 px-0">
           Detailed Admission Chances for {{ college.name }}
         </v-card-title>
 
         <!-- Controls Section -->
-        <v-card class="mb-6 pa-4">
-          <v-row>
-            <v-col cols="12">
-              <div class="d-flex align-center justify-space-around">
-                <div class="d-flex align-center" v-if="college.allowsEarlyDecision">
-                  <div class="me-3">
-                    <div class="text-subtitle-1 font-weight-medium">Early Decision</div>
-                    <div class="text-caption">Increases chances</div>
-                  </div>
-                  <v-switch
-                    :model-value="isEarlyDecision"
-                    @update:modelValue="$emit('update:isEarlyDecision', $event); $emit('calculateDetailedChance')"
-                    color="primary"
-                    hide-details
-                    density="compact"
-                    :disabled="!college.allowsEarlyDecision"
-                  ></v-switch>
+        <v-card class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-strategy</v-icon>
+              Admission Strategy
+            </v-card-title>
+            <v-card-subtitle>
+              Adjust factors to see how they impact your chances.
+            </v-card-subtitle>
+          </v-card-item>
+          <v-card-text>
+            <v-row align="center" justify="space-around">
+              <v-col cols="auto" class="text-center">
+                <div class="text-subtitle-1 font-weight-medium">Early Decision</div>
+                <div class="text-caption" :class="{'text-disabled': !college.allowsEarlyDecision}">
+                  {{ college.allowsEarlyDecision ? 'Increases chances' : 'Not offered' }}
                 </div>
-                <div v-else class="d-flex align-center">
-                  <div class="me-3">
-                    <div class="text-subtitle-1 font-weight-medium">Early Decision</div>
-                    <div class="text-caption text-disabled">Not offered</div>
-                  </div>
-                   <v-switch
-                    :model-value="false"
-                    color="primary"
-                    hide-details
-                    density="compact"
-                    disabled
-                  ></v-switch>
-                </div>
+                <v-switch
+                  :model-value="isEarlyDecision"
+                  @update:modelValue="$emit('update:isEarlyDecision', $event); $emit('calculateDetailedChance')"
+                  color="primary"
+                  hide-details
+                  density="compact"
+                  :disabled="!college.allowsEarlyDecision"
+                  class="d-inline-flex"
+                ></v-switch>
+              </v-col>
 
-                <v-divider vertical class="mx-4"></v-divider>
+              <v-divider vertical class="hidden-sm-and-down mx-4"></v-divider>
 
-                <div class="d-flex align-center" v-if="college.considersLegacy">
-                  <div class="me-3">
-                    <div class="text-subtitle-1 font-weight-medium">Legacy Status</div>
-                    <div class="text-caption">Family attended</div>
-                  </div>
-                  <v-switch
-                    :model-value="isLegacy"
-                    @update:modelValue="$emit('update:isLegacy', $event); $emit('calculateDetailedChance')"
-                    color="primary"
-                    hide-details
-                    density="compact"
-                    :disabled="!college.considersLegacy"
-                  ></v-switch>
+              <v-col cols="auto" class="text-center">
+                <div class="text-subtitle-1 font-weight-medium">Legacy Status</div>
+                <div class="text-caption" :class="{'text-disabled': !college.considersLegacy}">
+                  {{ college.considersLegacy ? 'Family attended' : 'Not considered' }}
                 </div>
-                 <div v-else class="d-flex align-center">
-                  <div class="me-3">
-                    <div class="text-subtitle-1 font-weight-medium">Legacy Status</div>
-                    <div class="text-caption text-disabled">Not considered</div>
-                  </div>
-                   <v-switch
-                    :model-value="false"
-                    color="primary"
-                    hide-details
-                    density="compact"
-                    disabled
-                  ></v-switch>
-                </div>
-              </div>
-            </v-col>
-          </v-row>
+                <v-switch
+                  :model-value="isLegacy"
+                  @update:modelValue="$emit('update:isLegacy', $event); $emit('calculateDetailedChance')"
+                  color="primary"
+                  hide-details
+                  density="compact"
+                  :disabled="!college.considersLegacy"
+                  class="d-inline-flex"
+                ></v-switch>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
 
-        <!-- Chance Overview -->
-        <v-card class="mb-6 pa-4">
-          <v-row>
-            <v-col cols="12" md="6">
-              <div class="d-flex flex-column align-center justify-center">
-                <v-progress-circular
-                  :model-value="detailedCollegeChance.probabilityPercentage"
-                  :color="detailedChanceColor"
-                  :size="150"
-                  :width="15"
-                  class="mb-3"
-                >
-                  <span class="text-h4">{{ detailedCollegeChance.probabilityPercentage }}%</span>
-                </v-progress-circular>
-                <div class="text-h6 font-weight-bold">{{ detailedChanceDescription }}</div>
-                <div class="text-body-2 text-center mt-2">
-                  {{ detailedCollegeChance.timesAverageApplicant || '1.0' }} times the average applicant
-                </div>
-                <!-- Add Bitter by Coffee factor display if enabled -->
-                <div v-if="studentProfile.enableBitterByCoffee && detailedCollegeChance.bitterByCoffeeFactor && detailedCollegeChance.bitterByCoffeeFactor !== '1.00'" class="text-caption text-center mt-2">
-                  <v-icon size="small" color="warning">mdi-coffee</v-icon>
-                  Randomness factor: {{ detailedCollegeChance.bitterByCoffeeFactor }}x
-                </div>
-              </div>
-            </v-col>
+        <!-- Chance Overview and Recommendation Combined -->
+        <v-card class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-target</v-icon>
+              Your Admission Analysis
+            </v-card-title>
+          </v-card-item>
+          <v-card-text>
+            <!-- Chance Overview Section -->
+            <div class="mb-6">
+              <h3 class="text-h6 font-weight-bold mb-3">Admission Chances</h3>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <div class="d-flex flex-column align-center justify-center">
+                    <v-progress-circular
+                      :model-value="detailedCollegeChance.probabilityPercentage"
+                      :color="detailedChanceColor"
+                      :size="150"
+                      :width="15"
+                      class="mb-3"
+                    >
+                      <span class="text-h4">{{ detailedCollegeChance.probabilityPercentage }}%</span>
+                    </v-progress-circular>
+                    <div class="text-h6 font-weight-bold">{{ detailedChanceDescription }}</div>
+                    <div class="text-body-2 text-center mt-2">
+                      {{ detailedCollegeChance.timesAverageApplicant || '1.0' }} times the average applicant
+                    </div>
+                    <!-- Add Bitter by Coffee factor display if enabled -->
+                    <div v-if="studentProfile.enableBitterByCoffee && detailedCollegeChance.bitterByCoffeeFactor && detailedCollegeChance.bitterByCoffeeFactor !== '1.00'" class="text-caption text-center mt-2">
+                      <v-icon size="small" color="warning">mdi-coffee</v-icon>
+                      Randomness factor: {{ detailedCollegeChance.bitterByCoffeeFactor }}x
+                    </div>
+                  </div>
+                </v-col>
 
-            <v-col cols="12" md="6">
-              <v-list density="compact">
-                <v-list-subheader class="text-subtitle-1 font-weight-medium">Your Profile Strengths</v-list-subheader>
-                <v-list-item>
-                  <template v-slot:prepend>
-                    <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.gpa || 0)" class="mr-2">
-                      mdi-school
-                    </v-icon>
-                  </template>
-                  <v-list-item-title>GPA: {{ studentProfile.gpa || 'N/A' }}</v-list-item-title>
-                  <template v-slot:append>
-                    <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.gpa || 0)" size="small">
-                      {{ formatZScore(detailedCollegeChance.zScores?.gpa || 0) }}σ
-                    </v-chip>
-                  </template>
-                </v-list-item>
-                <v-list-item>
-                  <template v-slot:prepend>
-                    <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.sat || 0)" class="mr-2">
-                      mdi-book-open-variant
-                    </v-icon>
-                  </template>
-                  <v-list-item-title>SAT: {{ studentProfile.satReading && studentProfile.satMath ? studentProfile.satReading + studentProfile.satMath : 'N/A' }}</v-list-item-title>
-                  <template v-slot:append>
-                    <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.sat || 0)" size="small">
-                      {{ formatZScore(detailedCollegeChance.zScores?.sat || 0) }}σ
-                    </v-chip>
-                  </template>
-                </v-list-item>
-                <v-list-item>
-                  <template v-slot:prepend>
-                    <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.ap || 0)" class="mr-2">
-                      mdi-certificate
-                    </v-icon>
-                  </template>
-                  <v-list-item-title>AP Courses: {{ apCourseCount }}</v-list-item-title>
-                  <template v-slot:append>
-                    <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ap || 0)" size="small">
-                      {{ formatZScore(detailedCollegeChance.zScores?.ap || 0) }}σ
-                    </v-chip>
-                  </template>
-                </v-list-item>
-                <v-list-item>
-                  <template v-slot:prepend>
-                    <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.ec || 0)" class="mr-2">
-                      mdi-account-group
-                    </v-icon>
-                  </template>
-                  <v-list-item-title>Extracurriculars: {{ extracurricularCount }}</v-list-item-title>
-                  <template v-slot:append>
-                    <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ec || 0)" size="small">
-                      {{ formatZScore(detailedCollegeChance.zScores?.ec || 0) }}σ
-                    </v-chip>
-                  </template>
-                </v-list-item>
-              </v-list>
-            </v-col>
-          </v-row>
-        </v-card>
-        <!-- Recommendation -->
-        <v-card class="mb-6 pa-4">
-          <div class="d-flex align-center justify-space-between mb-3">
-            <div class="text-subtitle-1 font-weight-medium">Admission Recommendation</div>
-            <v-btn
-              v-if="!loadingAiRec"
-              color="primary"
-              variant="tonal"
-              size="small"
-              @click="$emit('toggleAiRecommendation')"
-            >
-              <v-icon size="small" class="mr-1">mdi-robot</v-icon>
-              {{ useAiRecommendation ? 'Using AI Insight' : 'Get AI Insight' }}
-            </v-btn>
-            <v-progress-circular
-              v-else
-              indeterminate
-              size="20"
-              width="2"
-              color="primary"
-            ></v-progress-circular>
-          </div>
-
-          <v-alert
-            v-if="showNoApiKeyMessage && useAiRecommendation"
-            type="info"
-            density="compact"
-            variant="tonal"
-            class="mt-2 mb-3"
-            color="warning"
-          >
-            <div class="d-flex align-center">
-              <span>OpenAI API Key is not configured. AI recommendations are disabled.</span>
+                <v-col cols="12" md="6">
+                  <v-list density="compact">
+                    <v-list-subheader class="text-subtitle-1 font-weight-medium">Your Profile Strengths</v-list-subheader>
+                    <v-list-item>
+                      <template v-slot:prepend>
+                        <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.gpa || 0)" class="mr-2">
+                          mdi-school
+                        </v-icon>
+                      </template>
+                      <v-list-item-title>GPA: {{ studentProfile.gpa || 'N/A' }}</v-list-item-title>
+                      <template v-slot:append>
+                        <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.gpa || 0)" size="small">
+                          {{ formatZScore(detailedCollegeChance.zScores?.gpa || 0) }}σ
+                        </v-chip>
+                      </template>
+                    </v-list-item>
+                    <v-list-item>
+                      <template v-slot:prepend>
+                        <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.sat || 0)" class="mr-2">
+                          mdi-book-open-variant
+                        </v-icon>
+                      </template>
+                      <v-list-item-title>SAT: {{ studentProfile.satReading && studentProfile.satMath ? studentProfile.satReading + studentProfile.satMath : 'N/A' }}</v-list-item-title>
+                      <template v-slot:append>
+                        <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.sat || 0)" size="small">
+                          {{ formatZScore(detailedCollegeChance.zScores?.sat || 0) }}σ
+                        </v-chip>
+                      </template>
+                    </v-list-item>
+                    <v-list-item>
+                      <template v-slot:prepend>
+                        <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.ap || 0)" class="mr-2">
+                          mdi-certificate
+                        </v-icon>
+                      </template>
+                      <v-list-item-title>AP Courses: {{ apCourseCount }}</v-list-item-title>
+                      <template v-slot:append>
+                        <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ap || 0)" size="small">
+                          {{ formatZScore(detailedCollegeChance.zScores?.ap || 0) }}σ
+                        </v-chip>
+                      </template>
+                    </v-list-item>
+                    <v-list-item>
+                      <template v-slot:prepend>
+                        <v-icon :color="getZScoreColor(detailedCollegeChance.zScores?.ec || 0)" class="mr-2">
+                          mdi-account-group
+                        </v-icon>
+                      </template>
+                      <v-list-item-title>Extracurriculars: {{ extracurricularCount }}</v-list-item-title>
+                      <template v-slot:append>
+                        <v-chip :color="getZScoreColor(detailedCollegeChance.zScores?.ec || 0)" size="small">
+                          {{ formatZScore(detailedCollegeChance.zScores?.ec || 0) }}σ
+                        </v-chip>
+                      </template>
+                    </v-list-item>
+                  </v-list>
+                </v-col>
+              </v-row>
             </div>
-          </v-alert>
-          <v-alert
-            v-if="aiError && useAiRecommendation"
-            type="error"
-            density="compact"
-            variant="tonal"
-            class="mt-2 mb-3"
-          >
-            {{ aiError }}
-          </v-alert>
 
-          <div class="text-body-1">
-            <div v-if="useAiRecommendation && aiRecommendation" v-html="formatRecommendation(aiRecommendation)"></div>
-            <div v-else-if="useAiRecommendation && !aiRecommendation && !aiError && !showNoApiKeyMessage && loadingAiRec">Fetching AI insight...</div>
-            <div v-else>{{ detailedRecommendation }}</div>
-          </div>
+            <v-divider class="my-4"></v-divider>
+
+            <!-- Recommendation Section -->
+            <div>
+              <div class="d-flex align-center justify-space-between mb-3">
+                <h3 class="text-h6 font-weight-bold d-flex align-center">
+                  <v-icon class="mr-2">mdi-lightbulb-outline</v-icon>
+                  Admission Recommendation
+                </h3>
+                <v-btn
+                  v-if="!loadingAiRec"
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+                  @click="$emit('toggleAiRecommendation')"
+                >
+                  <v-icon size="small" class="mr-1">mdi-robot</v-icon>
+                  {{ useAiRecommendation ? 'Using AI Insight' : 'Get AI Insight' }}
+                </v-btn>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="20"
+                  width="2"
+                  color="primary"
+                ></v-progress-circular>
+              </div>
+
+              <v-alert
+                v-if="showNoApiKeyMessage && useAiRecommendation"
+                type="info"
+                density="compact"
+                variant="tonal"
+                class="mb-3"
+                color="warning"
+              >
+                <div class="d-flex align-center">
+                  <v-icon start>mdi-key-alert</v-icon>
+                  <span>OpenAI API Key is not configured. AI recommendations are disabled.</span>
+                </div>
+              </v-alert>
+              <v-alert
+                v-if="aiError && useAiRecommendation"
+                type="error"
+                density="compact"
+                variant="tonal"
+                class="mb-3"
+              >
+                <v-icon start>mdi-alert-circle</v-icon>
+                {{ aiError }}
+              </v-alert>
+
+              <div class="text-body-1">
+                <div v-if="useAiRecommendation && aiRecommendation" v-html="formatRecommendation(aiRecommendation)"></div>
+                <div v-else-if="useAiRecommendation && !aiRecommendation && !aiError && !showNoApiKeyMessage && loadingAiRec">
+                  <v-skeleton-loader
+                    type="paragraph"
+                  ></v-skeleton-loader>
+                </div>
+                <div v-else class="text-body-1">{{ detailedRecommendation }}</div>
+              </div>
+            </div>
+          </v-card-text>
         </v-card>
 
         <!-- AP Courses Details Card -->
-        <v-card v-if="studentProfile.apClasses && studentProfile.apClasses.length > 0" class="mb-6 pa-4">
-          <div class="text-subtitle-1 font-weight-medium mb-3">AP Courses ({{ apCourseCount }})</div>
-          <v-row>
-            <v-col v-for="(ap, index) in studentProfile.apClasses" :key="index" cols="12" sm="6">
-              <v-chip
-                :color="getApColor(ap)"
-                variant="outlined"
-                class="ma-1"
-                size="small"
-              >
-                <v-icon start size="x-small">{{ ap.status === 'ongoing' ? 'mdi-clock-outline' : 'mdi-check' }}</v-icon>
-                {{ ap.name }}{{ ap.score && ap.score !== 'N/A' ? ` (${ap.score})` : '' }}
-              </v-chip>
-            </v-col>
-          </v-row>
-          <div v-if="studentProfile.intendedMajor" class="text-caption mt-2">
-            AP-Major Alignment: <strong>{{ getApMajorAlignment() }}</strong>
-          </div>
+        <v-card v-if="studentProfile.apClasses && studentProfile.apClasses.length > 0" class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-certificate</v-icon>
+              AP Courses ({{ apCourseCount }})
+            </v-card-title>
+            <v-card-subtitle v-if="studentProfile.intendedMajor">
+              AP-Major Alignment: <strong>{{ getApMajorAlignment() }}</strong>
+            </v-card-subtitle>
+          </v-card-item>
+          <v-card-text>
+            <v-row>
+              <v-col v-for="(ap, index) in studentProfile.apClasses" :key="index" cols="12" sm="6">
+                <v-chip
+                  :color="getApColor(ap)"
+                  variant="outlined"
+                  class="ma-1"
+                  size="small"
+                >
+                  <v-icon start size="x-small">{{ ap.status === 'ongoing' ? 'mdi-clock-outline' : 'mdi-check' }}</v-icon>
+                  {{ ap.name }}{{ ap.score && ap.score !== 'N/A' ? ` (${ap.score})` : '' }}
+                </v-chip>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
 
         <!-- Extracurricular Activities Details Card -->
-        <v-card v-if="studentProfile.extracurriculars && studentProfile.extracurriculars.length > 0" class="mb-6 pa-4">
-          <div class="text-subtitle-1 font-weight-medium mb-3">Extracurricular Activities ({{ extracurricularCount }})</div>
-          <v-row>
-            <v-col v-for="(ec, index) in studentProfile.extracurriculars" :key="index" cols="12" sm="6">
-              <v-chip
-                :color="getEcColor(ec)"
-                variant="outlined"
-                class="ma-1"
-                size="small"
-              >
-                <v-icon start size="x-small">{{ getEcIcon(ec.level) }}</v-icon>
-                {{ ec.name }} (Level {{ ec.level }})
-              </v-chip>
-            </v-col>
-          </v-row>
-          <div v-if="studentProfile.intendedMajor" class="text-caption mt-2">
-            EC-Major Alignment: <strong>{{ getEcMajorAlignment() }}</strong>
-          </div>
+        <v-card v-if="studentProfile.extracurriculars && studentProfile.extracurriculars.length > 0" class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-account-group</v-icon>
+              Extracurricular Activities ({{ extracurricularCount }})
+            </v-card-title>
+            <v-card-subtitle v-if="studentProfile.intendedMajor">
+              EC-Major Alignment: <strong>{{ getEcMajorAlignment() }}</strong>
+            </v-card-subtitle>
+          </v-card-item>
+          <v-card-text>
+            <v-row>
+              <v-col v-for="(ec, index) in studentProfile.extracurriculars" :key="index" cols="12" sm="6">
+                <v-chip
+                  :color="getEcColor(ec)"
+                  variant="outlined"
+                  class="ma-1"
+                  size="small"
+                >
+                  <v-icon start size="x-small">{{ getEcIcon(ec.level) }}</v-icon>
+                  {{ ec.name }} (Level {{ ec.level }})
+                </v-chip>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
 
-        <!-- Save Button -->
-        <v-card class="mb-6 pa-4">
-          <v-row>
-            <v-col cols="12" sm="6">
-              <v-btn
-                color="primary"
-                variant="elevated"
-                block
-                @click="$emit('saveToEarly', { college: college, action: 'add' })"
-              >
-                <v-icon left>mdi-star</v-icon>
-                Save to Early Decision
-              </v-btn>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-btn
-                color="secondary"
-                variant="elevated"
-                block
-                @click="$emit('saveToRegular', { college: college, action: 'add' })"
-              >
-                <v-icon left>mdi-content-save</v-icon>
-                Save to Regular Decision
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-card>
+      </div>
     </v-col>
 
     <v-col cols="12" md="4">
       <div class="sticky-top-side">
         <!-- Strength Metrics card -->
-        <v-card class="mb-6 pa-4">
-          <div class="text-h6 font-weight-bold mb-3">Key Profile Metrics</div>
-          <v-row sm="6">
-            <v-col cols="12" >
-              <v-card variant="outlined" class="pa-3 mt-3">
-                <div class="text-subtitle-1 font-weight-medium mb-2">Academic Strength</div>
-                <v-progress-linear
-                  :model-value="normalizeBlock(detailedCollegeChance.strengthBlock || 0)"
-                  color="primary"
-                  height="12"
-                  class="mb-2"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-caption text-high-emphasis">
-                  Your academic strength score: {{ formatNumber(detailedCollegeChance.strengthBlock || 0) }}
-                </div>
-              </v-card>
-            </v-col>
+        <v-card class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-chart-line</v-icon>
+              Key Profile Metrics
+            </v-card-title>
+          </v-card-item>
+          <v-card-text>
+            <v-tooltip text="Based on your GPA, test scores, and AP performance compared to admitted students">
+              <template v-slot:activator="{ props }">
+                <v-card variant="outlined" class="pa-3 mb-3 hoverable-item" v-bind="props">
+                  <div class="d-flex align-center mb-2">
+                    <v-icon class="mr-2">mdi-school</v-icon>
+                    <div class="text-subtitle-1 font-weight-medium">Academic Strength</div>
+                    <v-icon class="ml-auto" size="small" color="grey">mdi-information-outline</v-icon>
+                  </div>
+                  <v-progress-linear
+                    :model-value="normalizeBlock(detailedCollegeChance.strengthBlock || 0)"
+                    color="primary"
+                    height="12"
+                    class="mb-2"
+                    rounded
+                  ></v-progress-linear>
+                  <div class="text-caption">
+                    Score: {{ formatNumber(detailedCollegeChance.strengthBlock || 0) }}
+                  </div>
+                </v-card>
+              </template>
+            </v-tooltip>
 
-          </v-row>
-          <v-row sm="6">
-            <v-col cols="12" >
-              <v-card variant="outlined" class="pa-3 mb-3">
-                <div class="text-subtitle-1 font-weight-medium mb-2">Mission Alignment</div>
-                <v-progress-linear
-                  :model-value="normalizeBlock(detailedCollegeChance.alignmentBlock || 0)"
-                  color="secondary"
-                  height="12"
-                  class="mb-2"
-                  rounded
-                ></v-progress-linear>
-                <div class="text-caption text-high-emphasis">
-                  Your alignment score: {{ formatNumber(detailedCollegeChance.alignmentBlock || 0) }}
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
+            <v-tooltip text="How well your intended major and extracurriculars align with this college's mission">
+              <template v-slot:activator="{ props }">
+                <v-card variant="outlined" class="pa-3 hoverable-item" v-bind="props">
+                  <div class="d-flex align-center mb-2">
+                    <v-icon class="mr-2">mdi-target</v-icon>
+                    <div class="text-subtitle-1 font-weight-medium">Mission Alignment</div>
+                    <v-icon class="ml-auto" size="small" color="grey">mdi-information-outline</v-icon>
+                  </div>
+                  <v-progress-linear
+                    :model-value="normalizeBlock(detailedCollegeChance.alignmentBlock || 0)"
+                    color="secondary"
+                    height="12"
+                    class="mb-2"
+                    rounded
+                  ></v-progress-linear>
+                  <div class="text-caption">
+                    Score: {{ formatNumber(detailedCollegeChance.alignmentBlock || 0) }}
+                  </div>
+                </v-card>
+              </template>
+            </v-tooltip>
+          </v-card-text>
         </v-card>
 
-        <!-- Additional Metrics and Details -->
-        <v-card class="mb-6 pa-4">
-          <div class="text-h6 font-weight-bold mb-3">Acceptance Rate Factors</div>
-          <v-list density="compact">
-            <v-list-item class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2 font-weight-medium">Base Acceptance Rate</v-list-item-title>
-              </v-list-item-content>
-              <template v-slot:append>
-                <v-chip color="primary" size="small" variant="elevated">{{ college.acceptanceRate }}%</v-chip>
-              </template>
-            </v-list-item>
+        <!-- Additional Metrics and Demographics Combined -->
+        <v-card class="mb-6" elevation="1" rounded="lg">
+          <v-card-item>
+            <v-card-title class="d-flex align-center">
+              <v-icon start>mdi-chart-box-outline</v-icon>
+              Admission Factors & Demographics
+            </v-card-title>
+          </v-card-item>
+          <v-card-text>
+            <!-- Acceptance Rate Factors Section -->
+            <div class="mb-4">
+              <h4 class="text-subtitle-1 font-weight-medium mb-3 d-flex align-center">
+                <v-icon start size="small">mdi-percent</v-icon>
+                Acceptance Rate Factors
+              </h4>
+              <v-list density="compact">
+                <v-list-item class="pa-0 mb-2">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">Base Acceptance Rate</v-list-item-title>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip color="primary" size="small" variant="outlined">{{ college.acceptanceRate }}%</v-chip>
+                  </template>
+                </v-list-item>
 
-            <v-divider class="my-2"></v-divider>
+                <v-divider class="my-2"></v-divider>
 
-            <v-list-item class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2 font-weight-medium">Major Adjusted Rate</v-list-item-title>
-                <v-list-item-subtitle class="text-caption mt-1" v-if="studentProfile.intendedMajor">
-                  {{ isHarderMajor ? 'Major is more competitive' : isEasierMajor ? 'Major improves chances' : 'Neutral major impact' }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-              <template v-slot:append>
-                <v-chip :color="isHarderMajor ? 'error' : isEasierMajor ? 'success' : 'primary'" size="small" variant="elevated">
-                  {{ majorAdjustedRateForDisplay }}%
-                </v-chip>
-              </template>
-            </v-list-item>
+                <v-list-item class="pa-0 mb-2">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">Major Adjusted Rate</v-list-item-title>
+                    <v-list-item-subtitle class="text-caption mt-1" v-if="studentProfile.intendedMajor">
+                      {{ isHarderMajor ? 'Major is more competitive' : isEasierMajor ? 'Major improves chances' : 'Neutral major impact' }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip :color="isHarderMajor ? 'error' : isEasierMajor ? 'success' : 'primary'" size="small" variant="outlined">
+                      {{ majorAdjustedRateForDisplay }}%
+                    </v-chip>
+                  </template>
+                </v-list-item>
 
-            <v-divider class="my-2"></v-divider>
+                <v-divider class="my-2"></v-divider>
 
-            <v-list-item class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2 font-weight-medium">Final Adjusted Rate</v-list-item-title>
-                <v-list-item-subtitle class="text-caption mt-1">
-                  {{ isEarlyDecision ? 'ED provides a boost' : 'Regular Decision' }}
-                  {{ isLegacy ? ' + Legacy status' : '' }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-              <template v-slot:append>
-                <v-chip :color="isEarlyDecision || isLegacy ? 'success' : 'primary'" size="small" variant="elevated">
-                  {{ finalAdjustedRateForDisplay }}%
-                </v-chip>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
+                <v-list-item class="pa-0 mb-2">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">Final Adjusted Rate</v-list-item-title>
+                    <v-list-item-subtitle class="text-caption mt-1">
+                      {{ isEarlyDecision ? 'ED provides a boost' : 'Regular Decision' }}
+                      {{ isLegacy ? ' + Legacy status' : '' }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip :color="isEarlyDecision || isLegacy ? 'success' : 'primary'" size="small" variant="outlined">
+                      {{ finalAdjustedRateForDisplay }}%
+                    </v-chip>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </div>
 
-        <!-- Demographics Card -->
-        <v-card v-if="studentProfile.nationality || studentProfile.gender" class="mb-6 pa-4">
-          <div class="text-h6 font-weight-bold mb-3">Demographics</div>
-          <v-list density="compact">
-            <v-list-item v-if="studentProfile.nationality" class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2">Nationality</v-list-item-title>
-              </v-list-item-content>
-              <template v-slot:append>
-                <span class="text-caption">{{ studentProfile.nationality }}</span>
-              </template>
-            </v-list-item>
-            <v-list-item v-if="studentProfile.gender" class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2">Gender</v-list-item-title>
-              </v-list-item-content>
-              <template v-slot:append>
-                <span class="text-caption">{{ studentProfile.gender }}</span>
-              </template>
-            </v-list-item>
-            <v-list-item v-if="studentProfile.demoScore !== undefined" class="pa-0">
-              <v-list-item-content class="py-2">
-                <v-list-item-title class="text-subtitle-2">Diversity Score</v-list-item-title>
-              </v-list-item-content>
-              <template v-slot:append>
-                <v-chip size="small" :color="getDemoScoreColor(studentProfile.demoScore)">
-                  {{ (studentProfile.demoScore || 0).toFixed(2) }}
-                </v-chip>
-              </template>
-            </v-list-item>
-          </v-list>
+            <!-- Demographics Section -->
+            <div v-if="studentProfile.nationality || studentProfile.gender">
+              <v-divider class="my-4"></v-divider>
+              <h4 class="text-subtitle-1 font-weight-medium mb-3 d-flex align-center">
+                <v-icon start size="small">mdi-account-details</v-icon>
+                Demographics
+              </h4>
+              <v-list density="compact">
+                <v-list-item v-if="studentProfile.nationality" class="pa-0 mb-1">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">
+                      <v-icon start size="small">mdi-earth</v-icon>
+                      Nationality
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip size="small" variant="outlined">{{ studentProfile.nationality }}</v-chip>
+                  </template>
+                </v-list-item>
+                <v-list-item v-if="studentProfile.gender" class="pa-0 mb-1">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">
+                      <v-icon start size="small">mdi-human</v-icon>
+                      Gender
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip size="small" variant="outlined">{{ studentProfile.gender }}</v-chip>
+                  </template>
+                </v-list-item>
+                <v-list-item v-if="studentProfile.demoScore !== undefined" class="pa-0">
+                  <v-list-item-content class="py-2">
+                    <v-list-item-title class="text-subtitle-2 font-weight-medium">
+                      <v-icon start size="small">mdi-chart-donut</v-icon>
+                      Diversity Score
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <template v-slot:append>
+                    <v-chip size="small" :color="getDemoScoreColor(studentProfile.demoScore)" variant="outlined">
+                      {{ (studentProfile.demoScore || 0).toFixed(2) }}
+                    </v-chip>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </div>
+          </v-card-text>
         </v-card>
 
       </div>
@@ -575,6 +611,13 @@ const getDemoScoreColor = (score) => {
   return 'grey';
 };
 
+const getAlignmentClass = (alignment) => {
+  if (alignment === 'Excellent') return 'text-success';
+  if (alignment === 'Good') return 'text-info';
+  if (alignment === 'Fair') return 'text-warning';
+  return 'text-error';
+};
+
 // Added computed properties for display rates and major competitiveness
 const majorAdjustedRateForDisplay = computed(() => {
   if (!props.college || !props.studentProfile) return props.college?.acceptanceRate?.toFixed(1) || '0.0';
@@ -675,5 +718,40 @@ const formatRecommendation = (text) => {
 }
 .sticky-top-side::-webkit-scrollbar-track {
   background-color: #f1f1f1;
+}
+
+.chancing-content {
+  position: relative;
+}
+
+/* Subtle hover effects for interactive elements only */
+.hoverable-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Button-like hover effects for specific metrics cards */
+.v-card.pa-3:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  transition: background-color 0.2s ease;
+}
+
+/* Hover for chips and interactive elements */
+.v-chip:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  transition: background-color 0.2s ease;
+}
+
+/* Button hover effects - no elevation */
+.v-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  transition: background-color 0.2s ease;
+}
+
+/* List item hover effects */
+.v-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  transition: background-color 0.2s ease;
 }
 </style>

@@ -66,6 +66,7 @@
         :close-on-content-click="false"
         location="bottom end"
         transition="slide-y-transition"
+        
       >
         <template v-slot:activator="{ props }">
           <div class="d-flex align-center mr-1 user-activator" v-bind="props">

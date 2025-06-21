@@ -6,6 +6,8 @@ import dukeImg from '@/assets/colleges/duke.png';
 import harvard from '@/assets/colleges/harvard.png';
 import stanford from '@/assets/colleges/stanford.png';
 import mit from '@/assets/colleges/mit.png';
+import cornell from '@/assets/colleges/cornell.png';
+import brown from '@/assets/colleges/brown.png';
 
 // Elite colleges (acceptance rate < 10%)
 // The statistics (GPA, SAT, AP, EC) have been adjusted to better reflect
@@ -279,5 +281,68 @@ export const eliteColleges = [
         { name: 'Safety', rating: 'B' }
       ]
     }
-  })
+  }),
+
+  createCollegeData({
+    name: 'Brown University',
+    location: 'Providence, RI',
+    description: 'A private Ivy League research university known for its unique Open Curriculum.',
+    acceptanceRate: 5,
+    tuition: 65146,
+    imageUrl: brown,
+    collegeType: 'Liberal-arts',
+    stats: {
+      gpa: { mean: 3.93, stdDev: 0.1 },
+      sat: { mean: 1500, stdDev: 70 },
+      ap: { mean: 8, stdDev: 2.5 },
+      ec: { mean: 8, stdDev: 2 },
+    },
+    deadlines: {
+      earlyDecision: 'November 1',
+      regularDecision: 'January 5',
+    },
+    allowsEarlyDecision: true,
+    considersLegacy: true,
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Student Life', rating: 'A+' },
+        { name: 'Value', rating: 'A' },
+      ],
+    },
+    websiteUrl: 'https://www.brown.edu',
+    usNewsUrl: 'https://www.usnews.com/best-colleges/brown-university-3401',
+  }),
+  createCollegeData({
+    name: 'Cornell University',
+    location: 'Ithaca, NY',
+    description: 'A private Ivy League and statutory land-grant research university in Ithaca, New York.',
+    acceptanceRate: 7,
+    tuition: 68380,
+    imageUrl: cornell,
+    collegeType: 'STEM-heavy',
+    stats: {
+      gpa: { mean: 3.9, stdDev: 0.12 },
+      sat: { mean: 1510, stdDev: 70 },
+      ap: { mean: 8, stdDev: 2.5 },
+      ec: { mean: 10, stdDev: 2 },
+    },
+    deadlines: {
+      earlyDecision: 'November 1',
+      regularDecision: 'January 2',
+    },
+    allowsEarlyDecision: true,
+    considersLegacy: true,
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Value', rating: 'A' },
+      ],
+    },
+    websiteUrl: 'https://www.cornell.edu',
+    usNewsUrl: 'https://www.usnews.com/best-colleges/cornell-university-2711',
+  }),
 ];
