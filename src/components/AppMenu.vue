@@ -240,6 +240,12 @@ const menuItems = [
     to: '/explore',
   },
   {
+    title: 'essays',
+    icon: 'mdi-file-document-edit-outline',
+    value: 'essays',
+    to: '/essays',
+  },
+  {
     title: 'profile',
     icon: 'mdi-account-circle-outline',
     value: 'profile',

@@ -132,6 +132,7 @@
                       class="mb-3"
                       variant="outlined"
                       density="compact"
+                      rounded="lg"
                     ></v-select>
                     <div class="text-caption mb-4">
                       Some institutions have specific programs or considerations for international students.
@@ -289,6 +290,7 @@
                 class="mb-4"
                 variant="outlined"
                 density="compact"
+                rounded="lg"
               ></v-select>
               <v-select
                 v-model="newApScore"
@@ -298,6 +300,7 @@
                 class="mb-3"
                 variant="outlined"
                 density="compact"
+                rounded="lg"
               ></v-select>
               <div class="text-caption mt-3">
                 Status: {{ newApScore === "N/A" ? "ongoing" : "completed" }}
@@ -339,6 +342,7 @@
                 class="mb-4"
                 variant="outlined"
                 density="compact"
+                rounded="lg"
               ></v-select>
               <div class="mt-2">
                 <div class="d-flex justify-space-between mb-1">
