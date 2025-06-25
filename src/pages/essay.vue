@@ -124,9 +124,14 @@
                               rounded="lg"
                               :menu-props="{ transition: 'slide-y-transition' }"
                               @update:model-value="onCollegeChange"
+                              class="custom-select"
                             >
                               <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" rounded="lg">
+                                <v-list-item 
+                                  v-bind="props" 
+                                  rounded="lg"
+                                  class="custom-select-item"
+                                >
                                   <template v-slot:prepend>
                                     <v-avatar size="24" class="me-2">
                                       <v-img :src="item.raw.image" :alt="item.raw.name" />
@@ -150,9 +155,15 @@
                               rounded="lg"
                               :menu-props="{ transition: 'slide-y-transition' }"
                               @update:model-value="onPromptSourceChange"
+                              class="custom-select"
                             >
                               <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                                <v-list-item 
+                                  v-bind="props" 
+                                  :title="item.title" 
+                                  rounded="lg"
+                                  class="custom-select-item"
+                                ></v-list-item>
                               </template>
                             </v-select>
                           </v-col>
@@ -186,14 +197,19 @@
                               label="Select a prompt"
                               variant="outlined"
                               density="compact"
-                              class="mb-2"
+                              class="mb-2 custom-select"
                               hide-details
                               rounded="lg"
                               :menu-props="{ transition: 'slide-y-transition' }"
                               @update:model-value="onPromptChange"
                             >
                               <template v-slot:item="{ props, item }">
-                                <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                                <v-list-item 
+                                  v-bind="props" 
+                                  :title="item.title" 
+                                  rounded="lg"
+                                  class="custom-select-item"
+                                ></v-list-item>
                               </template>
                             </v-select>
                             <p v-if="currentPrompt" class="prompt-text text-caption pa-2">{{ currentPrompt.text }}</p>
@@ -1478,7 +1494,7 @@ const loadExistingEssay = (essayId) => {
 <style scoped>
 .essay-page {
   height: 100%;
-  background-color: #fffbfe;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .essay-container {
@@ -1492,12 +1508,17 @@ const loadExistingEssay = (essayId) => {
 }
 
 .editor-header-sticky {
-  position: relative; /* Changed from sticky */
+  position: relative;
   z-index: 10;
 }
 
 .editor-header-sticky > .v-card {
   border-bottom-width: 0;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .editor-header-sticky::after {
@@ -1507,7 +1528,7 @@ const loadExistingEssay = (essayId) => {
   right: 0;
   bottom: 0;
   height: 2rem;
-  background: linear-gradient(to bottom, #fffbfe, transparent);
+  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), transparent);
   transform: translateY(100%);
   pointer-events: none;
   z-index: 2;
@@ -1534,6 +1555,109 @@ const loadExistingEssay = (essayId) => {
   }
 }
 
+.left-panel-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.writing-card {
+  border-top: none;
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.prompt-text {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.comment-item {
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  margin-bottom: 8px;
+}
+
+.comment-item:hover {
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateX(2px);
+}
+
+.comment-suggestion { border-color: #6366f1; }
+.comment-grammar { border-color: #f59e0b; }
+.comment-strength { border-color: #10b981; }
+.comment-question { border-color: #3b82f6; }
+
+.context-chip {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  max-width: 240px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.context-chip:hover {
+  background: rgba(25, 118, 210, 0.1);
+  border-color: #1976d2;
+  color: #1976d2;
+  transform: scale(1.02);
+}
+
+.context-preview {
+  margin-top: 8px;
+}
+
+.line-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.line-chip:hover {
+  transform: scale(1.05);
+  background-color: #1976d2 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.essay-textarea :deep(textarea) {
+  line-height: 1.8 !important;
+  font-size: 1rem !important;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+.rotating-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+</style>
+
+<style scoped>
 .left-panel-sticky-wrapper {
   position: sticky;
   top: calc(var(--v-layout-top, 0px) + 2rem);
@@ -1655,5 +1779,14 @@ const loadExistingEssay = (essayId) => {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Essay-specific cards with glass effect */
+.v-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 </style>

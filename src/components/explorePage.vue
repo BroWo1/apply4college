@@ -348,13 +348,18 @@
                     :label="$t('explorePage.filter')"
                     hide-details
                     density="compact"
-                    class="my-1"
+                    class="my-1 custom-select"
                     variant="outlined"
                     rounded="lg"
                     :menu-props="{ transition: 'slide-y-transition' }"
                   >
                     <template v-slot:item="{ props, item }">
-                      <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                      <v-list-item 
+                        v-bind="props" 
+                        :title="item.title" 
+                        rounded="lg"
+                        class="custom-select-item"
+                      ></v-list-item>
                     </template>
                   </v-select>
                 </v-col>
@@ -365,13 +370,18 @@
                     :label="$t('explorePage.sort')"
                     hide-details
                     density="compact"
-                    class="my-1"
+                    class="my-1 custom-select"
                     variant="outlined"
                     rounded="lg"
                     :menu-props="{ transition: 'slide-y-transition' }"
                   >
                     <template v-slot:item="{ props, item }">
-                      <v-list-item v-bind="props" :title="item.title" rounded="lg"></v-list-item>
+                      <v-list-item 
+                        v-bind="props" 
+                        :title="item.title" 
+                        rounded="lg"
+                        class="custom-select-item"
+                      ></v-list-item>
                     </template>
                   </v-select>
                 </v-col>
@@ -1423,11 +1433,25 @@ router.beforeEach((to, from, next) => {
 /* Deep styles for consistency */
 :deep(.v-card) {
   border: none;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.v-btn) {
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
+}
+
+/* Glass effect for search field */
+.search-field :deep(.v-field) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 </style>

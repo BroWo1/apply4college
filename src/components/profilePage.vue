@@ -32,7 +32,6 @@
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                   <div class="pt-2">
-                    <!-- Academic Metrics Section -->
                     <div class="text-subtitle-1 mb-3">Academic Metrics</div>
                     <div class="text-body-1 pb-2">
                       SAT ({{satReading + satMath}})
@@ -76,7 +75,6 @@
                     
                     <v-divider class="my-6"></v-divider>
                     
-                    <!-- Academic Focus Section -->
                     <div class="text-subtitle-1 mb-3">Academic Focus</div>
                     <div class="text-body-2 mb-3">Intended Major</div>
                     <v-radio-group
@@ -129,11 +127,20 @@
                       :items="nationalityOptions"
                       label="Select your nationality"
                       hide-details
-                      class="mb-3"
+                      class="mb-3 custom-select"
                       variant="outlined"
                       density="compact"
                       rounded="lg"
-                    ></v-select>
+                    >
+                      <template v-slot:item="{ props, item }">
+                        <v-list-item 
+                          v-bind="props" 
+                          :title="item.title"
+                          rounded="lg"
+                          class="custom-select-item"
+                        ></v-list-item>
+                      </template>
+                    </v-select>
                     <div class="text-caption mb-4">
                       Some institutions have specific programs or considerations for international students.
                     </div>
@@ -287,21 +294,39 @@
                 :items="apOptions"
                 label="AP Class Name"
                 hide-details
-                class="mb-4"
+                class="mb-4 custom-select"
                 variant="outlined"
                 density="compact"
                 rounded="lg"
-              ></v-select>
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item 
+                    v-bind="props" 
+                    :title="item.title"
+                    rounded="lg"
+                    class="custom-select-item"
+                  ></v-list-item>
+                </template>
+              </v-select>
               <v-select
                 v-model="newApScore"
                 label="Score"
                 :items="['N/A', 1, 2, 3, 4, 5]"
                 hide-details
-                class="mb-3"
+                class="mb-3 custom-select"
                 variant="outlined"
                 density="compact"
                 rounded="lg"
-              ></v-select>
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item 
+                    v-bind="props" 
+                    :title="item.title"
+                    rounded="lg"
+                    class="custom-select-item"
+                  ></v-list-item>
+                </template>
+              </v-select>
               <div class="text-caption mt-3">
                 Status: {{ newApScore === "N/A" ? "ongoing" : "completed" }}
               </div>
@@ -339,11 +364,20 @@
                 :items="activityOptions"
                 label="Activity Name"
                 hide-details
-                class="mb-4"
+                class="mb-4 custom-select"
                 variant="outlined"
                 density="compact"
                 rounded="lg"
-              ></v-select>
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item 
+                    v-bind="props" 
+                    :title="item.title"
+                    rounded="lg"
+                    class="custom-select-item"
+                  ></v-list-item>
+                </template>
+              </v-select>
               <div class="mt-2">
                 <div class="d-flex justify-space-between mb-1">
                   <span>Strength Rating</span>
@@ -570,9 +604,19 @@ function debounce(func, delay) {
   };
 }
 
+const debouncedAutoSave = debounce(() => {
+  if (initialLoadComplete.value) { // Ensure auto-save only runs after initial load
+    performSaveOperation(true); 
+  }
+}, 2000); // Auto-save after 2 seconds of inactivity
+
+// Watch for any changes in the student profile and trigger the debounced auto-save
+watch(studentProfile, () => {
+  debouncedAutoSave();
+}, { deep: true });
+
 async function fetchUserProfileFromAPI() {
   if (!userStore.isAuthenticated) {
-    // Should not be called if not authenticated, handled by loadProfile
     console.warn('fetchUserProfileFromAPI called while not authenticated');
     return false;
   }
@@ -582,30 +626,23 @@ async function fetchUserProfileFromAPI() {
     satReading.value = data.sat_reading || 500;
     satMath.value = data.sat_math || 500;
     gpa.value = data.gpa || 3.0;
-    // Ensure apClasses and extracurriculars are arrays even if API returns null/undefined
     apClasses.value = (data.ap_classes && Array.isArray(data.ap_classes)) ? data.ap_classes : [];
     extracurriculars.value = (data.extracurriculars && Array.isArray(data.extracurriculars)) ? data.extracurriculars : [];
     
-    // Load intendedMajor from API and map to frontend values
     const apiMajor = data.intended_major || "";
     if (apiMajor === "LAH") {
       intendedMajor.value = "Liberal Arts";
     } else if (apiMajor === "STEM") {
       intendedMajor.value = "STEM";
     } else {
-      intendedMajor.value = ""; // Default to empty if API value is unexpected
+      intendedMajor.value = "";
     }
     
     recScore.value = data.recommendation_strength || 2;
     isLegacy.value = data.is_legacy || false;
-    // nationality.value = data.nationality || 'United States'; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
-    // gender.value = data.gender || 'Prefer not to say'; // Removed: Will be loaded from PERSISTENT_PROFILE_KEY
-    enableBitterByCoffee.value = data.enable_bitter_by_coffee || false; // Keep this as it's part of randomization, not demographics/major
+    enableBitterByCoffee.value = data.enable_bitter_by_coffee || false;
     
-    console.log('Profile data loaded successfully from API (excluding major/demographics managed locally)');
-    // Update localStorage with the fetched data (for authenticated user) - this will not include the locally managed fields
-    // However, studentProfile.value will still have them from persistent load, so USER_PROFILE_KEY will store them.
-    // This is acceptable as USER_PROFILE_KEY acts as a full snapshot for authenticated users if API fails later.
+    console.log('Profile data loaded successfully from API');
     localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(studentProfile.value));
     return true;
   } catch (e) {
@@ -613,20 +650,17 @@ async function fetchUserProfileFromAPI() {
     snackbarText.value = e.response?.data?.detail || 'Failed to load profile from server. Using local data if available.';
     snackbarColor.value = 'error';
     snackbar.value = true;
-    // Fallback to user-specific local storage if API fails for an authenticated user
     const localData = localStorage.getItem(USER_PROFILE_KEY);
     if (localData) {
       try {
         const profileData = JSON.parse(localData);
-        applyProfileData(profileData); // Apply the full profile data
+        applyProfileData(profileData);
         console.log('Profile data loaded from USER_PROFILE_KEY as API fallback.');
-        return true; // Indicate that data was loaded (from local fallback)
+        return true;
       } catch (parseError) {
         console.error('Error parsing local user profile data:', parseError);
-        // If parsing USER_PROFILE_KEY fails, defaults will be set later or persistent data might cover some fields
       }
     }
-    // If API failed and USER_PROFILE_KEY also failed or was empty, return false
     return false;
   } finally {
     loading.value = false;
@@ -641,23 +675,18 @@ function loadGuestProfileFromLocalStorage() {
       const profileData = JSON.parse(savedData);
       applyProfileData(profileData);
       console.log('Guest profile data loaded successfully from localStorage');
-      // Snackbar for guest load can be shown here or suppressed if persistent load also shows one
-      // snackbarText.value = 'Profile loaded locally (guest)';
-      // snackbarColor.value = 'info';
-      // snackbar.value = true;
     } catch (e) {
       console.error('Error parsing saved guest profile data from localStorage:', e);
-      setDefaultProfileData(); // Reset to defaults if parsing fails
+      setDefaultProfileData();
       snackbarText.value = 'Could not load local guest data. Using default profile.';
       snackbarColor.value = 'warning';
       snackbar.value = true;
     }
   } else {
-    setDefaultProfileData(); // Set defaults if no guest data found
+    setDefaultProfileData();
     console.log('No guest profile data found in localStorage. Using defaults.');
   }
   loading.value = false;
-  // initialLoadComplete will be set in onMounted after persistent data is also processed
 }
 
 function applyProfileData(profileData) {
@@ -672,7 +701,6 @@ function applyProfileData(profileData) {
   nationality.value = profileData.nationality || 'United States';
   gender.value = profileData.gender || 'Prefer not to say';
   enableBitterByCoffee.value = profileData.enableBitterByCoffee || false;
-  // demoScore is computed, no need to set it here
 }
 
 function setDefaultProfileData() {
@@ -690,9 +718,8 @@ function setDefaultProfileData() {
 }
 
 const performSaveOperation = async (isAutoSave = false) => {
-  loading.value = true;
+  loading.value = !isAutoSave;
   try {
-    // 1. Prepare the specific data to be always saved locally
     const persistentData = {
       apClasses: apClasses.value,
       extracurriculars: extracurriculars.value,
@@ -701,90 +728,65 @@ const performSaveOperation = async (isAutoSave = false) => {
       gender: gender.value,
       enableBitterByCoffee: enableBitterByCoffee.value
     };
-    // 2. Always save this persistent subset to its own local storage key
     localStorage.setItem(PERSISTENT_PROFILE_KEY, JSON.stringify(persistentData));
-    console.log('Persisted specific profile data locally:', persistentData);
 
-    // 3. Proceed with existing logic for API/Guest save for the *full* profile
     if (userStore.isAuthenticated) {
       const payload = {
         sat_reading: studentProfile.value.satReading,
         sat_math: studentProfile.value.satMath,
         gpa: studentProfile.value.gpa,
-        ap_classes: studentProfile.value.apClasses, // Keep sending these as they are not exclusively local
-        extracurriculars: studentProfile.value.extracurriculars, // Keep sending these
-        // intended_major: studentProfile.value.intendedMajor, // Removed: Not sent to API
+        ap_classes: studentProfile.value.apClasses,
+        extracurriculars: studentProfile.value.extracurriculars,
         recommendation_strength: studentProfile.value.recScore,
         is_legacy: studentProfile.value.isLegacy,
-        // nationality: studentProfile.value.nationality, // Removed: Not sent to API
-        // gender: studentProfile.value.gender, // Removed: Not sent to API
-        enable_bitter_by_coffee: studentProfile.value.enableBitterByCoffee // Keep this as it's part of randomization
+        enable_bitter_by_coffee: studentProfile.value.enableBitterByCoffee
       };
 
-      // Conditionally add intended_major if it has a non-empty value
-      if (studentProfile.value.intendedMajor && studentProfile.value.intendedMajor !== "") {
-        let majorApiValue = studentProfile.value.intendedMajor;
-        
-        // Map frontend display/partial values to backend enum keys
-        if (majorApiValue === "Liberal Arts" || majorApiValue === "Liberal Arts & Humanities") {
-          majorApiValue = "LAH";
-        } else if (majorApiValue === "Science, Technology, Engineering, Math") {
-          majorApiValue = "STEM";
-        }
-        // Add other mappings here if new Major choices are added to models.py
-        // and the frontend uses different display strings for them.
-        
-        payload.intended_major = majorApiValue;
+      if (studentProfile.value.intendedMajor) {
+        payload.intended_major = studentProfile.value.intendedMajor === "Liberal Arts" ? "LAH" : studentProfile.value.intendedMajor;
       }
 
       await api.put('profile/', payload);
-
-      // USER_PROFILE_KEY will store the complete profile including locally managed fields.
-      // This is for local fallback consistency for authenticated users.
       localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(studentProfile.value));
-      if (!isAutoSave) {
+      
+      if (isAutoSave) {
+        snackbarText.value = 'Profile auto-saved.';
+        snackbarColor.value = 'info';
+      } else {
         snackbarText.value = 'Profile saved successfully to server.';
         snackbarColor.value = 'success';
-        snackbar.value = true;
       }
+      snackbar.value = true;
+
     } else {
       localStorage.setItem(GUEST_PROFILE_KEY, JSON.stringify(studentProfile.value));
-      if (!isAutoSave) {
+      if (isAutoSave) {
+        snackbarText.value = 'Profile auto-saved locally.';
+        snackbarColor.value = 'info';
+      } else {
         snackbarText.value = 'Profile saved locally.';
         snackbarColor.value = 'success';
-        snackbar.value = true;
       }
+      snackbar.value = true;
     }
 
   } catch (e) {
     console.error('Error during save operation:', e);
-    // The persistentData was already saved successfully before this catch block.
-    if (userStore.isAuthenticated) { // This error is from the API call or USER_PROFILE_KEY save
-      snackbarText.value = 'Failed to save full profile to server. Key settings are backed up locally.';
-    } else { // This error is from GUEST_PROFILE_KEY save (should be rare if not API related)
-      snackbarText.value = 'Failed to save full profile locally. Key settings may still be backed up.';
+    if (!isAutoSave) {
+      snackbarText.value = userStore.isAuthenticated 
+        ? 'Failed to save profile to server. Key settings are backed up locally.'
+        : 'Failed to save profile locally. Key settings may still be backed up.';
+      snackbarColor.value = 'error';
+      snackbar.value = true;
     }
-    snackbarColor.value = 'error';
-    snackbar.value = true;
   } finally {
     loading.value = false;
   }
 };
 
-const debouncedAutoSave = debounce(() => {
-  if (initialLoadComplete.value) { // Ensure auto-save only runs after initial load
-    console.log('Auto-saving profile data...');
-    performSaveOperation(true); // Auto-save is now silent
-  }
-}, 2000); // Auto-save after 2 seconds of inactivity
-
-// Manual save function
 const manualSaveUserProfile = async () => {
-  // Directly call the save operation without debounce
   await performSaveOperation(false);
 };
-
-// --- END AUTO-SAVE LOGIC ---
 
 const getApScoreColor = (score) => {
   if (score === 5) return "success";
@@ -799,11 +801,9 @@ const addApClassAndClose = () => {
     const existingClass = apClasses.value.find(apClass => apClass.name === newApClass.value);
     if (existingClass) {
       snackbarText.value = `AP Class "${newApClass.value}" already added.`;
-      snackbarColor.value = 'warning'; // Yellow for warning
+      snackbarColor.value = 'warning';
       snackbar.value = true;
-      // newApClass.value = ""; // Optionally reset
-      // newApScore.value = "N/A";
-      dialog.value = false; // Close dialog even on error
+      dialog.value = false;
       return;
     }
 
@@ -844,15 +844,6 @@ const getApMajorMatchColor = (apCourseName) => {
 
 const addActivityAndClose = () => {
   if (newActivity.value) {
-    // Optional: Check for duplicate activity
-    // const existingActivity = extracurriculars.value.find(act => act.name === newActivity.value);
-    // if (existingActivity) {
-    //   snackbarText.value = `Activity "${newActivity.value}" already added.`;
-    //   snackbarColor.value = 'warning';
-    //   snackbar.value = true;
-    //   activityDialog.value = false;
-    //   return;
-    // }
     let fitScore = 0;
     if (intendedMajor.value) {
       fitScore = calculateFitScore(newActivity.value, 'activity', intendedMajor.value);
@@ -888,22 +879,21 @@ const getActivityMajorMatchColor = (activityName) => {
 
 const getActivityLevelColor = (level, activityName = "") => {
   const special = isSpecialActivityType(activityName);
-  if (special) { // Max 5 for special types
+  if (special) {
     if (level === 5) return "success";
     if (level === 4) return "info";
     if (level === 3) return "warning";
     if (level === 2) return "grey-darken-1";
-    return "grey"; // Level 1
-  } else { // Max 4 for normal types
+    return "grey";
+  } else {
     if (level === 4) return "success";
     if (level === 3) return "info";
     if (level === 2) return "warning";
-    return "grey"; // Level 1
+    return "grey";
   }
 };
 
 const getLevelDescription = (level) => {
-  // Descriptions are now universal up to 5; slider max controls availability of level 5
   const levelDescriptions = {
     1: 'Average / Participation',
     2: 'Somewhat Strong / Notable Achievement',
@@ -930,67 +920,33 @@ const openActivityDialog = () => {
 };
 
 onMounted(async () => {
-  let mainProfileSourceLoaded = false;
-
-  // Step 1: Load the main profile (full data)
+  loading.value = true;
   if (userStore.isAuthenticated) {
-    const loadedSuccessfully = await fetchUserProfileFromAPI();
-    if (loadedSuccessfully) {
-      mainProfileSourceLoaded = true;
-    } else {
-      // fetchUserProfileFromAPI already tries USER_PROFILE_KEY. If it returned false,
-      // it means API failed AND USER_PROFILE_KEY was not found or failed to parse.
-      // In this scenario, applyProfileData wasn't called with valid data from these primary sources.
-      // We will set defaults, then persistent data will override specific fields.
-      console.log('Authenticated user: API and USER_PROFILE_KEY failed. Setting defaults before persistent load.');
-      setDefaultProfileData();
-    }
+    await fetchUserProfileFromAPI();
   } else {
-    // For guest users, loadGuestProfileFromLocalStorage handles GUEST_PROFILE_KEY or sets defaults.
     loadGuestProfileFromLocalStorage();
-    mainProfileSourceLoaded = true; // loadGuestProfileFromLocalStorage always sets some state (loaded or default)
   }
 
-  // Step 2: Load and apply data from PERSISTENT_PROFILE_KEY for specified fields,
-  // overriding values for these specific fields that might have been loaded from the main profile sources or defaults.
   const persistentDataString = localStorage.getItem(PERSISTENT_PROFILE_KEY);
   if (persistentDataString) {
     try {
       const persistentProfileData = JSON.parse(persistentDataString);
       console.log('Applying persistent local data over current state:', persistentProfileData);
       
-      if (persistentProfileData.hasOwnProperty('apClasses') && Array.isArray(persistentProfileData.apClasses)) {
-        apClasses.value = persistentProfileData.apClasses;
-      }
-      if (persistentProfileData.hasOwnProperty('extracurriculars') && Array.isArray(persistentProfileData.extracurriculars)) {
-        extracurriculars.value = persistentProfileData.extracurriculars;
-      }
-      if (persistentProfileData.hasOwnProperty('nationality')) {
-        nationality.value = persistentProfileData.nationality;
-      }
-      if (persistentProfileData.hasOwnProperty('gender')) {
-        gender.value = persistentProfileData.gender;
-      }
-      if (persistentProfileData.hasOwnProperty('enableBitterByCoffee')) {
-        enableBitterByCoffee.value = persistentProfileData.enableBitterByCoffee;
-      }
-      
-      // Optionally, provide feedback that persistent data was applied.
-      // This might be too frequent if shown every time.
-      // if (mainProfileSourceLoaded && !snackbar.value) { // Avoid overriding other snackbars
-      //   snackbarText.value = 'Applied locally stored preferences for key settings.';
-      //   snackbarColor.value = 'info';
-      //   snackbar.value = true;
-      // }
+      if (persistentProfileData.hasOwnProperty('apClasses')) apClasses.value = persistentProfileData.apClasses;
+      if (persistentProfileData.hasOwnProperty('extracurriculars')) extracurriculars.value = persistentProfileData.extracurriculars;
+      if (persistentProfileData.hasOwnProperty('intendedMajor')) intendedMajor.value = persistentProfileData.intendedMajor;
+      if (persistentProfileData.hasOwnProperty('nationality')) nationality.value = persistentProfileData.nationality;
+      if (persistentProfileData.hasOwnProperty('gender')) gender.value = persistentProfileData.gender;
+      if (persistentProfileData.hasOwnProperty('enableBitterByCoffee')) enableBitterByCoffee.value = persistentProfileData.enableBitterByCoffee;
 
     } catch (e) {
       console.error('Error parsing or applying persistent profile data from localStorage:', e);
-      // If persistent data is corrupt, the values from main load (or defaults) will remain.
     }
   }
+  
+  loading.value = false;
 
-  // Initial load is complete after all attempts to load/apply data.
-  // nextTick ensures Vue has processed DOM updates from data changes before setting initialLoadComplete.
   nextTick(() => {
     initialLoadComplete.value = true;
     console.log('Initial load sequence complete. Auto-save monitoring active.');
@@ -1120,10 +1076,24 @@ onMounted(async () => {
 
 /* Deep styles for consistency */
 :deep(.v-expansion-panel) {
-  background-color: white;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
 }
+
 :deep(.v-expansion-panels) {
   background-color: transparent !important;
+}
+
+:deep(.v-card) {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.v-btn) {
