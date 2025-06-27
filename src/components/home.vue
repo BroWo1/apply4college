@@ -23,21 +23,26 @@
     </section>
     <!-- Main Content -->
     <main class="main-content">
-      <!-- AI Advisor Section -->
-      <AIAdvisorSection 
-        v-model:question="aiQuestion"
-        :loading="loadingAiResponse"
-        :response="aiResponse"
-        :error="aiError"
-        :quick-questions="quickQuestions"
-        @ask="askAI"
-      />
+      <div class="content-platform">
+        <!-- AI Advisor Section -->
+        <AIAdvisorSection 
+          v-model:question="aiQuestion"
+          :loading="loadingAiResponse"
+          :response="aiResponse"
+          :error="aiError"
+          :quick-questions="quickQuestions"
+          @ask="askAI"
+        />
 
-      <!-- Saved Colleges Section -->
-      <SavedCollegesSection 
-        :colleges="allSavedColleges"
-        @view-college="viewCollege"
-      />
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Saved Colleges Section -->
+        <SavedCollegesSection 
+          :colleges="allSavedColleges"
+          @view-college="viewCollege"
+        />
+      </div>
     </main>
   </div>
 </template>
@@ -74,20 +79,21 @@ const viewCollege = (college) => {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 50%, #e8eaf6 100%);
 }
 
 /* Modern Hero Section */
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, 
-    #8b5cf6 0%, 
-    #7c3aed 50%,
-    #6d28d9 100%
+    #667eea 0%, 
+    #764ba2 50%,
+    #8b5cf6 100%
   );
-  padding: 4rem 2rem;
+  padding: 3.5rem 2rem 4.5rem;
   overflow: hidden;
   color: white;
+  margin-bottom: -2rem;
 }
 
 .hero-content {
@@ -99,30 +105,32 @@ const viewCollege = (college) => {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  font-weight: 700;
   line-height: 1.1;
   margin-bottom: 1rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .hero-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.6em;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 0.3rem 0.8rem;
+  border-radius: 1.2rem;
+  font-size: 0.65em;
   margin-left: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 600;
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
-  opacity: 0.9;
+  font-size: 1.2rem;
+  opacity: 0.92;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
+  font-weight: 400;
 }
 
 /* Floating Animation */
@@ -180,42 +188,103 @@ const viewCollege = (college) => {
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem 2rem;
   position: relative;
   z-index: 1;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 3rem 1rem;
-  }
-  
-  .main-content {
-    padding: 1rem;
-  }
-  
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.125rem;
-  }
-}
-
-/* Modern card styles for consistency */
-:deep(.v-card) {
+/* Unified Content Platform */
+.content-platform {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 2rem;
+  padding: 3rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:deep(.v-card:hover) {
-  transform: translateY(-2px);
+
+/* Section Divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.2) 20%, rgba(139, 92, 246, 0.4) 50%, rgba(139, 92, 246, 0.2) 80%, transparent 100%);
+  margin: 3rem 0;
+  position: relative;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2.5rem 1rem 3.5rem;
+    margin-bottom: -1.5rem;
+  }
+  
+  .main-content {
+    padding: 2rem 1rem 1rem;
+  }
+  
+  .content-platform {
+    padding: 2rem;
+    border-radius: 1.5rem;
+  }
+  
+  .section-divider {
+    margin: 2rem 0;
+  }
+  
+  .hero-title {
+    font-size: 2.25rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-platform {
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+  }
+  
+  .section-divider {
+    margin: 1.5rem 0;
+  }
+}
+
+/* Remove card-like styling and create natural flat content sections */
+:deep(.v-card) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Flat content section styling within the platform */
+:deep(.ai-advisor-section),
+:deep(.saved-colleges-section) {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Remove hover effects for flat design */
+:deep(.ai-advisor-section:hover),
+:deep(.saved-colleges-section:hover) {
+  transform: none;
+  box-shadow: none !important;
 }
 
 /* Smooth animations */
 * {
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 /* Clean button styles */
@@ -223,10 +292,23 @@ const viewCollege = (college) => {
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
-  box-shadow: none;
+  border-radius: 0.75rem;
 }
 
-:deep(.v-btn:hover) {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+:deep(.v-btn:not(.v-btn--icon)) {
+  padding: 0 1.5rem;
+  height: 44px;
+}
+
+:deep(.v-btn--variant-tonal) {
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: #7c3aed !important;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+:deep(.v-btn--variant-tonal:hover) {
+  background: rgba(139, 92, 246, 0.12) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
 }
 </style>

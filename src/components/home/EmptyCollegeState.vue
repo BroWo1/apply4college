@@ -29,11 +29,18 @@
 
 <style scoped>
 .empty-state {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 2px dashed rgba(0, 0, 0, 0.1);
-  border-radius: 1.5rem;
-  padding: 4rem 2rem;
+  background: rgba(248, 250, 252, 0.6);
+  backdrop-filter: none;
+  border: 2px dashed rgba(139, 92, 246, 0.2);
+  border-radius: 1.25rem;
+  padding: 3rem 2rem;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.empty-state:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(248, 250, 252, 0.8);
 }
 
 .empty-state-content {
@@ -43,34 +50,43 @@
 }
 
 .empty-state-icon {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.empty-state-icon .v-icon {
+  color: rgba(139, 92, 246, 0.6) !important;
 }
 
 .empty-state-title {
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   font-weight: 700;
-  color: rgb(var(--v-theme-on-surface));
-  margin: 0 0 1rem 0;
+  color: #1a202c;
+  margin: 0 0 1.25rem 0;
   line-height: 1.3;
 }
 
 .empty-state-description {
-  color: #1f2937;
-  font-size: 1rem;
+  color: #4a5568;
+  font-size: 1.05rem;
   line-height: 1.6;
-  margin: 0 0 2rem 0;
+  margin: 0 0 2.5rem 0;
+  font-weight: 400;
 }
 
 .explore-button {
   text-transform: none;
   font-weight: 600;
-  padding: 0 2rem;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  padding: 0 2.5rem !important;
+  height: 56px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3) !important;
+  border: none !important;
+  color: white !important;
 }
 
 .explore-button:hover {
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(139, 92, 246, 0.4) !important;
+  transform: translateY(-2px);
 }
 
 @keyframes fadeInUp {
@@ -91,11 +107,26 @@
   }
   
   .empty-state-title {
-    font-size: 1.25rem;
+    font-size: 1.375rem;
+  }
+  
+  .empty-state-description {
+    font-size: 1rem;
   }
   
   .explore-button {
     width: 100%;
+    height: 52px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .empty-state {
+    padding: 2.5rem 1rem;
+  }
+  
+  .empty-state-title {
+    font-size: 1.25rem;
   }
 }
 </style>

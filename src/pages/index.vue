@@ -134,9 +134,15 @@
           <p class="text-subtitle-1" style="color: #1f2937;">{{ $t('indexPage.teamSubtitle') }}</p>
         </div>
 
-        <v-row>
-          <v-col v-for="member in teamMembers" :key="member.name" cols="12" md="4">
-            <v-card rounded="xl" elevation="0" class="text-center h-100">
+        <div class="team-cards-container">
+          <div class="team-cards-scroll">
+            <v-card 
+              v-for="member in teamMembers" 
+              :key="member.name" 
+              rounded="xl" 
+              elevation="0" 
+              class="text-center team-card"
+            >
               <v-card-text class="pa-6">
                 <v-avatar size="120" class="mb-4">
                   <v-img :src="member.image" :alt="member.name"></v-img>
@@ -153,8 +159,8 @@
                 </v-btn>
               </v-card-text>
             </v-card>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
 
         <!-- GPE Club Section -->
         <v-card class="text-center mt-8" color="primary" rounded="xl">
@@ -180,6 +186,7 @@ import { colleges } from '@/data/colleges.js';
 import willImg from '@/assets/will.jpg';
 import andyImg from '@/assets/andy.jpg';
 import jczImg from '@/assets/jcz.jpg';
+import ericImg from '@/assets/eric.jpg';
 
 const { t } = useI18n();
 
@@ -277,7 +284,14 @@ const teamMembers = [
     club: t('indexPage.krypotoClub'),
     image: jczImg,
     github: 'https://github.com/chrisdsasa'
-  }
+  },
+  {
+    name: 'Eric Jia',
+    role: t('Lead Designer'),
+    school: t('indexPage.school'),
+    club: t('Spartans Magazine'),
+    image: ericImg,
+  },
 ];
 </script>
 
@@ -471,6 +485,65 @@ const teamMembers = [
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
+}
+
+/* Team Cards Horizontal Scroll */
+.team-cards-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+}
+
+.team-cards-scroll {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.team-cards-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.team-cards-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.team-cards-scroll::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.team-cards-scroll::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.team-card {
+  flex: 0 0 300px;
+  height: 100%;
+  min-height: 400px;
+  transition: all 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+  .team-card {
+    flex: 0 0 280px;
+  }
+  
+  .team-cards-scroll {
+    gap: 1rem;
+  }
 }
 
 /* Responsive Design */

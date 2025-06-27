@@ -1,12 +1,14 @@
 <template>
   <div class="essay-page">
-    <!-- Main Content -->
     <v-container fluid class="essay-container">
       <v-row>
-        <!-- Left Panel - Essay Editor -->
-        <v-col cols="12" lg="7" class="essay-editor-panel">
+        <v-col 
+          cols="12" 
+          :lg="isCoachVisible ? 7 : 8" 
+          :offset-lg="isCoachVisible ? 0 : 2" 
+          class="essay-editor-panel"
+        >
           <div class="left-panel-sticky-wrapper">
-            <!-- Sticky Header -->
             <div class="editor-header-sticky">
               <v-card 
                 class="mb-0"
@@ -14,7 +16,6 @@
                 elevation="0"
               >
                 <v-card-text class="pa-5">
-                  <!-- Header Title Row -->
                   <div class="d-flex justify-space-between align-center mb-3">
                     <div class="d-flex align-center">
                       <v-icon size="28" color="primary" class="me-3">mdi-file-document-edit-outline</v-icon>
@@ -50,8 +51,7 @@
                         <v-icon>{{ headerExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                       </v-btn>
                     </div>
-                  </div>                    <!-- Status Chips Row -->
-                  <div class="d-flex align-center flex-wrap mb-2" style="gap: 8px;">
+                  </div>                    <div class="d-flex align-center flex-wrap mb-2" style="gap: 8px;">
                     <v-chip 
                       :color="wordCountColor" 
                       size="small" 
@@ -86,7 +86,6 @@
                       Complete profile for chance
                     </v-chip>
 
-                    <!-- Auto-save status chip -->
                     <v-chip
                       v-if="autoSaveStatus && autoSaveStatus !== 'enabled'"
                       :color="autoSaveStatus === 'saving' ? 'warning' : autoSaveStatus === 'saved' ? 'success' : 'error'"
@@ -183,11 +182,9 @@
                           </v-col>
                         </v-row>
 
-                        <!-- Essay Prompt Display/Input -->
                         <div class="mt-4">
                           <h3 class="text-subtitle-1 font-weight-bold mb-2">Essay Prompt</h3>
                           
-                          <!-- Predefined Prompts -->
                           <div v-if="promptSource === 'predefined'">
                             <v-select
                               v-model="selectedPrompt"
@@ -215,7 +212,6 @@
                             <p v-if="currentPrompt" class="prompt-text text-caption pa-2">{{ currentPrompt.text }}</p>
                           </div>
 
-                          <!-- Custom Prompt -->
                           <div v-else>
                             <v-textarea
                               v-model="customPrompt"
@@ -236,14 +232,12 @@
               </v-card>
             </div>
 
-            <!-- Writing Section -->
             <v-card 
               class="writing-card" 
               rounded="b-xl" 
               elevation="0"
             >
               <v-card-text class="pa-6">
-                <!-- Simple Text Editor -->
                 <v-textarea
                   ref="essayTextarea"
                   v-model="essayContent"
@@ -261,355 +255,373 @@
           </div>
         </v-col>
 
-        <!-- Right Panel - AI Analysis -->
-        <v-col cols="12" lg="5" class="ai-analysis-panel">
-          <div class="sticky-panel">
-            <div class="ai-header-sticky">
+        <transition name="slide-right-fade">
+          <v-col v-if="isCoachVisible" cols="12" lg="5" class="ai-analysis-panel">
+            <div class="sticky-panel">
+              <div class="ai-header-sticky">
+                <v-card 
+                  class="mb-0"
+                  rounded="t-xl" 
+                  elevation="0"
+                  border
+                >
+                  <v-card-text class="pa-6">
+                    <div class="d-flex align-center">
+                      <v-icon size="32" color="primary" class="me-3">mdi-robot-outline</v-icon>
+                      <h2 class="text-h5 font-weight-bold">AI Essay Coach</h2>
+                      <v-progress-circular
+                        v-if="isAnalyzing"
+                        indeterminate
+                        size="20"
+                        width="2"
+                        color="primary"
+                        class="ms-2"
+                      />
+                      <v-spacer />
+                      <v-btn
+                        color="primary"
+                        variant="tonal"
+                        size="small"
+                        prepend-icon="mdi-refresh"
+                        @click="refreshAnalysis"
+                        :loading="isAnalyzing"
+                        :disabled="!essayContent.trim()"
+                      >
+                        Analyze
+                      </v-btn>
+                      
+                      <v-btn
+                        v-if="debugMode || debugInfo"
+                        color="orange"
+                        variant="outlined"
+                        size="small"
+                        prepend-icon="mdi-bug"
+                        class="ml-2"
+                        @click="showDebugModal = true"
+                        :disabled="!debugInfo"
+                      >
+                        Debug
+                      </v-btn>
+                      
+                      <v-tooltip text="Toggle debug mode to capture detailed AI analysis information">
+                        <template #activator="{ props }">
+                          <v-btn
+                            v-bind="props"
+                            :color="debugMode ? 'orange' : 'grey'"
+                            variant="text"
+                            size="small"
+                            icon="mdi-cog"
+                            class="ml-2"
+                            @click="debugMode = !debugMode"
+                          >
+                          </v-btn>
+                        </template>
+                      </v-tooltip>
+                      
+                      <v-btn
+                        v-if="debugMode"
+                        color="blue"
+                        variant="text"
+                        size="small"
+                        icon="mdi-information"
+                        class="ml-1"
+                        @click="console.log('Debug Info:', { selectedCollege: selectedCollege.value, selectedCollegeData: selectedCollegeData.value, studentProfile: studentProfile.value, admissionChance: admissionChance.value })"
+                      >
+                      </v-btn>
+
+                      <v-tooltip text="Close Coach">
+                        <template v-slot:activator="{ props }">
+                          <v-btn
+                            v-bind="props"
+                            variant="text"
+                            size="small"
+                            icon="mdi-chevron-right"
+                            class="ms-1"
+                            @click="isCoachVisible = false"
+                          />
+                        </template>
+                      </v-tooltip>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </div>
               <v-card 
-                class="mb-0"
-                rounded="t-xl" 
+                class="ai-analysis-card" 
+                rounded="b-xl" 
                 elevation="0"
                 border
               >
                 <v-card-text class="pa-6">
-                  <div class="d-flex align-center">
-                    <v-icon size="32" color="primary" class="me-3">mdi-robot-outline</v-icon>
-                    <h2 class="text-h5 font-weight-bold">AI Essay Coach</h2>
-                    <v-progress-circular
-                      v-if="isAnalyzing"
-                      indeterminate
-                      size="20"
-                      width="2"
-                      color="primary"
-                      class="ms-2"
-                    />
-                    <v-spacer />
-                    <v-btn
-                      color="primary"
-                      variant="tonal"
-                      size="small"
-                      prepend-icon="mdi-refresh"
-                      @click="refreshAnalysis"
-                      :loading="isAnalyzing"
-                      :disabled="!essayContent.trim()"
-                    >
-                      Analyze
-                    </v-btn>
-                    
-                    <!-- Dev Button -->
-                    <v-btn
-                      v-if="debugMode || debugInfo"
-                      color="orange"
-                      variant="outlined"
-                      size="small"
-                      prepend-icon="mdi-bug"
-                      class="ml-2"
-                      @click="showDebugModal = true"
-                      :disabled="!debugInfo"
-                    >
-                      Debug
-                    </v-btn>
-                    
-                    <v-tooltip text="Toggle debug mode to capture detailed AI analysis information">
-                      <template #activator="{ props }">
-                        <v-btn
-                          v-bind="props"
-                          :color="debugMode ? 'orange' : 'grey'"
-                          variant="text"
-                          size="small"
-                          icon="mdi-cog"
-                          class="ml-2"
-                          @click="debugMode = !debugMode"
+                  <v-card v-if="selectedCollegeData && admissionChance" class="mb-4" rounded="lg" elevation="0" color="white">
+                    <v-card-text class="pa-4">
+                      <div class="d-flex align-center mb-3">
+                        <v-avatar size="40" class="me-3">
+                          <v-img :src="selectedCollegeData.image" :alt="selectedCollegeData.name" />
+                        </v-avatar>
+                        <div>
+                          <h3 class="text-subtitle-1 font-weight-bold">{{ selectedCollegeData.name }}</h3>
+                          <p class="text-caption mb-0 text-grey-darken-1">{{ selectedCollegeData.location }}</p>
+                        </div>
+                        <v-spacer />
+                        <v-chip 
+                          :color="getChanceColor(admissionChance.probabilityPercentage)" 
+                          variant="flat" 
+                          class="font-weight-bold"
                         >
+                          {{ admissionChance.probabilityPercentage }}%
+                        </v-chip>
+                      </div>
+                      
+                      <v-progress-linear
+                        :model-value="admissionChance.probabilityPercentage"
+                        :color="getChanceColor(admissionChance.probabilityPercentage)"
+                        height="8"
+                        rounded
+                        class="mb-3"
+                      />
+                      
+                      <div class="d-flex justify-space-between text-caption">
+                        <span>Admission Chance</span>
+                        <span class="font-weight-bold">{{ getChanceDescription(admissionChance.probabilityPercentage) }}</span>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <v-card v-else-if="selectedCollegeData && !studentProfile" class="mb-4" rounded="lg" elevation="0" color="orange-lighten-5" border>
+                    <v-card-text class="pa-4">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon color="orange" size="32" class="me-3">mdi-account-alert</v-icon>
+                        <div>
+                          <h3 class="text-subtitle-1 font-weight-bold text-orange-darken-2">Set Up Your Profile</h3>
+                          <p class="text-caption mb-0 text-orange-darken-1">Complete your profile to see admission chances for {{ selectedCollegeData.name }}</p>
+                        </div>
+                        <v-spacer />
+                        <v-btn
+                          color="orange"
+                          variant="flat"
+                          size="small"
+                          to="/profile"
+                          prepend-icon="mdi-account-edit"
+                        >
+                          Set Up Profile
                         </v-btn>
-                      </template>
-                    </v-tooltip>
-                    
-                    <!-- Debug Info Button -->
-                    <v-btn
-                      v-if="debugMode"
-                      color="blue"
-                      variant="text"
-                      size="small"
-                      icon="mdi-information"
-                      class="ml-1"
-                      @click="console.log('Debug Info:', { selectedCollege: selectedCollege.value, selectedCollegeData: selectedCollegeData.value, studentProfile: studentProfile.value, admissionChance: admissionChance.value })"
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <v-card v-else-if="!selectedCollegeData" class="mb-4" rounded="lg" elevation="0" color="blue-lighten-5" border>
+                    <v-card-text class="pa-4">
+                      <div class="d-flex align-center">
+                        <v-icon color="primary" size="32" class="me-3">mdi-school</v-icon>
+                        <div>
+                          <h3 class="text-subtitle-1 font-weight-bold text-primary">Select a College</h3>
+                          <p class="text-caption mb-0 text-grey-darken-1">Choose a target college to see personalized analysis and admission chances</p>
+                        </div>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <div v-if="!essayContent.trim()" class="analysis-placeholder">
+                    <v-sheet 
+                      class="text-center pa-8" 
+                      color="transparent"
+                      rounded="lg"
                     >
-                    </v-btn>
+                      <v-icon size="80" color="grey-lighten-1" class="mb-4">mdi-pencil-outline</v-icon>
+                      <h3 class="text-h6 text-grey-darken-1 mb-2">Start Writing</h3>
+                      <p class="text-body-2 text-grey-darken-1">
+                        Select a college and prompt, then start writing to get AI-powered feedback and suggestions.
+                      </p>
+                    </v-sheet>
+                  </div>
+
+                  <v-alert 
+                    v-if="analysisError"
+                    type="error"
+                    class="mb-4"
+                    dismissible
+                    @input="analysisError = null"
+                  >
+                    <strong>Analysis Failed:</strong> {{ analysisError }}
+                  </v-alert>
+
+                  <div v-else class="analysis-content">
+                    <transition-group name="staggered-fade" tag="div" appear>
+                      <v-card :key="'score'" class="mb-4" rounded="lg" elevation="0" color="white">
+                        <v-card-text class="pa-4">
+                          <div class="d-flex align-center justify-space-between mb-2">
+                            <h3 class="text-subtitle-1 font-weight-bold">Overall Score</h3>
+                            <v-chip :color="getScoreColor(overallScore)" variant="flat" class="font-weight-bold">
+                              {{ overallScore }}/100
+                            </v-chip>
+                          </div>
+                          <v-progress-linear
+                            :model-value="overallScore"
+                            :color="getScoreColor(overallScore)"
+                            height="8"
+                            rounded
+                          />
+                        </v-card-text>
+                      </v-card>
+
+                      <div :key="'categories'" class="analysis-categories mb-4">
+                        <v-expansion-panels multiple>
+                          <v-expansion-panel 
+                            v-for="category in analysisCategories" 
+                            :key="category.id"
+                            :value="category.id"
+                            rounded="lg"
+                            bg-color="white"
+                            class="mb-2"
+                          >
+                            <v-expansion-panel-title>
+                              <div class="d-flex align-center w-100">
+                                <v-icon :color="getCategoryColor(category.id)" class="me-3">{{ getCategoryIcon(category.id) }}</v-icon>
+                                <span class="font-weight-medium">{{ category.title }}</span>
+                                <v-spacer />
+                                <v-chip 
+                                  size="small" 
+                                  :color="getScoreColor(category.score * 10)" 
+                                  variant="tonal"
+                                >
+                                  {{ category.score }}/10
+                                </v-chip>
+                              </div>
+                            </v-expansion-panel-title>
+                            <v-expansion-panel-text class="pt-3">
+                              <p class="mb-3 text-body-2">{{ category.feedback }}</p>
+                              <div v-if="category.suggestions.length">
+                                <h4 class="text-subtitle-2 font-weight-bold mb-2">Suggestions:</h4>
+                                <v-list density="compact" class="bg-transparent">
+                                  <v-list-item 
+                                    v-for="(suggestion, i) in category.suggestions" 
+                                    :key="i"
+                                    class="px-0"
+                                  >
+                                    <template v-slot:prepend>
+                                      <v-icon size="16" color="primary" class="me-3">mdi-lightbulb-outline</v-icon>
+                                    </template>
+                                    <v-list-item-title class="text-body-2" style="white-space: normal;">{{ suggestion }}</v-list-item-title>
+                                  </v-list-item>
+                                </v-list>
+                              </div>
+                            </v-expansion-panel-text>
+                          </v-expansion-panel>
+                        </v-expansion-panels>
+                      </div>
+
+                      <v-card :key="'comments'" rounded="lg" elevation="0" color="white" class="mb-4">
+                        <v-card-text class="pa-4">
+                          <h3 class="text-subtitle-1 font-weight-bold mb-3">
+                            <v-icon color="primary" class="me-2">mdi-comment-text-outline</v-icon>
+                            AI Comments
+                          </h3>
+                          <div class="comments-list">
+                            <div v-if="analysisComments.length === 0 && !isAnalyzing" class="text-center text-grey-darken-1 py-4">
+                              <p>No specific comments yet. Click "Analyze" to get detailed feedback.</p>
+                            </div>
+                            <div 
+                              v-for="comment in analysisComments" 
+                              :key="comment.id || comment.text"
+                              class="comment-item mb-3 pa-3"
+                              :class="`comment-${comment.type}`"
+                            >
+                              <div class="d-flex align-start">
+                                <v-icon 
+                                  size="20" 
+                                  :color="getCommentColor(comment.type)" 
+                                  class="me-3 mt-1"
+                                >
+                                  {{ getCommentIcon(comment.type) }}
+                                </v-icon>
+                                <div class="flex-grow-1">
+                                  <div class="d-flex align-center mb-1">
+                                    <span class="text-caption font-weight-medium text-uppercase">
+                                      {{ comment.type }}
+                                    </span>
+                                    <v-tooltip location="top">
+                                      <template v-slot:activator="{ props }">
+                                        <v-chip 
+                                          v-if="comment.line" 
+                                          v-bind="props"
+                                          size="x-small" 
+                                          variant="tonal" 
+                                          class="ms-2 line-chip"
+                                          @click="highlightLine(comment.line)"
+                                          color="primary"
+                                        >
+                                          <v-icon start size="12">mdi-cursor-text</v-icon>
+                                          Line {{ comment.line }}
+                                        </v-chip>
+                                      </template>
+                                      <span>Click to highlight this line in your essay</span>
+                                    </v-tooltip>
+                                  </div>
+                                  <p class="text-body-2 mb-2">{{ comment.text }}</p>
+                                  <div v-if="comment.context" class="context-preview">
+                                    <v-chip 
+                                      size="small" 
+                                      variant="outlined" 
+                                      class="context-chip text-caption"
+                                      prepend-icon="mdi-text-search"
+                                    >
+                                      "{{ truncateContext(comment.context) }}"
+                                    </v-chip>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </v-card-text>
+                      </v-card>
+
+                      <v-card :key="'profile'" rounded="lg" elevation="0" color="white">
+                        <v-card-text class="pa-4">
+                          <h3 class="text-subtitle-1 font-weight-bold mb-3">
+                            <v-icon color="secondary" class="me-2">mdi-account-check-outline</v-icon>
+                            Profile Alignment
+                          </h3>
+                          <p class="text-body-2 mb-3">
+                            Based on your profile and the selected college's values, here's how well your essay aligns:
+                          </p>
+                          <v-progress-linear
+                            :model-value="profileAlignment"
+                            color="secondary"
+                            height="8"
+                            rounded
+                            class="mb-2"
+                          />
+                          <div class="d-flex justify-space-between">
+                            <span class="text-caption">Profile Match</span>
+                            <span class="text-caption font-weight-bold">{{ profileAlignment }}%</span>
+                          </div>
+                        </v-card-text>
+                      </v-card>
+                    </transition-group>
                   </div>
                 </v-card-text>
               </v-card>
             </div>
-            <v-card 
-              class="ai-analysis-card" 
-              rounded="b-xl" 
-              elevation="0"
-              border
-            >
-              <v-card-text class="pa-6">
-                <!-- College Match Info Card -->
-                <v-card v-if="selectedCollegeData && admissionChance" class="mb-4" rounded="lg" elevation="0" color="white">
-                  <v-card-text class="pa-4">
-                    <div class="d-flex align-center mb-3">
-                      <v-avatar size="40" class="me-3">
-                        <v-img :src="selectedCollegeData.image" :alt="selectedCollegeData.name" />
-                      </v-avatar>
-                      <div>
-                        <h3 class="text-subtitle-1 font-weight-bold">{{ selectedCollegeData.name }}</h3>
-                        <p class="text-caption mb-0 text-grey-darken-1">{{ selectedCollegeData.location }}</p>
-                      </div>
-                      <v-spacer />
-                      <v-chip 
-                        :color="getChanceColor(admissionChance.probabilityPercentage)" 
-                        variant="flat" 
-                        class="font-weight-bold"
-                      >
-                        {{ admissionChance.probabilityPercentage }}%
-                      </v-chip>
-                    </div>
-                    
-                    <v-progress-linear
-                      :model-value="admissionChance.probabilityPercentage"
-                      :color="getChanceColor(admissionChance.probabilityPercentage)"
-                      height="8"
-                      rounded
-                      class="mb-3"
-                    />
-                    
-                    <div class="d-flex justify-space-between text-caption">
-                      <span>Admission Chance</span>
-                      <span class="font-weight-bold">{{ getChanceDescription(admissionChance.probabilityPercentage) }}</span>
-                    </div>
-                  </v-card-text>
-                </v-card>
-
-                <!-- Profile Setup Prompt -->
-                <v-card v-else-if="selectedCollegeData && !studentProfile" class="mb-4" rounded="lg" elevation="0" color="orange-lighten-5" border>
-                  <v-card-text class="pa-4">
-                    <div class="d-flex align-center mb-3">
-                      <v-icon color="orange" size="32" class="me-3">mdi-account-alert</v-icon>
-                      <div>
-                        <h3 class="text-subtitle-1 font-weight-bold text-orange-darken-2">Set Up Your Profile</h3>
-                        <p class="text-caption mb-0 text-orange-darken-1">Complete your profile to see admission chances for {{ selectedCollegeData.name }}</p>
-                      </div>
-                      <v-spacer />
-                      <v-btn
-                        color="orange"
-                        variant="flat"
-                        size="small"
-                        to="/profile"
-                        prepend-icon="mdi-account-edit"
-                      >
-                        Set Up Profile
-                      </v-btn>
-                    </div>
-                  </v-card-text>
-                </v-card>
-
-                <!-- College Selection Prompt -->
-                <v-card v-else-if="!selectedCollegeData" class="mb-4" rounded="lg" elevation="0" color="blue-lighten-5" border>
-                  <v-card-text class="pa-4">
-                    <div class="d-flex align-center">
-                      <v-icon color="primary" size="32" class="me-3">mdi-school</v-icon>
-                      <div>
-                        <h3 class="text-subtitle-1 font-weight-bold text-primary">Select a College</h3>
-                        <p class="text-caption mb-0 text-grey-darken-1">Choose a target college to see personalized analysis and admission chances</p>
-                      </div>
-                    </div>
-                  </v-card-text>
-                </v-card>
-
-                <!-- Analysis Status -->
-                <div v-if="!essayContent.trim()" class="analysis-placeholder">
-                  <v-sheet 
-                    class="text-center pa-8" 
-                    color="transparent"
-                    rounded="lg"
-                  >
-                    <v-icon size="80" color="grey-lighten-1" class="mb-4">mdi-pencil-outline</v-icon>
-                    <h3 class="text-h6 text-grey-darken-1 mb-2">Start Writing</h3>
-                    <p class="text-body-2 text-grey-darken-1">
-                      Select a college and prompt, then start writing to get AI-powered feedback and suggestions.
-                    </p>
-                  </v-sheet>
-                </div>
-
-                <!-- Error Display -->
-                <v-alert 
-                  v-if="analysisError"
-                  type="error"
-                  class="mb-4"
-                  dismissible
-                  @input="analysisError = null"
-                >
-                  <strong>Analysis Failed:</strong> {{ analysisError }}
-                </v-alert>
-
-                <!-- AI Analysis Content -->
-                <div v-else class="analysis-content">
-                  <!-- Overall Score -->
-                  <v-card class="mb-4" rounded="lg" elevation="0" color="white">
-                    <v-card-text class="pa-4">
-                      <div class="d-flex align-center justify-space-between mb-2">
-                        <h3 class="text-subtitle-1 font-weight-bold">Overall Score</h3>
-                        <v-chip :color="getScoreColor(overallScore)" variant="flat" class="font-weight-bold">
-                          {{ overallScore }}/100
-                        </v-chip>
-                      </div>
-                      <v-progress-linear
-                        :model-value="overallScore"
-                        :color="getScoreColor(overallScore)"
-                        height="8"
-                        rounded
-                      />
-                    </v-card-text>
-                  </v-card>
-
-                  <!-- Analysis Categories -->
-                  <div class="analysis-categories mb-4">
-                    <v-expansion-panels multiple>
-                      <v-expansion-panel 
-                        v-for="category in analysisCategories" 
-                        :key="category.id"
-                        :value="category.id"
-                        rounded="lg"
-                        bg-color="white"
-                        class="mb-2"
-                      >
-                        <v-expansion-panel-title>
-                          <div class="d-flex align-center w-100">
-                            <v-icon :color="getCategoryColor(category.id)" class="me-3">{{ getCategoryIcon(category.id) }}</v-icon>
-                            <span class="font-weight-medium">{{ category.title }}</span>
-                            <v-spacer />
-                            <v-chip 
-                              size="small" 
-                              :color="getScoreColor(category.score * 10)" 
-                              variant="tonal"
-                            >
-                              {{ category.score }}/10
-                            </v-chip>
-                          </div>
-                        </v-expansion-panel-title>
-                        <v-expansion-panel-text class="pt-3">
-                          <p class="mb-3 text-body-2">{{ category.feedback }}</p>
-                          <div v-if="category.suggestions.length">
-                            <h4 class="text-subtitle-2 font-weight-bold mb-2">Suggestions:</h4>
-                            <v-list density="compact" class="bg-transparent">
-                              <v-list-item 
-                                v-for="(suggestion, i) in category.suggestions" 
-                                :key="i"
-                                class="px-0"
-                              >
-                                <template v-slot:prepend>
-                                  <v-icon size="16" color="primary" class="me-3">mdi-lightbulb-outline</v-icon>
-                                </template>
-                                <v-list-item-title class="text-body-2" style="white-space: normal;">{{ suggestion }}</v-list-item-title>
-                              </v-list-item>
-                            </v-list>
-                          </div>
-                        </v-expansion-panel-text>
-                      </v-expansion-panel>
-                    </v-expansion-panels>
-                  </div>
-
-                  <!-- AI Comments -->
-                  <v-card rounded="lg" elevation="0" color="white" class="mb-4">
-                    <v-card-text class="pa-4">
-                      <h3 class="text-subtitle-1 font-weight-bold mb-3">
-                        <v-icon color="primary" class="me-2">mdi-comment-text-outline</v-icon>
-                        AI Comments
-                      </h3>
-                      <div class="comments-list">
-                        <div v-if="analysisComments.length === 0 && !isAnalyzing" class="text-center text-grey-darken-1 py-4">
-                          <p>No specific comments yet. Click "Analyze" to get detailed feedback.</p>
-                        </div>
-                        <div 
-                          v-for="comment in analysisComments" 
-                          :key="comment.id || comment.text"
-                          class="comment-item mb-3 pa-3"
-                          :class="`comment-${comment.type}`"
-                        >
-                          <div class="d-flex align-start">
-                            <v-icon 
-                              size="20" 
-                              :color="getCommentColor(comment.type)" 
-                              class="me-3 mt-1"
-                            >
-                              {{ getCommentIcon(comment.type) }}
-                            </v-icon>
-                            <div class="flex-grow-1">
-                              <div class="d-flex align-center mb-1">
-                                <span class="text-caption font-weight-medium text-uppercase">
-                                  {{ comment.type }}
-                                </span>
-                                <v-tooltip location="top">
-                                  <template v-slot:activator="{ props }">
-                                    <v-chip 
-                                      v-if="comment.line" 
-                                      v-bind="props"
-                                      size="x-small" 
-                                      variant="tonal" 
-                                      class="ms-2 line-chip"
-                                      @click="highlightLine(comment.line)"
-                                      color="primary"
-                                    >
-                                      <v-icon start size="12">mdi-cursor-text</v-icon>
-                                      Line {{ comment.line }}
-                                    </v-chip>
-                                  </template>
-                                  <span>Click to highlight this line in your essay</span>
-                                </v-tooltip>
-                              </div>
-                              <p class="text-body-2 mb-2">{{ comment.text }}</p>
-                              <div v-if="comment.context" class="context-preview">
-                                <v-chip 
-                                  size="small" 
-                                  variant="outlined" 
-                                  class="context-chip text-caption"
-                                  prepend-icon="mdi-text-search"
-                                >
-                                  "{{ truncateContext(comment.context) }}"
-                                </v-chip>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-
-                  <!-- Profile Match -->
-                  <v-card rounded="lg" elevation="0" color="white">
-                    <v-card-text class="pa-4">
-                      <h3 class="text-subtitle-1 font-weight-bold mb-3">
-                        <v-icon color="secondary" class="me-2">mdi-account-check-outline</v-icon>
-                        Profile Alignment
-                      </h3>
-                      <p class="text-body-2 mb-3">
-                        Based on your profile and the selected college's values, here's how well your essay aligns:
-                      </p>
-                      <v-progress-linear
-                        :model-value="profileAlignment"
-                        color="secondary"
-                        height="8"
-                        rounded
-                        class="mb-2"
-                      />
-                      <div class="d-flex justify-space-between">
-                        <span class="text-caption">Profile Match</span>
-                        <span class="text-caption font-weight-bold">{{ profileAlignment }}%</span>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-                </div>
-              </v-card-text>
-            </v-card>
-          </div>
-        </v-col>
+          </v-col>
+        </transition>
       </v-row>
     </v-container>
 
-    <!-- Debug Modal -->
+    <v-fab-transition>
+      <v-btn
+        v-show="!isCoachVisible"
+        position="fixed"
+        size="large"
+        color="primary"
+        @click="isCoachVisible = true"
+        class="open-coach-button"
+        elevation="8"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+        <span class="ms-1 me-2 text-capitalize font-weight-bold">Coach</span>
+      </v-btn>
+    </v-fab-transition>
+
     <v-dialog
       v-model="showDebugModal"
       max-width="1200"
@@ -835,6 +847,9 @@ import { useEssayAnalysis } from '@/composables/useEssayAnalysis.js'
 
 // Store
 const userStore = useUserStore()
+
+// UI State
+const isCoachVisible = ref(true)
 
 // Essay Analysis
 const {
@@ -1528,7 +1543,7 @@ const loadExistingEssay = (essayId) => {
   right: 0;
   bottom: 0;
   height: 2rem;
-  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), transparent);
+  background: linear-gradient(to bottom, #FFFFFF, transparent);
   transform: translateY(100%);
   pointer-events: none;
   z-index: 2;
@@ -1536,6 +1551,8 @@ const loadExistingEssay = (essayId) => {
 
 .essay-editor-panel {
   padding-right: 1rem;
+  /* NEW: Added transition for smooth movement */
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 1264px) {
@@ -1789,4 +1806,51 @@ const loadExistingEssay = (essayId) => {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
+
+/* NEW STYLES FOR SLIDING PANELS & CONTENT ANIMATION */
+
+.open-coach-button {
+  top: 100px;
+  right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.slide-right-fade-enter-active,
+.slide-right-fade-leave-active {
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
+}
+
+.slide-right-fade-enter-from,
+.slide-right-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-right-fade-enter-to,
+.slide-right-fade-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Staggered list animation for analysis content */
+.staggered-fade-enter-active {
+  transition: all 0.5s ease-out;
+}
+.staggered-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.staggered-fade-enter-from,
+.staggered-fade-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Apply cascading delay */
+.staggered-fade-enter-active:nth-child(1) { transition-delay: 0.1s; }
+.staggered-fade-enter-active:nth-child(2) { transition-delay: 0.2s; }
+.staggered-fade-enter-active:nth-child(3) { transition-delay: 0.3s; }
+.staggered-fade-enter-active:nth-child(4) { transition-delay: 0.4s; }
+
 </style>

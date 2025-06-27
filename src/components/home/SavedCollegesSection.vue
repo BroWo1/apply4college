@@ -58,78 +58,109 @@ defineEmits(['view-college'])
 
 <style scoped>
 .saved-colleges-section {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 1rem;
+  margin-bottom: 2.5rem;
+  gap: 1.5rem;
 }
 
 .section-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: rgb(var(--v-theme-on-surface));
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
   margin: 0;
   line-height: 1.2;
 }
 
 .section-subtitle {
-  color: #1f2937;
-  margin: 0.25rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.4;
+  color: #4a5568;
+  margin: 0.5rem 0 0 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
 .colleges-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.75rem;
 }
 
 .manage-button {
   flex-shrink: 0;
   text-transform: none;
-  font-weight: 500;
-  box-shadow: none;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 0 2rem !important;
+  height: 48px !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.manage-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.35) !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .saved-colleges-section {
-    padding: 1.5rem;
+    padding: 0;
   }
   
   .section-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
   }
   
   .manage-button {
     align-self: stretch;
+    height: 44px !important;
   }
   
   .colleges-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.25rem;
   }
   
   .section-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
+  .saved-colleges-section {
+    padding: 0;
+  }
+  
   .section-header {
     align-items: stretch;
+    gap: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.625rem;
+  }
+  
+  .colleges-grid {
+    gap: 1rem;
   }
 }
 </style>

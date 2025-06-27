@@ -42,7 +42,7 @@
     <!-- Main Content -->
     <main class="main-content">
       <!-- Search and Filter Bar -->
-      <v-card rounded="xl" elevation="0" class="mb-8 filter-card">
+      <v-card rounded="xl" elevation="2" class="mb-8 filter-card">
         <v-card-text class="pa-8">
           <v-row align="center" class="gy-4">
             <v-col cols="12" md="6">

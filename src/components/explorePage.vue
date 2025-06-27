@@ -656,6 +656,7 @@ import {
 import CollegeComparison from './CollegeComparison.vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user';
+import { components } from 'vuetify/dist/vuetify.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -971,7 +972,7 @@ const closeAdmitChanceModal = () => {
 const handleCollegeAction = (action, college) => {
   switch(action) {
     case 'view':
-      navigateToCollegeProfilePage(college);
+      openAdmitChanceModal(college);
       break;
     case 'saveRegular':
       handleSaveToRegular({ college, action: 'add' });
