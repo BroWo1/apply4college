@@ -49,10 +49,10 @@
                 <v-icon start>mdi-calculator</v-icon>
                 Chancing
               </v-tab>
-              <v-tab value="a4c-rating" class="tab-item">
+              <!-- <v-tab value="a4c-rating" class="tab-item">
                 <v-icon start>mdi-star-outline</v-icon>
                 Rating
-              </v-tab>
+              </v-tab> -->
             </v-tabs>
           </v-col>
           <v-col cols="auto">
@@ -232,7 +232,6 @@
             :recentlyViewed="recentlyViewed"
             :similarSchools="similarSchools"
             @navigateToChancing="handleNavigateToChancing"
-            @navigateToA4CRating="handleNavigateToA4CRating"
             @saveToEarly="handleSaveToEarly"
             @saveToRegular="handleSaveToRegular"
           />
@@ -270,9 +269,9 @@
           />
         </v-window-item>
 
-        <v-window-item value="a4c-rating">
+        <!-- <v-window-item value="a4c-rating">
           <A4CRatingTab :college="college" />
-        </v-window-item>
+        </v-window-item> -->
 
         <v-window-item value="majors">
           <MajorsTab :collegeName="college ? college.name : 'this school'" />
@@ -302,10 +301,9 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import AdmitChanceComponent from '../../components/AdmitChanceComponent.vue';
 import OverviewTab from '../../components/college/tabs/OverviewTab.vue';
 import ChancingTab from '../../components/college/tabs/ChancingTab.vue';
-import A4CRatingTab from '../../components/college/tabs/A4CRatingTab.vue';
+// import A4CRatingTab from '../../components/college/tabs/A4CRatingTab.vue';
 import MajorsTab from '../../components/college/tabs/MajorsTab.vue';
 import { colleges as allColleges } from '../../data/colleges.js';
 import { getAdmissionChanceColor, getAdmissionChanceDescription, calculateAdmissionChance, prepareStudentData, getMajorMatchAssessment, adjustAcceptanceRateByMajor, adjustAcceptanceRateByStrategicFactors } from '../../utils/admitChanceCalculator';
@@ -652,9 +650,9 @@ const handleNavigateToChancing = () => {
   activeTab.value = 'chancing';
 };
 
-const handleNavigateToA4CRating = () => {
-  activeTab.value = 'a4c-rating';
-};
+// const handleNavigateToA4CRating = () => {
+//   activeTab.value = 'a4c-rating';
+// };
 
 watch(activeTab, async (newTab, oldTab) => {
   // Preserve scroll position when navigating from Overview to Chancing/A4C-Rating

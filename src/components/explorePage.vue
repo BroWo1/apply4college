@@ -681,7 +681,7 @@ const searchQuery = ref('');
 const filterBy = ref('All');
 const sortBy = ref('acceptanceRate');
 const page = ref(1);
-const itemsPerPage = 8;
+const itemsPerPage = 10;
 const selectedCollege = ref(null);
 const admitChanceModalOpen = ref(false);
 

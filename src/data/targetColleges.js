@@ -9,18 +9,18 @@ export const targetColleges = [
     name: 'UC Berkeley',
     location: 'Berkeley, CA',
     description: 'A public research university known for its strong engineering and science programs.',
-    acceptanceRate: 10,
-    tuition: 14000,
+    acceptanceRate: 11.4, // updated
+    tuition: 14000, // $14,000¹
     imageUrl: ucb,
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
-    allowsEarlyDecision: false, // Example: UCs generally don't have ED
-    applicationDeadline: 'December 2', // All applications must be submitted by December 2
-    considersLegacy: false, // Example: UCs generally don't consider legacy
+    allowsEarlyDecision: false, // UCs generally don't have ED
+    applicationDeadline: 'November 30', // updated
+    considersLegacy: false, // UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.89, stdDev: 0.12 },
-      sat: { mean: 1470, stdDev: 70 },
+      sat: { mean: null, stdDev: null }, // Test-Blind²
       ap: { mean: 7, stdDev: 2 },
       ec: { mean: 10, stdDev: 3 },
       weights: {
@@ -38,6 +38,17 @@ export const targetColleges = [
           demo: 0.25
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A+' },
+        { name: 'Campus', rating: 'A-' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Location', rating: 'A+' },
+        { name: 'Safety', rating: 'C' }
+      ]
     }
   }),
 
@@ -45,18 +56,18 @@ export const targetColleges = [
     name: 'UC Los Angeles',
     location: 'Los Angeles, CA',
     description: 'A public research university known for its diverse programs and vibrant campus life.',
-    acceptanceRate: 12,
-    tuition: 14000,
+    acceptanceRate: 8.6, // updated
+    tuition: 14000, // $14,000¹
     imageUrl: ucla,
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
-    allowsEarlyDecision: false, // Example: UCs generally don't have ED
-    applicationDeadline: 'December 1',
-    considersLegacy: false, // Example: UCs generally don't consider legacy
+    allowsEarlyDecision: false, // UCs generally don't have ED
+    applicationDeadline: 'November 30', // updated
+    considersLegacy: false, // UCs generally don't consider legacy
     stats: {
       gpa: { mean: 3.85, stdDev: 0.15 },
-      sat: { mean: 1460, stdDev: 75 },
+      sat: { mean: null, stdDev: null }, // Test-Blind²
       ap: { mean: 6, stdDev: 2 },
       ec: { mean: 9, stdDev: 3 },
       weights: {
@@ -75,14 +86,25 @@ export const targetColleges = [
         }
       }
     },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A+' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'A+' },
+        { name: 'Location', rating: 'A+' },
+        { name: 'Safety', rating: 'B-' }
+      ]
+    },
     majorFactors: {
       STEM: {
-        competitive: 1.1, 
-        popular: 1.05     
+        competitive: 0.40, // More competitive
+        popular: 0.70      // Very popular
       },
       'Liberal Arts': {
-        competitive: 0.85, 
-        popular: 0.9
+        competitive: 1.10, // Less competitive
+        popular: 0.90      // Most popular
       }
     }
   }),
@@ -91,17 +113,16 @@ export const targetColleges = [
     name: 'University of Michigan',
     location: 'Ann Arbor, MI',
     description: 'A leading public research university with strengths in multiple academic areas.',
-    acceptanceRate: 18,
-    tuition: 17786,
+    acceptanceRate: 17.7, // updated
+    tuition: 17786, // $17,786¹
     imageUrl: 'https://placehold.co/600x400/fff8e1/FFB300?text=UMich',
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
-    // Michigan has Early Action, not strictly ED, but for this example, let's say it allows a form of early application
     allowsEarlyDecision: true,
     earlyActionDeadline: 'November 1',
     regularDecisionDeadline: 'February 1',
-    considersLegacy: true, // Example: UMich considers legacy
+    considersLegacy: true,
     stats: {
       gpa: { mean: 3.88, stdDev: 0.13 },
       sat: { mean: 1435, stdDev: 80 },
@@ -122,6 +143,17 @@ export const targetColleges = [
           demo: 0.20
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A+' },
+        { name: 'Campus', rating: 'A+' },
+        { name: 'Student Life', rating: 'A+' },
+        { name: 'Location', rating: 'A' },
+        { name: 'Safety', rating: 'B+' }
+      ]
     }
   }),
 
@@ -129,15 +161,14 @@ export const targetColleges = [
     name: 'Carnegie Mellon University',
     location: 'Pittsburgh, PA',
     description: 'A private research university with renowned programs in computer science and engineering.',
-    acceptanceRate: 15,
-    tuition: 58924,
+    acceptanceRate: 11, // updated
+    tuition: 58924, // $58,924
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
     allowsEarlyDecision: true,
     earlyDecisionIDeadline: 'November 1',
-    earlyDecisionIIDeadline: 'January 3',
-    regularDecisionDeadline: 'January 3', // Note: Deadline for Drama and Music is December 1
+    regularDecisionDeadline: 'January 2', // updated
     considersLegacy: true,
     stats: {
       gpa: { mean: 3.85, stdDev: 0.14 },
@@ -160,14 +191,25 @@ export const targetColleges = [
         }
       }
     },
+    a4cRatings: {
+      overall: 'A',
+      categories: [
+        { name: 'Academics', rating: 'A' },
+        { name: 'Value', rating: 'B+' },
+        { name: 'Campus', rating: 'B' },
+        { name: 'Student Life', rating: 'A-' },
+        { name: 'Location', rating: 'A-' },
+        { name: 'Safety', rating: 'B+' }
+      ]
+    },
     majorFactors: {
       STEM: {
-        competitive: 0.6, 
-        popular: 0.65,
+        competitive: 0.60, // More competitive
+        popular: 0.65      // Very popular
       },
       'Liberal Arts': {
-        competitive: 1.2, 
-        popular:  1.15
+        competitive: 1.20, // Less competitive
+        popular: 1.15      // Less popular
       }
     }
   }),
@@ -176,8 +218,8 @@ export const targetColleges = [
     name: 'Georgetown University',
     location: 'Washington, D.C.',
     description: 'A private research university known for its programs in international relations, law, and public policy.',
-    acceptanceRate: 12,
-    tuition: 64896,
+    acceptanceRate: 13, // updated
+    tuition: 64896, // $64,896
     imageUrl: georgetown,
     collegeType: 'Liberal-arts',
     stats: {
@@ -196,8 +238,11 @@ export const targetColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Student Life', rating: 'A' },
         { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Location', rating: 'A+' },
+        { name: 'Safety', rating: 'C+' }
       ],
     },
     websiteUrl: 'https://www.georgetown.edu',

@@ -102,7 +102,7 @@
                     <div class="text-subtitle-1 mb-3">Additional Factors</div>
                     <div class="text-body-1 mb-2">Extra Materials (e.g. Recommendation Letter, Essay)</div>
                     <div class="d-flex justify-space-between mb-1">
-                      <span class="text-caption">Expected strength (1-4)</span>
+                      <span class="text-caption">Expected strength (1-5)</span>
                       <span class="text-caption">
                         {{ recScore }} - {{ getRecDescription(recScore) }}
                       </span>
@@ -110,8 +110,8 @@
                     <v-slider
                       v-model="recScore"
                       :min="1"
-                      :max="4"
-                      :step="1"
+                      :max="5"
+                      :step="0.5"
                       thumb-label
                       :thumb-size="20"
                       color="primary"
@@ -263,11 +263,14 @@
                     <v-list v-else class="bg-transparent">
                       <v-list-item v-for="(activity, i) in extracurriculars" :key="i">
                         <template v-slot:prepend>
-                          <v-chip :color="getActivityLevelColor(activity.level, activity.name)" size="small" class="mx-3" label>
+                          <v-chip :color="getActivityLevelColor(activity.level, activity)" size="small" class="mx-3" label>
                             {{ activity.level }}
                           </v-chip>
                         </template>
                         <v-list-item-title>{{ activity.name }}</v-list-item-title>
+                        <v-list-item-subtitle v-if="activity.category && activity.category !== activity.name" class="text-caption">
+                          {{ activity.category }}
+                        </v-list-item-subtitle>
                         <template v-slot:append>
                           <v-btn icon="mdi-delete" size="small" variant="text" @click="removeActivity(i)"></v-btn>
                         </template>
@@ -362,7 +365,7 @@
               <v-select
                 v-model="newActivity"
                 :items="activityOptions"
-                label="Activity Name"
+                label="Activity Category"
                 hide-details
                 class="mb-4 custom-select"
                 variant="outlined"
@@ -378,6 +381,16 @@
                   ></v-list-item>
                 </template>
               </v-select>
+              <v-text-field
+                v-model="newActivityCustomName"
+                label="Custom Activity Name (Optional)"
+                placeholder="e.g., Varsity Basketball Captain, Debate Team President"
+                hide-details
+                class="mb-4"
+                variant="outlined"
+                density="compact"
+                rounded="lg"
+              ></v-text-field>
               <div class="mt-2">
                 <div class="d-flex justify-space-between mb-1">
                   <span>Strength Rating</span>
@@ -401,6 +414,9 @@
                   {{ getActivityMajorMatchText(newActivity) }}
                 </v-chip>
                 <span class="ml-2">match with {{ intendedMajor }}</span>
+              </div>
+              <div v-if="newActivityCustomName.trim()" class="mt-2 text-caption text-medium-emphasis">
+                Will be displayed as: "{{ newActivityCustomName.trim() }}"
               </div>
             </v-card-text>
             <v-card-actions class="px-6 pb-4">
@@ -545,6 +561,7 @@ const dialog = ref(false);
 
 // Extracurricular Activities functionality
 const newActivity = ref("");
+const newActivityCustomName = ref(""); // Custom name field
 const newActivityLevel = ref(2);
 const activityDialog = ref(false);
 
@@ -627,7 +644,25 @@ async function fetchUserProfileFromAPI() {
     satMath.value = data.sat_math || 500;
     gpa.value = data.gpa || 3.0;
     apClasses.value = (data.ap_classes && Array.isArray(data.ap_classes)) ? data.ap_classes : [];
-    extracurriculars.value = (data.extracurriculars && Array.isArray(data.extracurriculars)) ? data.extracurriculars : [];
+    
+    // Handle extracurriculars with backward compatibility
+    if (data.extracurriculars && Array.isArray(data.extracurriculars)) {
+      extracurriculars.value = data.extracurriculars.map(activity => {
+        // If it's already in the new format, keep it as is
+        if (activity.category) {
+          return activity;
+        }
+        // If it's in the old format, convert it
+        return {
+          name: activity.name,
+          category: activity.name, // Use name as category for old entries
+          level: activity.level,
+          fitScore: activity.fitScore || 0
+        };
+      });
+    } else {
+      extracurriculars.value = [];
+    }
     
     const apiMajor = data.intended_major || "";
     if (apiMajor === "LAH") {
@@ -694,7 +729,26 @@ function applyProfileData(profileData) {
   satMath.value = profileData.satMath || 500;
   gpa.value = profileData.gpa || 3.0;
   apClasses.value = (profileData.apClasses && Array.isArray(profileData.apClasses)) ? profileData.apClasses : [];
-  extracurriculars.value = (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) ? profileData.extracurriculars : [];
+  
+  // Handle both old and new extracurricular formats for backward compatibility
+  if (profileData.extracurriculars && Array.isArray(profileData.extracurriculars)) {
+    extracurriculars.value = profileData.extracurriculars.map(activity => {
+      // If it's already in the new format, keep it as is
+      if (activity.category) {
+        return activity;
+      }
+      // If it's in the old format, convert it
+      return {
+        name: activity.name,
+        category: activity.name, // Use name as category for old entries
+        level: activity.level,
+        fitScore: activity.fitScore || 0
+      };
+    });
+  } else {
+    extracurriculars.value = [];
+  }
+  
   intendedMajor.value = profileData.intendedMajor || "";
   recScore.value = profileData.recScore || 2;
   isLegacy.value = profileData.isLegacy || false;
@@ -747,7 +801,16 @@ const performSaveOperation = async (isAutoSave = false) => {
       }
 
       await api.put('profile/', payload);
-      localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(studentProfile.value));
+      
+      // Preserve existing college lists when updating localStorage
+      const existingData = JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || '{}');
+      const updatedProfileData = {
+        ...studentProfile.value,
+        // Preserve existing college lists if they exist
+        earlyDecisionColleges: existingData.earlyDecisionColleges || [],
+        regularDecisionColleges: existingData.regularDecisionColleges || []
+      };
+      localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(updatedProfileData));
       
       if (isAutoSave) {
         snackbarText.value = 'Profile auto-saved.';
@@ -759,7 +822,16 @@ const performSaveOperation = async (isAutoSave = false) => {
       snackbar.value = true;
 
     } else {
-      localStorage.setItem(GUEST_PROFILE_KEY, JSON.stringify(studentProfile.value));
+      // Preserve existing college lists when updating localStorage for guest users
+      const existingData = JSON.parse(localStorage.getItem(GUEST_PROFILE_KEY) || '{}');
+      const updatedProfileData = {
+        ...studentProfile.value,
+        // Preserve existing college lists if they exist
+        earlyDecisionColleges: existingData.earlyDecisionColleges || [],
+        regularDecisionColleges: existingData.regularDecisionColleges || []
+      };
+      localStorage.setItem(GUEST_PROFILE_KEY, JSON.stringify(updatedProfileData));
+      
       if (isAutoSave) {
         snackbarText.value = 'Profile auto-saved locally.';
         snackbarColor.value = 'info';
@@ -848,12 +920,18 @@ const addActivityAndClose = () => {
     if (intendedMajor.value) {
       fitScore = calculateFitScore(newActivity.value, 'activity', intendedMajor.value);
     }
+    
+    // Use custom name if provided, otherwise use the category name
+    const displayName = newActivityCustomName.value.trim() || newActivity.value;
+    
     extracurriculars.value.push({
-      name: newActivity.value,
+      name: displayName,
+      category: newActivity.value, // Store the category for fit score calculations
       level: newActivityLevel.value,
       fitScore: fitScore
     });
     newActivity.value = "";
+    newActivityCustomName.value = "";
     newActivityLevel.value = 2;
   }
   activityDialog.value = false;
@@ -877,7 +955,9 @@ const getActivityMajorMatchColor = (activityName) => {
   return 'warning';
 };
 
-const getActivityLevelColor = (level, activityName = "") => {
+const getActivityLevelColor = (level, activity) => {
+  // Handle both old format (string) and new format (object with category)
+  const activityName = typeof activity === 'string' ? activity : (activity?.category || activity?.name || "");
   const special = isSpecialActivityType(activityName);
   if (special) {
     if (level === 5) return "success";
@@ -905,6 +985,8 @@ const getLevelDescription = (level) => {
 };
 
 const getRecDescription = (score) => {
+  // Use Math.round to map 1.0-1.49 to 1, 1.5-2.49 to 2, etc.
+  const rounded = Math.round(score);
   const descriptions = { 
     1: 'Basic', 
     2: 'Decent', 
@@ -912,7 +994,7 @@ const getRecDescription = (score) => {
     4: 'Very Strong', 
     5: 'Outstanding' 
   };
-  return descriptions[score] || '';
+  return descriptions[rounded] || '';
 };
 
 const openActivityDialog = () => {

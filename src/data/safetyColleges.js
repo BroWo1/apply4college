@@ -6,8 +6,8 @@ export const safetyColleges = [
     name: 'University of Washington',
     location: 'Seattle, WA',
     description: 'A top public university known for computer science, engineering, and medicine.',
-    acceptanceRate: 52,
-    tuition: 12076,
+    acceptanceRate: 45, // updated
+    tuition: 12076, // $12,076¹
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
@@ -15,7 +15,7 @@ export const safetyColleges = [
     applicationDeadline: 'November 15',
     stats: {
       gpa: { mean: 3.72, stdDev: 0.18 },
-      sat: { mean: 1400, stdDev: 85 },
+      sat: { mean: 1350, stdDev: 85 }, // updated
       ap: { mean: 5, stdDev: 2 },
       ec: { mean: 7, stdDev: 3 },
       weights: {
@@ -33,6 +33,17 @@ export const safetyColleges = [
           demo: 0.25
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A',
+      categories: [
+        { name: 'Academics', rating: 'A-' },
+        { name: 'Value', rating: 'A' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'A-' },
+        { name: 'Location', rating: 'A+' },
+        { name: 'Safety', rating: 'C+' }
+      ]
     }
   }),
 
@@ -40,8 +51,8 @@ export const safetyColleges = [
     name: 'UNC Chapel Hill',
     location: 'Chapel Hill, NC',
     description: 'A public research university known for its strong programs in business, law, and public health.',
-    acceptanceRate: 23,
-    tuition: 9196,
+    acceptanceRate: 15.3, // updated
+    tuition: 9196, // $9,196¹
     rating: 0,
     reviewCount: 0,
     collegeType: 'Liberal-arts',
@@ -49,7 +60,7 @@ export const safetyColleges = [
     earlyActionDeadline: 'October 15',
     regularDecisionDeadline: 'January 15',
     stats: {
-      gpa: { mean: 3.6, stdDev: 0.25 },
+      gpa: { mean: 3.8, stdDev: 0.25 }, // updated (weighted)
       sat: { mean: 1380, stdDev: 90 },
       ap: { mean: 4, stdDev: 2 },
       ec: { mean: 6, stdDev: 3 },
@@ -68,6 +79,17 @@ export const safetyColleges = [
           demo: 0.20
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A+',
+      categories: [
+        { name: 'Academics', rating: 'A' },
+        { name: 'Value', rating: 'A+' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Location', rating: 'A-' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   }),
 
@@ -75,8 +97,8 @@ export const safetyColleges = [
     name: 'UIUC',
     location: 'Champaign, IL',
     description: 'A leading public research university with a strong emphasis on engineering and computer science.',
-    acceptanceRate: 60,
-    tuition: 15000,
+    acceptanceRate: 42.4, // updated
+    tuition: 15000, // $15,000¹
     rating: 0,
     reviewCount: 0,
     collegeType: 'STEM-heavy',
@@ -84,8 +106,8 @@ export const safetyColleges = [
     earlyActionDeadline: 'November 1',
     regularDecisionDeadline: 'January 5',
     stats: {
-      gpa: { mean: 3.62, stdDev: 0.22 },
-      sat: { mean: 1400, stdDev: 95 },
+      gpa: { mean: 3.7, stdDev: 0.22 }, // updated
+      sat: { mean: 1360, stdDev: 95 }, // updated
       ap: { mean: 4, stdDev: 2 },
       ec: { mean: 5, stdDev: 3 },
       weights: {
@@ -103,6 +125,17 @@ export const safetyColleges = [
           demo: 0.25
         }
       }
+    },
+    a4cRatings: {
+      overall: 'A',
+      categories: [
+        { name: 'Academics', rating: 'A' },
+        { name: 'Value', rating: 'A' },
+        { name: 'Campus', rating: 'B+' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Location', rating: 'B-' },
+        { name: 'Safety', rating: 'B' }
+      ]
     }
   })
 ];

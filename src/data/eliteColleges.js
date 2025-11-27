@@ -17,7 +17,7 @@ export const eliteColleges = [
   createCollegeData({
     name: 'Harvard University',
     location: 'Cambridge, MA',
-    acceptanceRate: 3.5,
+    acceptanceRate: 3.59, // updated
     tuition: 60000,
     imageUrl: harvard,
     rating: 4.16,
@@ -26,17 +26,15 @@ export const eliteColleges = [
     websiteUrl: 'https://www.harvard.edu',
     usNewsUrl: 'https://www.usnews.com/best-colleges/harvard-university-2155',
     deadlines: {
-      earlyDecision: "November 1",
+      earlyDecision: "November 1", // REA
       regularDecision: "January 1"
     },
     stats: {
-      // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.07 }, sat: { mean: 1540, stdDev: 50 }
-      // Adjusted for average applicant:
-      gpa: { mean: 3.86, stdDev: 0.12 }, // GPA mean lowered by 0.10, stdDev increased
-      sat: { mean: 1510, stdDev: 70 },  // SAT mean lowered by 30, stdDev increased
-      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
-      ec: { mean: 12, stdDev: 2.5 },    // EC mean lowered, stdDev increased
-      weights: { // Weights remain unchanged as per original data
+      gpa: { mean: 3.86, stdDev: 0.12 },
+      sat: { mean: 1510, stdDev: 70 },
+      ap: { mean: 7, stdDev: 2.5 },
+      ec: { mean: 12, stdDev: 2.5 },
+      weights: {
         strength: {
           gpa: 0.30,
           sat: 0.22,
@@ -56,22 +54,21 @@ export const eliteColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'A-' },
-        { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'B+' },
-        { name: 'Location', rating: 'A' },
+        { name: 'Value', rating: 'A' },
+        { name: 'Campus', rating: 'A+' },
+        { name: 'Student Life', rating: 'A' },
+        { name: 'Location', rating: 'A+' },
         { name: 'Safety', rating: 'B' }
       ]
     },
-    // Custom major factors for Harvard - Liberal Arts focused school
     majorFactors: {
       STEM: {
-        competitive: 1.1, // STEM is less competitive at Harvard (10% easier)
-        popular: 1.05     // But still somewhat popular
+        competitive: 0.75, // More competitive
+        popular: 0.85      // Very popular
       },
       'Liberal Arts': {
-        competitive: 0.75, // Liberal Arts is very competitive (25% harder)
-        popular: 0.8       // And very popular
+        competitive: 1.20, // Less competitive
+        popular: 0.90      // Most popular
       }
     }
   }),
@@ -79,24 +76,22 @@ export const eliteColleges = [
   createCollegeData({
     name: 'Stanford University',
     location: 'Stanford, CA',
-    acceptanceRate: 3.9,
+    acceptanceRate: 3.9, // updated
     tuition: 60430,
     imageUrl: stanford,
     rating: 4.05,
     reviewCount: 1023,
     collegeType: 'STEM-heavy',
     deadlines: {
-      earlyDecision: "November 1",
+      earlyDecision: "November 1", // REA
       regularDecision: "January 5"
     },
     stats: {
-      // Original admitted stats (approx): gpa: { mean: 3.96, stdDev: 0.08 }, sat: { mean: 1550, stdDev: 50 }
-      // Adjusted for average applicant:
-      gpa: { mean: 3.86, stdDev: 0.13 }, // GPA mean lowered by 0.10, stdDev increased
-      sat: { mean: 1520, stdDev: 70 },  // SAT mean lowered by 30, stdDev increased
-      ap: { mean: 8, stdDev: 2.5 },     // AP mean lowered, stdDev increased
-      ec: { mean: 12, stdDev: 2.5 },    // EC mean lowered, stdDev increased
-      weights: { // Weights remain unchanged
+      gpa: { mean: 3.86, stdDev: 0.13 },
+      sat: { mean: 1520, stdDev: 70 },
+      ap: { mean: 8, stdDev: 2.5 },
+      ec: { mean: 12, stdDev: 2.5 },
+      weights: {
         strength: {
           gpa: 0.32,
           sat: 0.28,
@@ -113,25 +108,24 @@ export const eliteColleges = [
       }
     },
     a4cRatings: {
-      overall: 'A',
+      overall: 'A+',
       categories: [
-        { name: 'Academics', rating: 'A' },
+        { name: 'Academics', rating: 'A+' },
         { name: 'Value', rating: 'A' },
         { name: 'Campus', rating: 'A+' },
-        { name: 'Student Life', rating: 'A-' },
+        { name: 'Student Life', rating: 'A+' },
         { name: 'Location', rating: 'A+' },
         { name: 'Safety', rating: 'B+' }
       ]
     },
-    // Custom major factors for Stanford - STEM-heavy school with strong Liberal Arts
     majorFactors: {
       STEM: {
-        competitive: 0.65, // STEM is extremely competitive at Stanford (35% harder)
-        popular: 0.7       // Very popular, especially CS and Engineering
+        competitive: 0.65, // More competitive
+        popular: 0.70      // Very popular
       },
       'Liberal Arts': {
-        competitive: 1.15, // Liberal Arts is less competitive (15% easier)
-        popular: 1.1       // But still respected
+        competitive: 1.15, // Less competitive
+        popular: 1.10      // Less popular
       }
     }
   }),
@@ -139,24 +133,22 @@ export const eliteColleges = [
   createCollegeData({
     name: 'MIT',
     location: 'Cambridge, MA',
-    acceptanceRate: 4.1,
+    acceptanceRate: 4.5, // updated
     tuition: 57986,
     imageUrl: mit,
     rating: 4.18,
     reviewCount: 742,
     collegeType: 'STEM-heavy',
     deadlines: {
-      earlyDecision: "November 1",
+      earlyDecision: "November 1", // EA
       regularDecision: "January 6"
     },
     stats: {
-      // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.09 }, sat: { mean: 1555, stdDev: 45 }
-      // Adjusted for average applicant:
-      gpa: { mean: 3.85, stdDev: 0.14 }, // GPA mean lowered by 0.10, stdDev increased
-      sat: { mean: 1525, stdDev: 65 },  // SAT mean lowered by 30, stdDev increased
-      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
-      ec: { mean: 10, stdDev: 2.5 },     // EC mean lowered, stdDev increased
-      weights: { // Weights remain unchanged
+      gpa: { mean: 3.85, stdDev: 0.14 },
+      sat: { mean: 1525, stdDev: 65 },
+      ap: { mean: 7, stdDev: 2.5 },
+      ec: { mean: 10, stdDev: 2.5 },
+      weights: {
         strength: {
           gpa: 0.38,
           sat: 0.32,
@@ -176,10 +168,10 @@ export const eliteColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'B+' },
-        { name: 'Campus', rating: 'B+' },
-        { name: 'Student Life', rating: 'B' },
-        { name: 'Location', rating: 'A-' },
+        { name: 'Value', rating: 'A' },
+        { name: 'Campus', rating: 'A-' },
+        { name: 'Student Life', rating: 'A-' },
+        { name: 'Location', rating: 'A' },
         { name: 'Safety', rating: 'A-' }
       ]
     }
@@ -188,24 +180,22 @@ export const eliteColleges = [
   createCollegeData({
     name: 'Duke University',
     location: 'Durham, NC',
-    acceptanceRate: 6.8,
+    acceptanceRate: 5.4, // updated
     tuition: 66327,
     imageUrl: dukeImg,
     rating: 3.95,
     reviewCount: 1235,
     collegeType: 'Liberal-arts',
     deadlines: {
-      earlyDecision: "November 1",
+      earlyDecision: "November 4", // updated
       regularDecision: "January 2"
     },
     stats: {
-      // Original admitted stats (approx): gpa: { mean: 3.94, stdDev: 0.1 }, sat: { mean: 1540, stdDev: 60 }
-      // Adjusted for average applicant:
-      gpa: { mean: 3.84, stdDev: 0.15 }, // GPA mean lowered by 0.10, stdDev increased
-      sat: { mean: 1510, stdDev: 80 },  // SAT mean lowered by 30, stdDev increased
-      ap: { mean: 7, stdDev: 2.5 },     // AP mean lowered, stdDev increased
-      ec: { mean: 10, stdDev: 3.5 },    // EC mean lowered, stdDev increased
-      weights: { // Weights remain unchanged
+      gpa: { mean: 3.84, stdDev: 0.15 },
+      sat: { mean: 1510, stdDev: 80 },
+      ap: { mean: 7, stdDev: 2.5 },
+      ec: { mean: 10, stdDev: 3.5 },
+      weights: {
         strength: {
           gpa: 0.32,
           sat: 0.28,
@@ -222,14 +212,14 @@ export const eliteColleges = [
       }
     },
     a4cRatings: {
-      overall: 'A',
+      overall: 'A+',
       categories: [
-        { name: 'Academics', rating: 'A' },
+        { name: 'Academics', rating: 'A+' },
         { name: 'Value', rating: 'A-' },
-        { name: 'Campus', rating: 'A' },
-        { name: 'Student Life', rating: 'A' },
-        { name: 'Location', rating: 'B+' },
-        { name: 'Safety', rating: 'A-' }
+        { name: 'Campus', rating: 'A+' },
+        { name: 'Student Life', rating: 'A+' },
+        { name: 'Location', rating: 'A-' },
+        { name: 'Safety', rating: 'B' }
       ]
     }
   }),
@@ -237,24 +227,22 @@ export const eliteColleges = [
   createCollegeData({
     name: 'University of Chicago',
     location: 'Chicago, IL',
-    acceptanceRate: 5.0,
+    acceptanceRate: 5.0, // updated
     tuition: 67446,
     imageUrl: uchicagoImg,
     rating: 3.83,
     reviewCount: 1333,
     collegeType: 'Liberal-arts',
     deadlines: {
-      earlyDecision: "November 1",
+      earlyDecision: "November 1", // ED
       regularDecision: "January 6"
     },
     stats: {
-      // Original admitted stats (approx): gpa: { mean: 3.95, stdDev: 0.08 }, sat: { mean: 1535, stdDev: 55 }
-      // Adjusted for average applicant:
-      gpa: { mean: 3.85, stdDev: 0.13 }, // GPA mean lowered by 0.10, stdDev increased
-      sat: { mean: 1505, stdDev: 75 },  // SAT mean lowered by 30, stdDev increased
-      ap: { mean: 6, stdDev: 2.5 },     // AP mean lowered, stdDev increased
-      ec: { mean: 9, stdDev: 3.5 },     // EC mean lowered, stdDev increased
-      weights: { // Weights remain unchanged
+      gpa: { mean: 3.85, stdDev: 0.13 },
+      sat: { mean: 1505, stdDev: 75 },
+      ap: { mean: 6, stdDev: 2.5 },
+      ec: { mean: 9, stdDev: 3.5 },
+      weights: {
         strength: {
           gpa: 0.30,
           sat: 0.25,
@@ -274,11 +262,11 @@ export const eliteColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
-        { name: 'Value', rating: 'B' },
-        { name: 'Campus', rating: 'A-' },
-        { name: 'Student Life', rating: 'B+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
+        { name: 'Student Life', rating: 'A-' },
         { name: 'Location', rating: 'A' },
-        { name: 'Safety', rating: 'B' }
+        { name: 'Safety', rating: 'C+' }
       ]
     }
   }),
@@ -287,7 +275,7 @@ export const eliteColleges = [
     name: 'Brown University',
     location: 'Providence, RI',
     description: 'A private Ivy League research university known for its unique Open Curriculum.',
-    acceptanceRate: 5,
+    acceptanceRate: 5.0, // updated
     tuition: 65146,
     imageUrl: brown,
     collegeType: 'Liberal-arts',
@@ -299,7 +287,7 @@ export const eliteColleges = [
     },
     deadlines: {
       earlyDecision: 'November 1',
-      regularDecision: 'January 5',
+      regularDecision: 'January 3', // updated
     },
     allowsEarlyDecision: true,
     considersLegacy: true,
@@ -307,8 +295,11 @@ export const eliteColleges = [
       overall: 'A+',
       categories: [
         { name: 'Academics', rating: 'A+' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A' },
         { name: 'Student Life', rating: 'A+' },
-        { name: 'Value', rating: 'A' },
+        { name: 'Location', rating: 'A-' },
+        { name: 'Safety', rating: 'B-' }
       ],
     },
     websiteUrl: 'https://www.brown.edu',
@@ -318,7 +309,7 @@ export const eliteColleges = [
     name: 'Cornell University',
     location: 'Ithaca, NY',
     description: 'A private Ivy League and statutory land-grant research university in Ithaca, New York.',
-    acceptanceRate: 7,
+    acceptanceRate: 8.0, // updated
     tuition: 68380,
     imageUrl: cornell,
     collegeType: 'STEM-heavy',
@@ -337,9 +328,12 @@ export const eliteColleges = [
     a4cRatings: {
       overall: 'A+',
       categories: [
-        { name: 'Academics', rating: 'A+' },
+        { name: 'Academics', rating: 'A' },
+        { name: 'Value', rating: 'A-' },
+        { name: 'Campus', rating: 'A+' },
         { name: 'Student Life', rating: 'A' },
-        { name: 'Value', rating: 'A' },
+        { name: 'Location', rating: 'B+' },
+        { name: 'Safety', rating: 'A-' }
       ],
     },
     websiteUrl: 'https://www.cornell.edu',

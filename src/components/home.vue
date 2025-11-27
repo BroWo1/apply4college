@@ -1,10 +1,10 @@
 <template>
   <div class="home-page">
-    <!-- Modern Hero Section -->
-    <section class="hero-section" aria-labelledby="hero-title">
+    <!-- Hero Section -->
+    <section class="hero-section">
       <div class="hero-content">
         <div class="hero-text-container">
-          <h1 id="hero-title" class="hero-title">
+          <h1 class="hero-title">
             {{ $t('homePage.title') }}
             <span class="hero-badge">.org</span>
           </h1>
@@ -25,7 +25,7 @@
     <main class="main-content">
       <div class="content-platform">
         <!-- AI Advisor Section -->
-        <AIAdvisorSection 
+        <AIAdvisorSection
           v-model:question="aiQuestion"
           :loading="loadingAiResponse"
           :response="aiResponse"
@@ -38,7 +38,7 @@
         <div class="section-divider"></div>
 
         <!-- Saved Colleges Section -->
-        <SavedCollegesSection 
+        <SavedCollegesSection
           :colleges="allSavedColleges"
           @view-college="viewCollege"
         />
@@ -79,21 +79,21 @@ const viewCollege = (college) => {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 50%, #e8eaf6 100%);
+  background: #f8fafc;
 }
 
-/* Modern Hero Section */
+/* Hero Section - Match Explore Page */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, 
-    #667eea 0%, 
-    #764ba2 50%,
-    #8b5cf6 100%
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #7c3aed 50%,
+    #6d28d9 100%
   );
-  padding: 3.5rem 2rem 4.5rem;
+  padding: 2rem 2rem;
   overflow: hidden;
   color: white;
-  margin-bottom: -2rem;
+  z-index: 1;
 }
 
 .hero-content {
@@ -105,32 +105,33 @@ const viewCollege = (college) => {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 5vw, 3.75rem);
-  font-weight: 700;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 1rem;
-  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  color: white;
 }
 
 .hero-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  padding: 0.3rem 0.8rem;
-  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.5rem;
   font-size: 0.65em;
-  margin-left: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin-left: 0.4rem;
   font-weight: 600;
+  color: white;
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
-  opacity: 0.92;
+  font-size: 1rem;
+  opacity: 0.9;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
-  font-weight: 400;
+  font-weight: 300;
+  color: white;
 }
 
 /* Floating Animation */
@@ -153,7 +154,7 @@ const viewCollege = (college) => {
 .floating-icon {
   position: absolute;
   opacity: 0.1;
-  font-size: 3rem;
+  font-size: 2rem;
   animation: float 6s ease-in-out infinite;
 }
 
@@ -176,11 +177,11 @@ const viewCollege = (college) => {
 }
 
 @keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg); 
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
   }
-  50% { 
-    transform: translateY(-20px) rotate(10deg); 
+  50% {
+    transform: translateY(-15px) rotate(8deg);
   }
 }
 
@@ -188,103 +189,134 @@ const viewCollege = (college) => {
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2rem 2rem;
-  position: relative;
-  z-index: 1;
+  padding: 2rem;
 }
 
 /* Unified Content Platform */
 .content-platform {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 2rem;
-  padding: 3rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
-
 
 /* Section Divider */
 .section-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.2) 20%, rgba(139, 92, 246, 0.4) 50%, rgba(139, 92, 246, 0.2) 80%, transparent 100%);
-  margin: 3rem 0;
-  position: relative;
+  background: #e5e7eb;
+  margin: 2rem 0;
 }
 
-
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 2.5rem 1rem 3.5rem;
-    margin-bottom: -1.5rem;
-  }
-  
-  .main-content {
-    padding: 2rem 1rem 1rem;
-  }
-  
-  .content-platform {
-    padding: 2rem;
-    border-radius: 1.5rem;
-  }
-  
-  .section-divider {
-    margin: 2rem 0;
-  }
-  
-  .hero-title {
-    font-size: 2.25rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
+/* Override child component styles */
+:deep(.ai-advisor-section) {
+  background: transparent;
+  padding: 0;
 }
 
-@media (max-width: 480px) {
-  .content-platform {
-    padding: 1.5rem;
-    border-radius: 1.25rem;
-  }
-  
-  .section-divider {
-    margin: 1.5rem 0;
-  }
-}
-
-/* Remove card-like styling and create natural flat content sections */
-:deep(.v-card) {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* Flat content section styling within the platform */
-:deep(.ai-advisor-section),
 :deep(.saved-colleges-section) {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  margin-bottom: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  background: transparent;
+  padding: 0;
+  border: none;
 }
 
-/* Remove hover effects for flat design */
-:deep(.ai-advisor-section:hover),
-:deep(.saved-colleges-section:hover) {
-  transform: none;
-  box-shadow: none !important;
+/* Make section headers smaller */
+:deep(.section-title) {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
 }
 
-/* Smooth animations */
-* {
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+:deep(.section-subtitle) {
+  font-size: 0.875rem !important;
+}
+
+/* Make section header spacing smaller */
+:deep(.section-header) {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Make avatar smaller */
+:deep(.gradient-avatar) {
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+:deep(.gradient-avatar .v-icon) {
+  font-size: 24px !important;
+}
+
+/* Override purple colors with blue */
+:deep(.send-button) {
+  background: #3b82f6 !important;
+}
+
+:deep(.send-button:hover) {
+  background: #2563eb !important;
+}
+
+:deep(.suggestion-chip) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+:deep(.response-avatar) {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+:deep(.response-label) {
+  color: #2563eb !important;
+  font-size: 0.875rem !important;
+}
+
+:deep(.manage-button) {
+  background: #3b82f6 !important;
+  box-shadow: none !important;
+  height: 40px !important;
+  font-size: 0.875rem !important;
+}
+
+:deep(.manage-button:hover) {
+  background: #2563eb !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Make input field smaller */
+:deep(.v-text-field .v-field) {
+  border-color: #e5e7eb !important;
+  background: #f9fafb !important;
+  font-size: 0.875rem !important;
+}
+
+:deep(.v-text-field .v-field:hover) {
+  border-color: #d1d5db !important;
+}
+
+:deep(.v-text-field .v-field__input) {
+  min-height: 42px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* Make suggestions smaller */
+:deep(.suggestions-label) {
+  font-size: 0.8rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+:deep(.suggestion-chip) {
+  font-size: 0.75rem !important;
+}
+
+/* Make response text smaller */
+:deep(.response-content) {
+  padding: 1.25rem !important;
+}
+
+:deep(.response-text) {
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
 }
 
 /* Clean button styles */
@@ -292,23 +324,76 @@ const viewCollege = (college) => {
   text-transform: none;
   letter-spacing: normal;
   font-weight: 500;
-  border-radius: 0.75rem;
 }
 
-:deep(.v-btn:not(.v-btn--icon)) {
-  padding: 0 1.5rem;
-  height: 44px;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .content-platform {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .section-divider {
+    margin: 1.5rem 0;
+  }
+
+  :deep(.section-title) {
+    font-size: 1.375rem !important;
+  }
+
+  :deep(.gradient-avatar) {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .floating-icon {
+    font-size: 1.5rem;
+  }
 }
 
-:deep(.v-btn--variant-tonal) {
-  background: rgba(139, 92, 246, 0.08) !important;
-  color: #7c3aed !important;
-  border: 1px solid rgba(139, 92, 246, 0.15);
-}
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 1.25rem 1rem;
+  }
 
-:deep(.v-btn--variant-tonal:hover) {
-  background: rgba(139, 92, 246, 0.12) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+  .hero-title {
+    font-size: 1.375rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .content-platform {
+    padding: 1.25rem;
+  }
+
+  .section-divider {
+    margin: 1.25rem 0;
+  }
+
+  :deep(.section-title) {
+    font-size: 1.25rem !important;
+  }
+
+  .floating-icon {
+    font-size: 1.25rem;
+  }
 }
 </style>

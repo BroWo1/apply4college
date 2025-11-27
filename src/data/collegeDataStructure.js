@@ -63,8 +63,8 @@ export const createCollegeData = ({
       ...majorFactors // Override defaults with college-specific factors
     },
     // Website URLs with fallback generation
-    websiteUrl: websiteUrl || generateWebsiteUrl(name),
-    usNewsUrl: usNewsUrl || generateUsNewsUrl(name)
+    websiteUrl: websiteUrl,
+    usNewsUrl: usNewsUrl
   };
 };
 
@@ -81,59 +81,6 @@ const getColorForCollege = (name) => {
   return color;
 };
 
-// Helper function to generate website URL for a college
-const generateWebsiteUrl = (name) => {
-  const collegeName = name.toLowerCase();
-  
-  // Common college website patterns
-  if (collegeName.includes('harvard')) return 'https://www.harvard.edu';
-  if (collegeName.includes('stanford')) return 'https://www.stanford.edu';
-  if (collegeName.includes('mit')) return 'https://www.mit.edu';
-  if (collegeName.includes('yale')) return 'https://www.yale.edu';
-  if (collegeName.includes('princeton')) return 'https://www.princeton.edu';
-  if (collegeName.includes('columbia')) return 'https://www.columbia.edu';
-  if (collegeName.includes('university of chicago')) return 'https://www.uchicago.edu';
-  if (collegeName.includes('duke')) return 'https://www.duke.edu';
-  if (collegeName.includes('penn') || collegeName.includes('university of pennsylvania')) return 'https://www.upenn.edu';
-  if (collegeName.includes('caltech')) return 'https://www.caltech.edu';
-  if (collegeName.includes('northwestern')) return 'https://www.northwestern.edu';
-  if (collegeName.includes('dartmouth')) return 'https://home.dartmouth.edu';
-  if (collegeName.includes('brown')) return 'https://www.brown.edu';
-  if (collegeName.includes('cornell')) return 'https://www.cornell.edu';
-  if (collegeName.includes('rice')) return 'https://www.rice.edu';
-  if (collegeName.includes('notre dame')) return 'https://www.nd.edu';
-  if (collegeName.includes('vanderbilt')) return 'https://www.vanderbilt.edu';
-  if (collegeName.includes('washington university')) return 'https://wustl.edu';
-  if (collegeName.includes('emory')) return 'https://www.emory.edu';
-  if (collegeName.includes('georgetown')) return 'https://www.georgetown.edu';
-  if (collegeName.includes('carnegie mellon')) return 'https://www.cmu.edu';
-  if (collegeName.includes('ucla')) return 'https://www.ucla.edu';
-  if (collegeName.includes('university of california, berkeley') || collegeName.includes('uc berkeley')) return 'https://www.berkeley.edu';
-  
-  // Generic fallback - try to construct a likely URL
-  const cleanName = collegeName
-    .replace(/university of /g, '')
-    .replace(/college/g, '')
-    .replace(/[^a-z\s]/g, '')
-    .trim()
-    .split(' ')[0];
-  
-  return `https://www.${cleanName}.edu`;
-};
-
-// Helper function to generate US News URL for a college
-const generateUsNewsUrl = (name) => {
-  const collegeName = name
-    .toLowerCase()
-    .replace(/[^a-z\s]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/university-of-/g, '') // Simplify "University of" patterns
-    .replace(/college/g, '')
-    .replace(/-+/g, '-') // Remove multiple consecutive hyphens
-    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-  
-  return `https://www.usnews.com/best-colleges/${collegeName}`;
-};
 
 // Get default weights based on college type
 export const getDefaultWeights = (collegeType) => {

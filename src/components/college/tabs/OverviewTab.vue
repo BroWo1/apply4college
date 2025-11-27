@@ -62,7 +62,7 @@
         </v-card>
 
         <!-- A4C Ratings Overview -->
-        <v-card v-if="college.a4cRatings && college.a4cRatings.overall !== 'N/A'" class="mb-6 clickable-section" elevation="1" rounded="lg" @click="$emit('navigateToA4CRating')">
+        <!-- <v-card v-if="college.a4cRatings && college.a4cRatings.overall !== 'N/A'" class="mb-6 clickable-section" elevation="1" rounded="lg" @click="$emit('navigateToA4CRating')">
           <v-card-item>
             <v-card-title class="d-flex align-center">
               <v-icon start>mdi-star-circle</v-icon>
@@ -76,8 +76,8 @@
                 <div class="grade-display">
                   <v-progress-circular
                     :model-value="overallScorePercentage"
-                    :size="120" 
-                    :width="12" 
+                    :size="120"
+                    :width="12"
                     :color="overallGradeColor"
                     class="mx-auto mx-md-0"
                   >
@@ -93,7 +93,7 @@
                 </h4>
                 <v-row dense>
                   <v-col
-                    v-for="category in college.a4cRatings.categories?.slice(0, 2)" 
+                    v-for="category in college.a4cRatings.categories?.slice(0, 2)"
                     :key="category.name"
                     cols="12" sm="6"
                     class="mb-2"
@@ -117,7 +117,7 @@
               Click for complete rating analysis
             </div>
           </v-card-text>
-        </v-card>
+        </v-card> -->
 
         <!-- College Type and Details -->
         <v-card class="mb-6" elevation="1" rounded="lg">
@@ -243,19 +243,19 @@ const props = defineProps({
   },
 });
 
-defineEmits(['navigateToChancing', 'saveToEarly', 'saveToRegular', 'navigateToA4CRating']);
+defineEmits(['navigateToChancing', 'saveToEarly', 'saveToRegular']);
 
-const overallScorePercentage = computed(() => {
-  if (props.college && props.college.a4cRatings)
-    return gradeToScore(props.college.a4cRatings.overall);
-  return 0;
-});
+// const overallScorePercentage = computed(() => {
+//   if (props.college && props.college.a4cRatings)
+//     return gradeToScore(props.college.a4cRatings.overall);
+//   return 0;
+// });
 
-const overallGradeColor = computed(() => {
-  if (props.college && props.college.a4cRatings)
-    return getGradeColor(props.college.a4cRatings.overall);
-  return 'grey'; // Default color
-});
+// const overallGradeColor = computed(() => {
+//   if (props.college && props.college.a4cRatings)
+//     return getGradeColor(props.college.a4cRatings.overall);
+//   return 'grey'; // Default color
+// });
 
 const chanceColor = computed(() => {
   if (!props.collegeChance) return 'grey';
@@ -268,54 +268,54 @@ const chanceDescription = computed(() => {
 });
 
 // Helper function to convert grade to a numerical score
-const gradeToScore = (grade) => {
-  const mapping = {
-    'A+': 97, 'A': 93, 'A-': 90,
-    'B+': 87, 'B': 83, 'B-': 80,
-    'C+': 77, 'C': 73, 'C-': 70,
-    'D+': 67, 'D': 63, 'D-': 60,
-    'F': 50
-  };
-  return mapping[grade] || 0;
-};
+// const gradeToScore = (grade) => {
+//   const mapping = {
+//     'A+': 97, 'A': 93, 'A-': 90,
+//     'B+': 87, 'B': 83, 'B-': 80,
+//     'C+': 77, 'C': 73, 'C-': 70,
+//     'D+': 67, 'D': 63, 'D-': 60,
+//     'F': 50
+//   };
+//   return mapping[grade] || 0;
+// };
 
-const getGradeColor = (grade) => {
-  const colors = {
-    'A+': 'green',
-    'A': 'green',
-    'A-': 'green',
-    'B+': 'lightgreen',
-    'B': 'lightgreen',
-    'B-': 'lightgreen',
-    'C+': 'yellow',
-    'C': 'yellow',
-    'C-': 'yellow',
-    'D+': 'orange',
-    'D': 'orange',
-    'D-': 'orange',
-    'F': 'red'
-  };
-  return colors[grade] || 'grey';
-};
+// const getGradeColor = (grade) => {
+//   const colors = {
+//     'A+': 'green',
+//     'A': 'green',
+//     'A-': 'green',
+//     'B+': 'lightgreen',
+//     'B': 'lightgreen',
+//     'B-': 'lightgreen',
+//     'C+': 'yellow',
+//     'C': 'yellow',
+//     'C-': 'yellow',
+//     'D+': 'orange',
+//     'D': 'orange',
+//     'D-': 'orange',
+//     'F': 'red'
+//   };
+//   return colors[grade] || 'grey';
+// };
 
-const getGradeDescription = (grade) => {
-  const descriptions = {
-    'A+': 'Excellent',
-    'A': 'Excellent', 
-    'A-': 'Very Good',
-    'B+': 'Good',
-    'B': 'Good',
-    'B-': 'Good',
-    'C+': 'Average',
-    'C': 'Average',
-    'C-': 'Below Average',
-    'D+': 'Poor',
-    'D': 'Poor',
-    'D-': 'Poor',
-    'F': 'Very Poor'
-  };
-  return descriptions[grade] || 'N/A';
-};
+// const getGradeDescription = (grade) => {
+//   const descriptions = {
+//     'A+': 'Excellent',
+//     'A': 'Excellent',
+//     'A-': 'Very Good',
+//     'B+': 'Good',
+//     'B': 'Good',
+//     'B-': 'Good',
+//     'C+': 'Average',
+//     'C': 'Average',
+//     'C-': 'Below Average',
+//     'D+': 'Poor',
+//     'D': 'Poor',
+//     'D-': 'Poor',
+//     'F': 'Very Poor'
+//   };
+//   return descriptions[grade] || 'N/A';
+// };
 
 </script>
 

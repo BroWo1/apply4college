@@ -2,18 +2,18 @@
   <div class="empty-state">
     <div class="empty-state-content">
       <div class="empty-state-icon">
-        <v-icon size="80" color="grey-lighten-1">mdi-school-outline</v-icon>
+        <v-icon size="56" color="grey-lighten-1">mdi-school-outline</v-icon>
       </div>
       <h3 class="empty-state-title">No colleges saved yet</h3>
       <p class="empty-state-description">
         Start building your personalized college list by exploring our comprehensive database of universities
       </p>
-      <v-btn 
-        color="purple" 
-        size="x-large" 
-        to="/explore" 
+      <v-btn
+        color="primary"
+        size="default"
+        to="/explore"
         prepend-icon="mdi-compass"
-        rounded="xl"
+        rounded="lg"
         variant="flat"
         class="explore-button"
       >
@@ -31,15 +31,15 @@
 .empty-state {
   background: rgba(248, 250, 252, 0.6);
   backdrop-filter: none;
-  border: 2px dashed rgba(139, 92, 246, 0.2);
-  border-radius: 1.25rem;
-  padding: 3rem 2rem;
+  border: 2px dashed rgba(59, 130, 246, 0.2);
+  border-radius: 0.75rem;
+  padding: 2rem 1.5rem;
   text-align: center;
   transition: all 0.3s ease;
 }
 
 .empty-state:hover {
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.3);
   background: rgba(248, 250, 252, 0.8);
 }
 
@@ -50,43 +50,39 @@
 }
 
 .empty-state-icon {
-  margin-bottom: 1.75rem;
+  margin-bottom: 1rem;
 }
 
 .empty-state-icon .v-icon {
-  color: rgba(139, 92, 246, 0.6) !important;
+  color: rgba(59, 130, 246, 0.5) !important;
 }
 
 .empty-state-title {
-  font-size: 1.625rem;
-  font-weight: 700;
-  color: #1a202c;
-  margin: 0 0 1.25rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
   line-height: 1.3;
 }
 
 .empty-state-description {
-  color: #4a5568;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin: 0 0 2.5rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
   font-weight: 400;
 }
 
 .explore-button {
   text-transform: none;
-  font-weight: 600;
-  padding: 0 2.5rem !important;
-  height: 56px !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3) !important;
-  border: none !important;
-  color: white !important;
+  font-weight: 500;
+  padding: 0 1.5rem !important;
+  height: 40px !important;
+  font-size: 0.875rem !important;
 }
 
 .explore-button:hover {
-  box-shadow: 0 8px 28px rgba(139, 92, 246, 0.4) !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 @keyframes fadeInUp {

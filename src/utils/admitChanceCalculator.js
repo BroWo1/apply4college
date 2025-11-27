@@ -9,6 +9,7 @@
  */
 export const calculateZScore = (value, mean, stdDev) => {
   if (stdDev === 0) return 0; // Avoid division by zero
+  if (value === null || value === undefined) return null; // Handle null/undefined values for test-blind scenarios
   return (value - mean) / stdDev;
 };
 
@@ -192,6 +193,10 @@ export const calculateAdmissionChance = (student, college) => {
       ec: calculateZScore(student.ecStrengthTotal, stats.ec.mean, stats.ec.stdDev)
     };
 
+    // Check if this is a test-blind scenario (SAT score is null or college doesn't consider SAT)
+    const isTestBlind = student.satTotal === null || student.satTotal === undefined || 
+                       (stats.sat && stats.sat.mean === null) || college.isTestBlind;
+
     // Legacy is now handled in p0 calculation, so it's removed from fitScores for alignmentBlock
     const fitScores = {
       apFit: student.apFit ? calculateZScore(student.apFit, 2, 0.5) : 0,
@@ -200,18 +205,21 @@ export const calculateAdmissionChance = (student, college) => {
       demo: student.demoScore ? student.demoScore : 0
     };
 
+    // Adjust weights for test-blind scenarios
+    const adjustedWeights = isTestBlind ? getTestBlindWeights(weights, collegeType) : weights;
+
     const strengthBlock =
-      weights.strength.gpa * zScores.gpa +
-      weights.strength.sat * zScores.sat +
-      weights.strength.ap * zScores.ap +
-      weights.strength.ec * zScores.ec;
+      adjustedWeights.strength.gpa * zScores.gpa +
+      (isTestBlind ? 0 : adjustedWeights.strength.sat * zScores.sat) +
+      adjustedWeights.strength.ap * zScores.ap +
+      adjustedWeights.strength.ec * zScores.ec;
 
     // Legacy term removed from alignmentBlock
     const alignmentBlock =
-      weights.alignment.apFit * fitScores.apFit +
-      weights.alignment.ecFit * fitScores.ecFit +
-      weights.alignment.rec * fitScores.rec +
-      weights.alignment.demo * fitScores.demo; // weights.alignment.legacy is 0 or term is removed
+      adjustedWeights.alignment.apFit * fitScores.apFit +
+      adjustedWeights.alignment.ecFit * fitScores.ecFit +
+      adjustedWeights.alignment.rec * fitScores.rec +
+      adjustedWeights.alignment.demo * fitScores.demo; // weights.alignment.legacy is 0 or term is removed
 
     const exponent = strengthBlock + alignmentBlock;
 
@@ -263,6 +271,7 @@ export const calculateAdmissionChance = (student, college) => {
       alignmentBlock,
       exponent,
       isEarlyDecision: student.isEarlyDecision,
+      isTestBlind,
       finalAdjustedAcceptanceRateForP0: currentAcceptanceRate
     };
   } catch (error) {
@@ -271,6 +280,7 @@ export const calculateAdmissionChance = (student, college) => {
       probability: 0,
       probabilityPercentage: 0,
       error: true,
+      isTestBlind: false,
       finalAdjustedAcceptanceRateForP0: parseFloat(college.acceptanceRate) // Fallback
     };
   }
@@ -296,12 +306,71 @@ export const getDefaultWeights = (collegeType) => {
 };
 
 /**
+ * Adjust weights for test-blind scenarios by redistributing SAT weight to other factors
+ * @param {Object} originalWeights - Original weights object
+ * @param {string} collegeType - 'Liberal-arts' or 'STEM-heavy'
+ * @returns {Object} - Adjusted weights for test-blind scenario
+ */
+export const getTestBlindWeights = (originalWeights, collegeType) => {
+  const satWeight = originalWeights.strength.sat;
+  
+  // Redistribute SAT weight proportionally to other strength factors
+  const remainingStrengthFactors = ['gpa', 'ap', 'ec'];
+  const totalRemainingWeight = remainingStrengthFactors.reduce((sum, factor) => 
+    sum + originalWeights.strength[factor], 0);
+  
+  const adjustedStrengthWeights = { ...originalWeights.strength };
+  adjustedStrengthWeights.sat = 0; // Remove SAT weight
+  
+  // Redistribute SAT weight proportionally
+  if (totalRemainingWeight > 0) {
+    remainingStrengthFactors.forEach(factor => {
+      const proportionalIncrease = (originalWeights.strength[factor] / totalRemainingWeight) * satWeight;
+      adjustedStrengthWeights[factor] += proportionalIncrease;
+    });
+  }
+  
+  // For test-blind scenarios, also slightly increase alignment weights to compensate
+  // for the loss of standardized test data
+  const alignmentBoost = satWeight * 0.3; // Use 30% of SAT weight to boost alignment factors
+  const alignmentFactors = ['apFit', 'ecFit', 'rec', 'demo'];
+  const totalAlignmentWeight = alignmentFactors.reduce((sum, factor) => 
+    sum + originalWeights.alignment[factor], 0);
+  
+  const adjustedAlignmentWeights = { ...originalWeights.alignment };
+  if (totalAlignmentWeight > 0) {
+    alignmentFactors.forEach(factor => {
+      const proportionalIncrease = (originalWeights.alignment[factor] / totalAlignmentWeight) * alignmentBoost;
+      adjustedAlignmentWeights[factor] += proportionalIncrease;
+    });
+  }
+  
+  return {
+    strength: adjustedStrengthWeights,
+    alignment: adjustedAlignmentWeights
+  };
+};
+
+/**
  * Prepare student profile data for admission chance calculation
  * @param {Object} profileData - Raw profile data from the application
  * @returns {Object} - Processed student data for calculations
  */
 export const prepareStudentData = (profileData) => {
-  const satTotal = (profileData.satReading || 0) + (profileData.satMath || 0);
+  // Handle test-blind scenarios where SAT scores might be null
+  const satReading = profileData.satReading;
+  const satMath = profileData.satMath;
+  
+  let satTotal = null;
+  if (satReading !== null && satReading !== undefined && 
+      satMath !== null && satMath !== undefined) {
+    satTotal = satReading + satMath;
+  } else if ((satReading !== null && satReading !== undefined) || 
+             (satMath !== null && satMath !== undefined)) {
+    // If only one section is provided, still consider it as having some SAT data
+    satTotal = (satReading || 0) + (satMath || 0);
+  }
+  
   const apCount = (profileData.apClasses || []).reduce((total, ap) => total + (ap.status === 'ongoing' ? 0.5 : 1), 0);
   const ecStrengthTotal = (profileData.extracurriculars || []).reduce((total, ec) => total + (ec.level || 0), 0);
 
@@ -319,7 +388,7 @@ export const prepareStudentData = (profileData) => {
 
   return {
     gpa: parseFloat(profileData.gpa) || 0,
-    satTotal: isNaN(satTotal) ? 0 : satTotal,
+    satTotal: satTotal, // Can be null for test-blind scenarios
     apCount: isNaN(apCount) ? 0 : apCount,
     ecStrengthTotal: isNaN(ecStrengthTotal) ? 0 : ecStrengthTotal,
     apFit: isNaN(apFit) ? 0 : apFit,
